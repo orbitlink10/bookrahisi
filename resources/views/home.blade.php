@@ -600,11 +600,11 @@
                 <a class="brand" href="{{ route('home') }}">bookrahisi</a>
 
                 <nav class="nav-links" aria-label="Primary navigation">
-                    <a class="nav-link nav-link-primary" href="#for-business">For Business</a>
+                    <a class="nav-link nav-link-primary" href="{{ route('for-business') }}">For Business</a>
                     <a class="nav-link" href="#daily-deals">Daily Deals</a>
                     <a class="nav-link" href="#nearby">Professionals</a>
                     <a class="nav-link" href="#daily-deals">Gallery</a>
-                    <a class="nav-link" href="#login">Login</a>
+                    <a class="nav-link" href="{{ route('for-business.sign-in') }}">Login</a>
                 </nav>
             </div>
         </header>
@@ -729,7 +729,7 @@
                             Create your profile, publish services, manage staff availability, and receive online bookings with instant customer confirmations.
                         </p>
                     </div>
-                    <a class="business-cta-button" href="#nearby">List your business</a>
+                    <a class="business-cta-button" href="{{ route('for-business') }}">List your business</a>
                 </article>
             </section>
         </main>
@@ -738,7 +738,7 @@
             <div class="page-shell footer-row">
                 <div>Book Rahisi connects customers with salons, spas, barbershops, and fitness studios across Kenya.</div>
                 <div class="footer-links">
-                    <a href="#for-business">For Business</a>
+                    <a href="{{ route('for-business') }}">For Business</a>
                     <a href="#daily-deals">Deals</a>
                     <a href="#cities">Cities</a>
                 </div>
