@@ -318,7 +318,7 @@
 
                     <div class="customer-panel">
                         <strong>Are you a customer looking to book an appointment?</strong>
-                        <a href="{{ route('home') }}">Go to Book Rahisi for customers</a>
+                        <a href="{{ route('customer.sign-in') }}">Go to customer sign in</a>
                     </div>
                 </div>
             </section>

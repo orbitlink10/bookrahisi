@@ -1,10 +1,20 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\PublicSiteController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PublicSiteController::class, 'index'])->name('home');
+Route::get('/customer/register', [CustomerController::class, 'register'])->name('customer.register');
+Route::post('/customer/register', [CustomerController::class, 'registerSubmit'])->name('customer.register.submit');
+Route::get('/customer/sign-in', [CustomerController::class, 'signIn'])->name('customer.sign-in');
+Route::post('/customer/sign-in', [CustomerController::class, 'signInSubmit'])->name('customer.sign-in.submit');
+Route::post('/customer/sign-out', [CustomerController::class, 'signOut'])->name('customer.sign-out');
+Route::get('/customer/dashboard', [CustomerController::class, 'dashboard'])->name('customer.dashboard');
+Route::get('/customer/bookings', [CustomerController::class, 'bookings'])->name('customer.bookings');
+Route::post('/customer/bookings/{booking}/cancel', [CustomerController::class, 'cancelBooking'])->name('customer.bookings.cancel');
+Route::post('/customer/bookings/{booking}/review', [CustomerController::class, 'submitReview'])->name('customer.bookings.review');
 Route::get('/admin/sign-in', [AdminController::class, 'signIn'])->name('admin.sign-in');
 Route::post('/admin/sign-in', [AdminController::class, 'signInSubmit'])->name('admin.sign-in.submit');
 Route::post('/admin/sign-out', [AdminController::class, 'signOut'])->name('admin.sign-out');

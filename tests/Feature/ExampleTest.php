@@ -20,7 +20,7 @@ class ExampleTest extends TestCase
             ->assertSeeText('Daily Deals')
             ->assertSeeText('Find a Service in a City Near You')
             ->assertSeeText('For Business')
-            ->assertSee('/for-business/sign-in', false);
+            ->assertSee('/customer/sign-in', false);
     }
 
     public function test_the_for_business_page_renders(): void

@@ -604,7 +604,9 @@
                     <a class="nav-link" href="#daily-deals">Daily Deals</a>
                     <a class="nav-link" href="#nearby">Professionals</a>
                     <a class="nav-link" href="#daily-deals">Gallery</a>
-                    <a class="nav-link" href="{{ route('for-business.sign-in') }}">Login</a>
+                    <a class="nav-link" href="{{ $customerUser ? route('customer.dashboard') : route('customer.sign-in') }}">
+                        {{ $customerUser ? 'Dashboard' : 'Login' }}
+                    </a>
                 </nav>
             </div>
         </header>

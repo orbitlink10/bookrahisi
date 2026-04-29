@@ -358,6 +358,22 @@
                 color: var(--success);
             }
 
+            .info-banner {
+                margin-bottom: 18px;
+                padding: 14px 16px;
+                border-radius: 18px;
+                background: #eef7ff;
+                color: #195b8f;
+                font-size: 0.94rem;
+                font-weight: 700;
+                line-height: 1.65;
+            }
+
+            .info-banner a {
+                color: inherit;
+                text-decoration: underline;
+            }
+
             .submit-row {
                 display: flex;
                 flex-wrap: wrap;
@@ -478,6 +494,16 @@
                         <div class="success-banner">{{ session('booking_success') }}</div>
                     @endif
 
+                    @if ($customerUser)
+                        <div class="info-banner">
+                            Signed in as {{ $customerUser->name }}. This booking will be linked to {{ $customerUser->email }} and will appear in your customer dashboard.
+                        </div>
+                    @else
+                        <div class="info-banner">
+                            Want to manage this booking later? <a href="{{ route('customer.sign-in') }}">Sign in</a> or <a href="{{ route('customer.register') }}">create a customer account</a> before booking to track appointments, payment status, and reviews from one dashboard.
+                        </div>
+                    @endif
+
                     @if ($errors->any())
                         <div class="error-summary">Complete the highlighted booking details before continuing.</div>
                     @endif
@@ -576,7 +602,7 @@
                             <div class="field-grid">
                                 <label class="field-label">
                                     Full name
-                                    <input class="field-input @error('customer_name') field-error-state @enderror" type="text" name="customer_name" value="{{ old('customer_name') }}" placeholder="Enter your full name">
+                                    <input class="field-input @error('customer_name') field-error-state @enderror" type="text" name="customer_name" value="{{ old('customer_name', $customerUser?->name) }}" placeholder="Enter your full name">
                                     @error('customer_name')
                                         <span class="field-error">{{ $message }}</span>
                                     @enderror
@@ -584,7 +610,7 @@
 
                                 <label class="field-label">
                                     Phone number
-                                    <input class="field-input @error('customer_phone') field-error-state @enderror" type="text" name="customer_phone" value="{{ old('customer_phone') }}" placeholder="+254 7xx xxx xxx">
+                                    <input class="field-input @error('customer_phone') field-error-state @enderror" type="text" name="customer_phone" value="{{ old('customer_phone', $customerUser?->phone_number) }}" placeholder="+254 7xx xxx xxx">
                                     @error('customer_phone')
                                         <span class="field-error">{{ $message }}</span>
                                     @enderror

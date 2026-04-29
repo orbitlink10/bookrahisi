@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Business;
+use App\Models\Review;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -11,7 +13,7 @@ use Illuminate\View\View;
 
 class PublicSiteController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         $cities = [
             'Nairobi',
@@ -158,6 +160,7 @@ class PublicSiteController extends Controller
                     'image' => 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=1200&q=80',
                 ],
             ],
+            'customerUser' => $this->authenticatedCustomer($request),
             'cityColumns' => array_chunk($cities, 5),
         ]);
     }
@@ -510,8 +513,8 @@ class PublicSiteController extends Controller
         $profileDetails = $this->profileDetailsFromBusiness($business);
 
         $location = $profileDetails['neighborhood'].', '.$profileDetails['city'];
-        $reviews = $this->previewReviews($accountSetup['business_category']);
-        $reviewSummary = $this->previewReviewSummary($reviews);
+        $reviews = $this->resolvedBusinessReviews($business, $accountSetup['business_category']);
+        $reviewSummary = $this->resolvedBusinessReviewSummary($business, $reviews);
         $mapData = $this->previewMapData($profileDetails['city'], $profileDetails['neighborhood']);
 
         return view('business-public-profile', [
@@ -543,6 +546,7 @@ class PublicSiteController extends Controller
         $business = $this->findMarketplaceBusinessBySlug($request, $slug);
         $accountSetup = $this->accountSetupFromBusiness($business);
         $profileDetails = $this->profileDetailsFromBusiness($business);
+        $customerUser = $this->authenticatedCustomer($request);
 
         $services = $this->previewServices($accountSetup['business_category']);
         $staffMembers = $this->previewBookingStaff($this->previewTeamMembers($accountSetup['business_category']));
@@ -558,6 +562,7 @@ class PublicSiteController extends Controller
             'profileDetails' => $profileDetails,
             'selectedService' => $selectedService,
             'selectedStaff' => $selectedStaff,
+            'customerUser' => $customerUser,
             'services' => $services,
             'staffMembers' => $staffMembers,
             'timeSlots' => $this->previewBookingTimeSlots($profileDetails['opening_time'], $profileDetails['closing_time']),
@@ -569,6 +574,7 @@ class PublicSiteController extends Controller
         $business = $this->findMarketplaceBusinessBySlug($request, $slug);
         $accountSetup = $this->accountSetupFromBusiness($business);
         $profileDetails = $this->profileDetailsFromBusiness($business);
+        $customerUser = $this->authenticatedCustomer($request);
         $services = $this->previewServices($accountSetup['business_category']);
         $staffMembers = $this->previewBookingStaff($this->previewTeamMembers($accountSetup['business_category']));
         $bookingDates = $this->previewBookingDates();
@@ -588,6 +594,8 @@ class PublicSiteController extends Controller
         $selectedStaff = $this->resolvePreviewStaff($staffMembers, $validated['staff']);
 
         $business->bookings()->create([
+            'customer_user_id' => $customerUser?->id,
+            'customer_email' => $customerUser?->email,
             'service_slug' => $selectedService['slug'],
             'service_name' => $selectedService['name'],
             'appointment_date' => $validated['appointment_date'],
@@ -606,7 +614,9 @@ class PublicSiteController extends Controller
                 'service' => $validated['service'],
                 'staff' => $validated['staff'],
             ])
-            ->with('booking_success', 'Booking request received. The business owner can now review it from their bookings page.');
+            ->with('booking_success', $customerUser
+                ? 'Booking request received. You can now manage it from your customer dashboard.'
+                : 'Booking request received. Sign in with a customer account next time to manage appointments, reviews, and payment status from one dashboard.');
     }
 
     public function businessBookings(Request $request): View|RedirectResponse
@@ -679,6 +689,21 @@ class PublicSiteController extends Controller
             ->first();
     }
 
+    private function authenticatedCustomer(Request $request): ?User
+    {
+        $customerId = $request->session()->get('customer_user_id');
+
+        if (! $customerId) {
+            return null;
+        }
+
+        return User::query()
+            ->whereKey($customerId)
+            ->where('is_admin', false)
+            ->where('account_status', 'active')
+            ->first();
+    }
+
     private function findMarketplaceBusinessBySlug(Request $request, string $slug): Business
     {
         $business = Business::query()
@@ -695,6 +720,59 @@ class PublicSiteController extends Controller
     private function ownerCanPreviewBusiness(Request $request, Business $business): bool
     {
         return $request->session()->get('business_signup_email') === $business->owner_email;
+    }
+
+    private function resolvedBusinessReviews(Business $business, string $category): array
+    {
+        $reviews = $business->reviews()
+            ->with(['customer', 'booking'])
+            ->latest()
+            ->take(6)
+            ->get()
+            ->map(function (Review $review): array {
+                $customerName = $review->customer?->name ?? $review->booking?->customer_name ?? 'Book Rahisi customer';
+                $initials = collect(explode(' ', $customerName))
+                    ->filter()
+                    ->take(2)
+                    ->map(static fn (string $part): string => strtoupper(substr($part, 0, 1)))
+                    ->implode('');
+
+                return [
+                    'name' => $customerName,
+                    'date' => $review->created_at?->format('D, j M Y \a\t g:ia') ?? 'Recently',
+                    'rating' => $review->rating,
+                    'body' => $review->body,
+                    'avatar_initials' => $initials !== '' ? $initials : 'BR',
+                    'avatar_color' => $this->reviewAvatarColor($customerName),
+                ];
+            })
+            ->all();
+
+        return $reviews !== [] ? $reviews : $this->previewReviews($category);
+    }
+
+    private function resolvedBusinessReviewSummary(Business $business, array $fallbackReviews): array
+    {
+        $reviewCount = $business->reviews()->count();
+
+        if ($reviewCount === 0) {
+            return $this->previewReviewSummary($fallbackReviews);
+        }
+
+        $averageRating = (float) $business->reviews()->avg('rating');
+
+        return [
+            'rating' => number_format($averageRating, 1),
+            'count' => (string) $reviewCount,
+        ];
+    }
+
+    private function reviewAvatarColor(string $seed): string
+    {
+        $palette = ['#2f6df6', '#14a38b', '#e26d5a', '#8b61ff', '#3a8f58'];
+        $index = abs(crc32($seed)) % count($palette);
+
+        return $palette[$index];
     }
 
     private function accountSetupFromBusiness(Business $business): array

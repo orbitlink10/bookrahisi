@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'admin@bookrahisi.test'],
             [
                 'name' => 'Book Rahisi Owner',
+                'phone_number' => '+254700000010',
                 'password' => 'password',
                 'is_admin' => true,
                 'account_status' => 'active',
@@ -28,7 +29,8 @@ class DatabaseSeeder extends Seeder
         User::query()->updateOrCreate(
             ['email' => 'test@example.com'],
             [
-                'name' => 'Test User',
+                'name' => 'Test Customer',
+                'phone_number' => '+254700000011',
                 'password' => 'password',
                 'is_admin' => false,
                 'account_status' => 'active',
