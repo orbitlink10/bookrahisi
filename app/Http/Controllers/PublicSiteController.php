@@ -7,6 +7,7 @@ use App\Models\Review;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -290,16 +291,19 @@ class PublicSiteController extends Controller
                 'phone' => ['required', 'string', 'min:10', 'max:30'],
                 'business_category' => ['required', 'string', 'max:80'],
                 'email' => ['required', 'email'],
+                'password' => ['required', 'string', 'min:8', 'confirmed'],
             ]);
 
             $request->session()->put('business_signup_email', $validated['email']);
 
             $existingBusiness = $this->findOwnedBusinessByEmail($validated['email']);
+            $existingUser = $this->findUserByEmail($validated['email']);
 
             if ($existingBusiness) {
-                $this->syncOwnerSessionFromBusiness($request, $existingBusiness);
-
-                return redirect()->route('for-business.tools');
+                return redirect()
+                    ->route('for-business.sign-in')
+                    ->withErrors(['email' => 'A business owner account already exists for this email. Use the existing owner section below to continue.'])
+                    ->withInput($request->except('password', 'password_confirmation'));
             }
 
             $slug = Str::slug($validated['business_name']);
@@ -311,7 +315,33 @@ class PublicSiteController extends Controller
                 return redirect()
                     ->route('for-business.sign-in')
                     ->withErrors(['business_name' => 'That business name is already in use. Choose a different name to continue.'])
-                    ->withInput();
+                    ->withInput($request->except('password', 'password_confirmation'));
+            }
+
+            $ownerName = $validated['first_name'].' '.$validated['last_name'];
+
+            if ($existingUser) {
+                if (! Hash::check($validated['password'], $existingUser->password)) {
+                    return redirect()
+                        ->route('for-business.sign-in')
+                        ->withErrors(['email' => 'That email already belongs to another account. Use the existing password for that email or choose a different one.'])
+                        ->withInput($request->except('password', 'password_confirmation'));
+                }
+
+                $existingUser->update([
+                    'name' => $ownerName,
+                    'phone_number' => $validated['phone'],
+                    'account_status' => 'active',
+                ]);
+            } else {
+                User::query()->create([
+                    'name' => $ownerName,
+                    'email' => $validated['email'],
+                    'phone_number' => $validated['phone'],
+                    'password' => $validated['password'],
+                    'is_admin' => false,
+                    'account_status' => 'active',
+                ]);
             }
 
             $request->session()->put('business_account_setup', [
@@ -327,13 +357,24 @@ class PublicSiteController extends Controller
 
         $validated = $request->validate([
             'email' => ['required', 'email'],
+            'password' => ['nullable', 'string'],
         ]);
 
         $request->session()->put('business_signup_email', $validated['email']);
 
         $business = $this->findOwnedBusinessByEmail($validated['email']);
+        $ownerUser = $this->findUserByEmail($validated['email']);
 
         if ($business) {
+            if (($validated['password'] ?? '') !== '') {
+                if (! $ownerUser || ! Hash::check($validated['password'], $ownerUser->password)) {
+                    return redirect()
+                        ->route('for-business.sign-in')
+                        ->withErrors(['email' => 'The owner credentials are invalid.'])
+                        ->withInput($request->except('password'));
+                }
+            }
+
             $this->syncOwnerSessionFromBusiness($request, $business);
 
             return redirect()->route('for-business.tools');
@@ -724,6 +765,17 @@ class PublicSiteController extends Controller
 
         return Business::query()
             ->where('owner_email', $email)
+            ->first();
+    }
+
+    private function findUserByEmail(?string $email): ?User
+    {
+        if (! $email) {
+            return null;
+        }
+
+        return User::query()
+            ->where('email', $email)
             ->first();
     }
 

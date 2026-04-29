@@ -512,6 +512,33 @@
                                         <span class="field-error">{{ $message }}</span>
                                     @enderror
                                 </div>
+
+                                <div class="field-group">
+                                    <label class="field-label" for="owner-password">Password</label>
+                                    <input
+                                        class="field-input @error('password') field-input-error @enderror"
+                                        id="owner-password"
+                                        name="password"
+                                        type="password"
+                                        placeholder="Create a secure password"
+                                    >
+                                    @error('password')
+                                        @if (old('intent', 'register') === 'register')
+                                            <span class="field-error">{{ $message }}</span>
+                                        @endif
+                                    @enderror
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label" for="owner-password-confirmation">Confirm Password</label>
+                                    <input
+                                        class="field-input"
+                                        id="owner-password-confirmation"
+                                        name="password_confirmation"
+                                        type="password"
+                                        placeholder="Repeat your password"
+                                    >
+                                </div>
                             </div>
 
                             <p class="helper-text">
@@ -538,6 +565,16 @@
                                     name="email"
                                     placeholder="Enter your email address"
                                     value="{{ old('intent') === 'continue' ? old('email') : '' }}"
+                                >
+                            </div>
+                            <div class="field-group">
+                                <label class="field-label" for="existing-password">Password</label>
+                                <input
+                                    class="field-input"
+                                    id="existing-password"
+                                    type="password"
+                                    name="password"
+                                    placeholder="Enter your password or leave blank for legacy access"
                                 >
                             </div>
                             <button class="continue-button" type="submit">Continue</button>

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Business;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -45,6 +46,8 @@ class ExampleTest extends TestCase
             ->assertSeeText('Book Rahisi for professionals')
             ->assertSeeText('Create your business account')
             ->assertSeeText('Already on Book Rahisi?')
+            ->assertSeeText('Password')
+            ->assertSeeText('Confirm Password')
             ->assertSeeText('Continue with Facebook')
             ->assertSeeText('Continue with Google')
             ->assertSeeText('Continue with Apple');
@@ -60,12 +63,48 @@ class ExampleTest extends TestCase
             'phone' => '+254711223344',
             'business_category' => 'Salon',
             'email' => 'owner@bookrahisi.test',
+            'password' => 'ownerpass123',
+            'password_confirmation' => 'ownerpass123',
         ]);
 
         $response
             ->assertRedirect('/for-business/business-setup')
             ->assertSessionHas('business_signup_email', 'owner@bookrahisi.test')
             ->assertSessionHas('business_account_setup', $this->accountSetupSession());
+
+        $this->assertDatabaseHas('users', [
+            'name' => 'Amina Njeri',
+            'email' => 'owner@bookrahisi.test',
+            'phone_number' => '+254711223344',
+            'is_admin' => false,
+            'account_status' => 'active',
+        ]);
+    }
+
+    public function test_the_existing_owner_can_continue_with_email_and_password(): void
+    {
+        $business = $this->createBusiness();
+
+        User::query()->create([
+            'name' => 'Amina Njeri',
+            'email' => $business->owner_email,
+            'phone_number' => $business->phone,
+            'password' => 'ownerpass123',
+            'is_admin' => false,
+            'account_status' => 'active',
+        ]);
+
+        $response = $this->post('/for-business/sign-in', [
+            'intent' => 'continue',
+            'email' => $business->owner_email,
+            'password' => 'ownerpass123',
+        ]);
+
+        $response
+            ->assertRedirect('/for-business/tools')
+            ->assertSessionHas('business_signup_email', $business->owner_email)
+            ->assertSessionHas('business_account_setup', $this->accountSetupSession())
+            ->assertSessionHas('business_profile_details', $this->profileDetailsSession());
     }
 
     public function test_the_business_sign_in_form_accepts_a_valid_email_for_a_new_owner(): void
