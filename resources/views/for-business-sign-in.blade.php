@@ -3,10 +3,10 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Book Rahisi For Professionals | Sign In</title>
+        <title>Book Rahisi For Professionals | Get Started</title>
         <meta
             name="description"
-            content="Create an account or log in to manage your business on Book Rahisi."
+            content="Create a business owner account or continue into your existing Book Rahisi workspace."
         >
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=outfit:400,500,600,700,800|manrope:400,500,600,700,800" rel="stylesheet" />
@@ -17,7 +17,10 @@
                 --line: #dcdfe5;
                 --focus: #6956ff;
                 --surface: #ffffff;
+                --soft: #f6f7fb;
                 --dark: #0f1012;
+                --danger: #d93025;
+                --danger-soft: #fff2f1;
             }
 
             * {
@@ -38,13 +41,14 @@
             }
 
             button,
-            input {
+            input,
+            select {
                 font: inherit;
             }
 
             .auth-layout {
                 display: grid;
-                grid-template-columns: minmax(0, 0.66fr) minmax(380px, 0.34fr);
+                grid-template-columns: minmax(0, 0.68fr) minmax(380px, 0.32fr);
                 min-height: 100vh;
             }
 
@@ -75,7 +79,20 @@
             }
 
             .auth-card {
-                width: min(100%, 632px);
+                width: min(100%, 760px);
+            }
+
+            .step-label {
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 18px;
+                padding: 10px 14px;
+                border-radius: 999px;
+                background: var(--soft);
+                color: var(--focus);
+                font-size: 0.88rem;
+                font-weight: 800;
             }
 
             .auth-card h1 {
@@ -88,50 +105,148 @@
             }
 
             .auth-subtitle {
-                margin: 16px 0 58px;
+                margin: 16px auto 36px;
+                max-width: 700px;
                 text-align: center;
                 color: var(--muted);
-                font-size: 1.1rem;
-                line-height: 1.7;
+                font-size: 1.05rem;
+                line-height: 1.75;
             }
 
-            .email-input {
+            .signup-panel,
+            .returning-panel {
+                border: 1px solid var(--line);
+                border-radius: 28px;
+                background: var(--surface);
+                box-shadow: 0 20px 42px rgba(17, 19, 23, 0.05);
+            }
+
+            .signup-panel {
+                padding: 28px;
+            }
+
+            .returning-panel {
+                margin-top: 22px;
+                padding: 24px 28px 28px;
+            }
+
+            .panel-title {
+                margin: 0;
+                font-family: 'Outfit', sans-serif;
+                font-size: 1.9rem;
+                line-height: 1.05;
+                letter-spacing: -0.05em;
+            }
+
+            .panel-copy {
+                margin: 12px 0 0;
+                color: var(--muted);
+                line-height: 1.75;
+            }
+
+            .setup-grid {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 18px;
+                margin-top: 22px;
+            }
+
+            .field-group {
+                display: grid;
+                gap: 10px;
+            }
+
+            .field-group-full {
+                grid-column: 1 / -1;
+            }
+
+            .field-label {
+                font-size: 0.92rem;
+                font-weight: 800;
+            }
+
+            .field-input,
+            .field-select {
                 width: 100%;
-                height: 74px;
-                padding: 0 22px;
-                border: 1.5px solid var(--focus);
+                min-height: 64px;
+                padding: 0 20px;
+                border: 1px solid var(--line);
                 border-radius: 16px;
                 outline: none;
-                font-size: 1rem;
+                background: #fff;
                 color: var(--ink);
+                font-size: 1rem;
+                transition: border-color 0.2s ease, box-shadow 0.2s ease;
             }
 
-            .email-input.input-error {
-                border-color: #df3d5a;
+            .field-select {
+                appearance: none;
             }
 
-            .email-input::placeholder {
-                color: #b1b5bf;
+            .field-input:focus,
+            .field-select:focus {
+                border-color: var(--focus);
+                box-shadow: 0 0 0 4px rgba(105, 86, 255, 0.08);
+            }
+
+            .field-input-error,
+            .field-select-error {
+                border-color: var(--danger);
+                background: var(--danger-soft);
             }
 
             .field-error {
-                margin-top: 10px;
-                color: #df3d5a;
-                font-size: 0.92rem;
+                color: var(--danger);
+                font-size: 0.88rem;
                 font-weight: 700;
             }
 
+            .error-summary {
+                margin-bottom: 20px;
+                padding: 14px 16px;
+                border: 1px solid rgba(217, 48, 37, 0.18);
+                border-radius: 16px;
+                background: var(--danger-soft);
+                color: var(--danger);
+                font-size: 0.94rem;
+                font-weight: 700;
+            }
+
+            .helper-text {
+                margin: 18px 0 0;
+                color: var(--muted);
+                font-size: 0.94rem;
+                line-height: 1.75;
+            }
+
+            .primary-button,
             .continue-button {
-                width: 100%;
-                margin-top: 28px;
-                height: 72px;
                 border: 0;
-                border-radius: 999px;
                 background: var(--dark);
                 color: #fff;
-                font-size: 1.02rem;
                 font-weight: 800;
                 cursor: pointer;
+            }
+
+            .primary-button {
+                width: 100%;
+                margin-top: 26px;
+                min-height: 70px;
+                border-radius: 999px;
+                font-size: 1rem;
+            }
+
+            .returning-form {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) 180px;
+                gap: 14px;
+                margin-top: 20px;
+            }
+
+            .continue-button {
+                min-height: 64px;
+                border-radius: 16px;
+                font-size: 0.98rem;
             }
 
             .divider {
@@ -240,7 +355,7 @@
                 }
             }
 
-            @media (max-width: 640px) {
+            @media (max-width: 760px) {
                 .auth-main {
                     padding: 28px 18px 34px;
                 }
@@ -254,8 +369,9 @@
                     padding-top: 28px;
                 }
 
-                .auth-subtitle {
-                    margin-bottom: 34px;
+                .setup-grid,
+                .returning-form {
+                    grid-template-columns: 1fr;
                 }
 
                 .social-button {
@@ -280,24 +396,157 @@
                 </a>
 
                 <div class="auth-card">
+                    <span class="step-label">Business owner onboarding</span>
                     <h1>Book Rahisi for professionals</h1>
-                    <p class="auth-subtitle">Create an account or log in to manage your business.</p>
+                    <p class="auth-subtitle">
+                        Start with your owner details below. Once this step is complete, you can continue into business setup, publish your profile, and open bookings.
+                    </p>
 
-                    <form action="{{ route('for-business.sign-in.submit') }}" method="post" novalidate>
-                        @csrf
-                        <input
-                            class="email-input @error('email') input-error @enderror"
-                            type="email"
-                            name="email"
-                            placeholder="Enter your email address"
-                            aria-label="Enter your email address"
-                            value="{{ old('email') }}"
-                        >
-                        @error('email')
-                            <div class="field-error">{{ $message }}</div>
-                        @enderror
-                        <button class="continue-button" type="submit">Continue</button>
-                    </form>
+                    <section class="signup-panel" aria-labelledby="owner-signup-title">
+                        <h2 class="panel-title" id="owner-signup-title">Create your business account</h2>
+                        <p class="panel-copy">This is the form business owners complete after clicking Get Started.</p>
+
+                        <form action="{{ route('for-business.sign-in.submit') }}" method="post" novalidate>
+                            @csrf
+                            <input type="hidden" name="intent" value="register">
+
+                            @if ($errors->any() && old('intent', 'register') === 'register')
+                                <div class="error-summary">
+                                    Complete the highlighted fields before continuing.
+                                </div>
+                            @endif
+
+                            <div class="setup-grid">
+                                <div class="field-group">
+                                    <label class="field-label" for="first-name">First name</label>
+                                    <input
+                                        class="field-input @error('first_name') field-input-error @enderror"
+                                        id="first-name"
+                                        name="first_name"
+                                        type="text"
+                                        placeholder="First name"
+                                        value="{{ old('first_name', $accountSetup['first_name'] ?? '') }}"
+                                    >
+                                    @error('first_name')
+                                        <span class="field-error">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label" for="last-name">Last name</label>
+                                    <input
+                                        class="field-input @error('last_name') field-input-error @enderror"
+                                        id="last-name"
+                                        name="last_name"
+                                        type="text"
+                                        placeholder="Last name"
+                                        value="{{ old('last_name', $accountSetup['last_name'] ?? '') }}"
+                                    >
+                                    @error('last_name')
+                                        <span class="field-error">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
+                                <div class="field-group field-group-full">
+                                    <label class="field-label" for="business-name">Business name</label>
+                                    <input
+                                        class="field-input @error('business_name') field-input-error @enderror"
+                                        id="business-name"
+                                        name="business_name"
+                                        type="text"
+                                        placeholder="Your salon, spa, studio, or clinic name"
+                                        value="{{ old('business_name', $accountSetup['business_name'] ?? '') }}"
+                                    >
+                                    @error('business_name')
+                                        <span class="field-error">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label" for="owner-email">Email address</label>
+                                    <input
+                                        class="field-input {{ $errors->has('email') && old('intent', 'register') === 'register' ? 'field-input-error' : '' }}"
+                                        id="owner-email"
+                                        name="email"
+                                        type="email"
+                                        placeholder="owner@business.com"
+                                        value="{{ old('email', session('business_signup_email')) }}"
+                                    >
+                                    @if ($errors->has('email') && old('intent', 'register') === 'register')
+                                        <span class="field-error">{{ $errors->first('email') }}</span>
+                                    @endif
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label" for="phone-number">Phone number</label>
+                                    <input
+                                        class="field-input @error('phone') field-input-error @enderror"
+                                        id="phone-number"
+                                        name="phone"
+                                        type="tel"
+                                        placeholder="+254 7xx xxx xxx"
+                                        value="{{ old('phone', $accountSetup['phone'] ?? '') }}"
+                                    >
+                                    @error('phone')
+                                        <span class="field-error">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
+                                <div class="field-group field-group-full">
+                                    <label class="field-label" for="business-category">Business category</label>
+                                    <select
+                                        class="field-select @error('business_category') field-select-error @enderror"
+                                        id="business-category"
+                                        name="business_category"
+                                    >
+                                        <option value="" disabled {{ old('business_category', $accountSetup['business_category'] ?? '') === '' ? 'selected' : '' }}>
+                                            Select a category
+                                        </option>
+                                        @foreach ($businessCategories as $businessCategory)
+                                            <option value="{{ $businessCategory }}" {{ old('business_category', $accountSetup['business_category'] ?? '') === $businessCategory ? 'selected' : '' }}>
+                                                {{ $businessCategory }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('business_category')
+                                        <span class="field-error">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <p class="helper-text">
+                                After this step, you can add services, staff, business hours, and the public booking details customers will see.
+                            </p>
+
+                            <button class="primary-button" type="submit">Create business account</button>
+                        </form>
+                    </section>
+
+                    <section class="returning-panel" aria-labelledby="existing-owner-title">
+                        <h2 class="panel-title" id="existing-owner-title">Already on Book Rahisi?</h2>
+                        <p class="panel-copy">If your business workspace already exists, continue with your owner email and go straight back into the dashboard.</p>
+
+                        <form class="returning-form" action="{{ route('for-business.sign-in.submit') }}" method="post" novalidate>
+                            @csrf
+                            <input type="hidden" name="intent" value="continue">
+                            <div class="field-group">
+                                <label class="field-label" for="existing-email">Email address</label>
+                                <input
+                                    class="field-input {{ $errors->has('email') && old('intent') === 'continue' ? 'field-input-error' : '' }}"
+                                    id="existing-email"
+                                    type="email"
+                                    name="email"
+                                    placeholder="Enter your email address"
+                                    value="{{ old('intent') === 'continue' ? old('email') : '' }}"
+                                >
+                            </div>
+                            <button class="continue-button" type="submit">Continue</button>
+                        </form>
+
+                        @if ($errors->has('email') && old('intent') === 'continue')
+                            <div class="field-error" style="margin-top: 12px;">{{ $errors->first('email') }}</div>
+                        @endif
+                    </section>
 
                     <div class="divider">OR</div>
 

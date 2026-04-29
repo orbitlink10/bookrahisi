@@ -271,15 +271,60 @@ class PublicSiteController extends Controller
         ]);
     }
 
-    public function businessSignIn(): View
+    public function businessSignIn(Request $request): View
     {
         return view('for-business-sign-in', [
+            'accountSetup' => $request->session()->get('business_account_setup', []),
+            'businessCategories' => $this->businessCategories(),
             'sideImage' => 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1400&q=80',
         ]);
     }
 
     public function businessSignInSubmit(Request $request): RedirectResponse
     {
+        if ($request->input('intent') === 'register') {
+            $validated = $request->validate([
+                'first_name' => ['required', 'string', 'max:80'],
+                'last_name' => ['required', 'string', 'max:80'],
+                'business_name' => ['required', 'string', 'max:120'],
+                'phone' => ['required', 'string', 'min:10', 'max:30'],
+                'business_category' => ['required', 'string', 'max:80'],
+                'email' => ['required', 'email'],
+            ]);
+
+            $request->session()->put('business_signup_email', $validated['email']);
+
+            $existingBusiness = $this->findOwnedBusinessByEmail($validated['email']);
+
+            if ($existingBusiness) {
+                $this->syncOwnerSessionFromBusiness($request, $existingBusiness);
+
+                return redirect()->route('for-business.tools');
+            }
+
+            $slug = Str::slug($validated['business_name']);
+            $slugTaken = Business::query()
+                ->where('slug', $slug)
+                ->exists();
+
+            if ($slugTaken) {
+                return redirect()
+                    ->route('for-business.sign-in')
+                    ->withErrors(['business_name' => 'That business name is already in use. Choose a different name to continue.'])
+                    ->withInput();
+            }
+
+            $request->session()->put('business_account_setup', [
+                'first_name' => $validated['first_name'],
+                'last_name' => $validated['last_name'],
+                'business_name' => $validated['business_name'],
+                'phone' => $validated['phone'],
+                'business_category' => $validated['business_category'],
+            ]);
+
+            return redirect()->route('for-business.business-setup');
+        }
+
         $validated = $request->validate([
             'email' => ['required', 'email'],
         ]);
@@ -309,14 +354,7 @@ class PublicSiteController extends Controller
 
         return view('for-business-account-setup', [
             'accountSetup' => $request->session()->get('business_account_setup', []),
-            'businessCategories' => [
-                'Salon',
-                'Spa',
-                'Barbershop',
-                'Nail studio',
-                'Massage therapy',
-                'Fitness studio',
-            ],
+            'businessCategories' => $this->businessCategories(),
             'email' => $email,
             'sideImage' => 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=1400&q=80',
         ]);
@@ -833,6 +871,18 @@ class PublicSiteController extends Controller
                 'https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&w=1400&q=80',
             ],
         };
+    }
+
+    private function businessCategories(): array
+    {
+        return [
+            'Salon',
+            'Spa',
+            'Barbershop',
+            'Nail studio',
+            'Massage therapy',
+            'Fitness studio',
+        ];
     }
 
     private function previewServiceFilters(string $category): array

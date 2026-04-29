@@ -43,9 +43,29 @@ class ExampleTest extends TestCase
         $response
             ->assertOk()
             ->assertSeeText('Book Rahisi for professionals')
+            ->assertSeeText('Create your business account')
+            ->assertSeeText('Already on Book Rahisi?')
             ->assertSeeText('Continue with Facebook')
             ->assertSeeText('Continue with Google')
             ->assertSeeText('Continue with Apple');
+    }
+
+    public function test_the_get_started_business_sign_up_form_advances_to_business_setup(): void
+    {
+        $response = $this->post('/for-business/sign-in', [
+            'intent' => 'register',
+            'first_name' => 'Amina',
+            'last_name' => 'Njeri',
+            'business_name' => 'Glow House',
+            'phone' => '+254711223344',
+            'business_category' => 'Salon',
+            'email' => 'owner@bookrahisi.test',
+        ]);
+
+        $response
+            ->assertRedirect('/for-business/business-setup')
+            ->assertSessionHas('business_signup_email', 'owner@bookrahisi.test')
+            ->assertSessionHas('business_account_setup', $this->accountSetupSession());
     }
 
     public function test_the_business_sign_in_form_accepts_a_valid_email_for_a_new_owner(): void
