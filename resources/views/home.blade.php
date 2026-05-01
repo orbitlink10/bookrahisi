@@ -1,3 +1,8 @@
+@php
+    $heroTitle = $hero['title'] ?? 'Book local self-care services';
+    $heroSubtitle = $hero['subtitle'] ?? 'Discover top-rated salons, barbers, medspas, wellness studios and beauty experts trusted across Kenya.';
+    $featuredDeals = array_slice($dailyDeals, 0, 4);
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -12,26 +17,38 @@
         <link href="https://fonts.bunny.net/css?family=outfit:400,500,600,700,800|manrope:400,500,600,700,800" rel="stylesheet" />
         <style>
             :root {
-                --accent: #d44d44;
-                --accent-dark: #ba3f36;
-                --accent-soft: #ffdbe4;
-                --accent-soft-deep: #ffcdd8;
-                --ink: #15181d;
-                --muted: #6b7280;
-                --line: #e5e7eb;
-                --surface: #ffffff;
-                --star: #f4b73f;
+                --page: #f4f1ea;
+                --surface: rgba(255, 255, 255, 0.8);
+                --surface-strong: #ffffff;
+                --surface-muted: #faf8f4;
+                --ink: #121212;
+                --muted: #585d68;
+                --line: rgba(18, 18, 18, 0.1);
+                --line-strong: rgba(18, 18, 18, 0.16);
+                --shadow: 0 30px 70px rgba(17, 18, 28, 0.08);
+                --hero-ring: rgba(222, 177, 246, 0.85);
+                --hero-lilac: #cfcafc;
+                --hero-pink: #f7c5ee;
+                --hero-blue: #d7ddff;
+                --hero-cream: #fff8ef;
+                --black: #121212;
             }
 
             * {
                 box-sizing: border-box;
             }
 
+            html {
+                scroll-behavior: smooth;
+            }
+
             body {
                 margin: 0;
                 font-family: 'Manrope', sans-serif;
                 color: var(--ink);
-                background: #fff;
+                background:
+                    radial-gradient(circle at top, rgba(255, 255, 255, 0.92), transparent 34%),
+                    linear-gradient(180deg, #f8f5ee 0%, #f3efe7 100%);
             }
 
             a {
@@ -45,155 +62,203 @@
                 font: inherit;
             }
 
+            .sr-only {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+                border: 0;
+            }
+
             .page-shell {
                 width: min(100% - 32px, 1840px);
                 margin: 0 auto;
             }
 
-            .promo-band {
-                position: relative;
-                overflow: hidden;
-                padding: 18px 0;
-                background: linear-gradient(90deg, var(--accent-soft) 0%, #ffd1df 50%, var(--accent-soft) 100%);
-                text-align: center;
-                color: #8f4350;
-                font-size: 0.96rem;
-                font-weight: 700;
+            .hero-stage {
+                padding: 6px 0 44px;
             }
 
-            .promo-band::before,
-            .promo-band::after {
+            .hero-panel {
+                position: relative;
+                overflow: hidden;
+                min-height: 860px;
+                border: 1px solid rgba(18, 18, 18, 0.08);
+                border-radius: 0 0 36px 36px;
+                background:
+                    radial-gradient(circle at 18% 72%, rgba(247, 197, 238, 0.96), transparent 24%),
+                    radial-gradient(circle at 50% 20%, rgba(209, 205, 255, 0.94), transparent 28%),
+                    radial-gradient(circle at 82% 34%, rgba(214, 219, 255, 0.88), transparent 30%),
+                    linear-gradient(140deg, rgba(255, 249, 241, 0.96) 4%, rgba(213, 210, 255, 0.95) 58%, rgba(240, 241, 255, 0.94) 100%);
+                box-shadow: var(--shadow);
+                isolation: isolate;
+            }
+
+            .hero-panel::before,
+            .hero-panel::after {
                 content: '';
                 position: absolute;
-                inset: 0 auto 0 10%;
-                width: 240px;
-                background:
-                    radial-gradient(circle at 18% 50%, rgba(255, 255, 255, 0.65) 0 5px, transparent 6px),
-                    radial-gradient(circle at 48% 24%, rgba(255, 150, 177, 0.45) 0 7px, transparent 8px),
-                    radial-gradient(circle at 80% 70%, rgba(154, 197, 255, 0.38) 0 6px, transparent 7px);
+                border-radius: 999px;
+                filter: blur(18px);
+                opacity: 0.58;
                 pointer-events: none;
             }
 
-            .promo-band::after {
-                inset: 0 10% 0 auto;
+            .hero-panel::before {
+                top: 130px;
+                left: 18%;
+                width: 260px;
+                height: 260px;
+                background: rgba(255, 255, 255, 0.62);
             }
 
-            .promo-band a {
-                margin-left: 10px;
-                color: var(--accent);
+            .hero-panel::after {
+                right: 10%;
+                bottom: 90px;
+                width: 300px;
+                height: 300px;
+                background: rgba(255, 255, 255, 0.34);
             }
 
-            .site-header {
-                position: sticky;
-                top: 0;
-                z-index: 20;
-                background: rgba(255, 255, 255, 0.96);
-                border-bottom: 1px solid rgba(17, 24, 39, 0.06);
-                backdrop-filter: blur(14px);
-            }
-
-            .top-nav {
+            .hero-header {
+                position: relative;
+                z-index: 1;
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                gap: 24px;
-                min-height: 76px;
+                gap: 20px;
+                padding: 18px 42px 0;
+                animation: rise-in 560ms ease both;
             }
 
             .brand {
                 font-family: 'Outfit', sans-serif;
-                font-size: 2.2rem;
+                font-size: 2.15rem;
                 font-weight: 800;
                 letter-spacing: -0.08em;
-                color: var(--accent);
                 text-transform: lowercase;
             }
 
-            .nav-links {
+            .hero-nav {
                 display: flex;
                 align-items: center;
-                gap: 18px;
+                gap: 16px;
             }
 
-            .nav-link {
-                padding: 12px 14px;
-                font-size: 0.96rem;
-                font-weight: 700;
+            .hero-link {
+                font-size: 1rem;
+                font-weight: 800;
             }
 
-            .nav-link-primary {
-                min-width: 188px;
-                padding: 16px 26px;
-                border-radius: 8px;
-                background: var(--accent);
-                color: #fff;
-                text-align: center;
-                box-shadow: 0 12px 24px rgba(212, 77, 68, 0.18);
+            .hero-pill {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                min-height: 66px;
+                padding: 0 28px;
+                border: 1px solid rgba(18, 18, 18, 0.12);
+                border-radius: 999px;
+                background: rgba(255, 255, 255, 0.74);
+                backdrop-filter: blur(18px);
+                font-size: 0.98rem;
+                font-weight: 800;
+                transition:
+                    transform 180ms ease,
+                    background 180ms ease,
+                    border-color 180ms ease;
             }
 
-            .hero-stage {
-                padding-top: 8px;
+            .hero-pill:hover {
+                transform: translateY(-1px);
+                background: rgba(255, 255, 255, 0.9);
+                border-color: rgba(18, 18, 18, 0.18);
             }
 
-            .hero-surface {
-                position: relative;
-                min-height: 585px;
-                background-image:
-                    linear-gradient(90deg, rgba(32, 26, 27, 0.22) 0%, rgba(32, 26, 27, 0.14) 35%, rgba(32, 26, 27, 0.08) 100%),
-                    url('{{ $hero['image'] }}');
-                background-position: center;
-                background-size: cover;
-                overflow: hidden;
+            .menu-icon {
+                width: 26px;
+                height: 18px;
+                display: inline-flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+
+            .menu-icon span {
+                display: block;
+                height: 2px;
+                border-radius: 999px;
+                background: currentColor;
             }
 
             .hero-inner {
                 position: relative;
                 z-index: 1;
-                padding: 72px 0 78px;
-            }
-
-            .hero-title {
-                margin: 0 0 16px;
-                max-width: 11ch;
-                font-family: 'Outfit', sans-serif;
-                font-size: clamp(3.5rem, 7vw, 5.8rem);
-                line-height: 0.94;
-                letter-spacing: -0.07em;
-                color: #fff;
+                display: grid;
+                place-items: center;
+                padding: 136px 28px 114px;
+                text-align: center;
             }
 
             .hero-copy {
-                margin: 0 0 34px;
-                max-width: 720px;
-                color: rgba(255, 255, 255, 0.94);
-                font-size: 1.04rem;
-                line-height: 1.7;
+                width: min(100%, 1180px);
+                animation: rise-in 680ms ease both;
             }
 
-            .search-bar {
+            .hero-title {
+                margin: 0;
+                font-family: 'Outfit', sans-serif;
+                font-size: clamp(3.8rem, 7vw, 6.6rem);
+                font-weight: 800;
+                line-height: 0.93;
+                letter-spacing: -0.08em;
+            }
+
+            .hero-subtitle {
+                width: min(100%, 1020px);
+                margin: 22px auto 0;
+                color: rgba(18, 18, 18, 0.84);
+                font-size: clamp(1.06rem, 2vw, 1.42rem);
+                line-height: 1.45;
+            }
+
+            .search-shell {
                 display: grid;
-                grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.2fr) minmax(0, 0.7fr) 170px;
-                max-width: 1080px;
-                overflow: hidden;
-                border-radius: 14px;
-                background: #fff;
-                box-shadow: 0 18px 42px rgba(17, 24, 39, 0.22);
+                grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.05fr) minmax(0, 0.85fr) auto;
+                gap: 0;
+                width: min(100%, 1360px);
+                margin: 72px auto 0;
+                padding: 8px;
+                border-radius: 999px;
+                background: rgba(255, 255, 255, 0.94);
+                border: 1px solid rgba(255, 255, 255, 0.9);
+                box-shadow:
+                    0 0 0 7px var(--hero-ring),
+                    0 22px 60px rgba(86, 89, 134, 0.15);
+                animation: rise-in 820ms ease both;
             }
 
-            .search-segment {
+            .search-field {
                 display: flex;
                 align-items: center;
                 gap: 16px;
-                min-height: 74px;
-                padding: 0 24px;
-                border-right: 1px solid var(--line);
+                min-height: 86px;
+                padding: 0 28px;
+                border-right: 1px solid rgba(18, 18, 18, 0.1);
+            }
+
+            .search-field:last-of-type {
+                border-right: 0;
             }
 
             .search-icon {
-                flex: 0 0 22px;
-                width: 22px;
-                height: 22px;
-                color: #545f6b;
+                flex: 0 0 24px;
+                width: 24px;
+                height: 24px;
+                color: rgba(18, 18, 18, 0.78);
             }
 
             .search-input,
@@ -201,269 +266,503 @@
                 width: 100%;
                 border: 0;
                 outline: none;
+                background: transparent;
                 color: var(--ink);
                 font-size: 1rem;
-                background: transparent;
+                font-weight: 700;
+                appearance: none;
             }
 
             .search-input::placeholder {
-                color: #8b94a1;
+                color: rgba(18, 18, 18, 0.76);
             }
 
-            .search-button {
+            .search-submit {
+                min-width: 176px;
+                margin-left: 8px;
                 border: 0;
-                background: var(--accent);
+                border-radius: 999px;
+                background: var(--black);
                 color: #fff;
-                font-size: 1rem;
+                font-size: 1.08rem;
                 font-weight: 800;
                 cursor: pointer;
-                transition: background 180ms ease;
+                transition:
+                    transform 180ms ease,
+                    box-shadow 180ms ease,
+                    background 180ms ease;
             }
 
-            .search-button:hover {
-                background: var(--accent-dark);
+            .search-submit:hover {
+                transform: translateY(-1px);
+                background: #1f1f1f;
+                box-shadow: 0 16px 30px rgba(18, 18, 18, 0.18);
             }
 
-            .service-pills {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 12px;
-                margin-top: 22px;
+            .hero-note {
+                margin: 72px 0 0;
+                font-size: clamp(1.3rem, 3vw, 2.1rem);
+                letter-spacing: -0.04em;
+                animation: rise-in 960ms ease both;
             }
 
-            .service-pill {
-                padding: 13px 24px;
+            .hero-note strong {
+                font-weight: 800;
+            }
+
+            .hero-app {
+                margin-top: 56px;
+                animation: rise-in 1080ms ease both;
+            }
+
+            .hero-app-link {
+                display: inline-flex;
+                align-items: center;
+                gap: 14px;
+                min-height: 64px;
+                padding: 0 28px;
                 border-radius: 999px;
-                border: 1px solid rgba(255, 255, 255, 0.72);
-                background: rgba(255, 255, 255, 0.06);
-                color: #fff;
-                font-weight: 700;
-                backdrop-filter: blur(8px);
+                border: 1px solid rgba(18, 18, 18, 0.12);
+                background: rgba(255, 255, 255, 0.88);
+                box-shadow: 0 14px 36px rgba(74, 68, 124, 0.08);
+                font-size: 1.05rem;
+                font-weight: 800;
+                transition:
+                    transform 180ms ease,
+                    box-shadow 180ms ease;
+            }
+
+            .hero-app-link:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 18px 36px rgba(74, 68, 124, 0.12);
+            }
+
+            .qr-icon {
+                width: 24px;
+                height: 24px;
             }
 
             .section {
-                padding: 30px 0 0;
+                padding: 0 0 28px;
             }
 
-            .section-head {
-                display: flex;
+            .section-card {
+                border: 1px solid rgba(18, 18, 18, 0.08);
+                border-radius: 32px;
+                background: rgba(255, 255, 255, 0.76);
+                backdrop-filter: blur(14px);
+                box-shadow: 0 16px 42px rgba(17, 18, 28, 0.05);
+            }
+
+            .browse-panel {
+                display: grid;
+                grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.35fr);
                 align-items: center;
-                justify-content: space-between;
-                gap: 20px;
-                margin-bottom: 14px;
+                gap: 32px;
+                padding: 34px;
+                margin-bottom: 26px;
+            }
+
+            .section-kicker {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 12px;
+                color: #6f6287;
+                font-size: 0.84rem;
+                font-weight: 800;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+            }
+
+            .section-kicker::before {
+                content: '';
+                width: 24px;
+                height: 1px;
+                background: currentColor;
             }
 
             .section-title {
                 margin: 0;
                 font-family: 'Outfit', sans-serif;
-                font-size: 1.65rem;
-                line-height: 1.1;
-                letter-spacing: -0.05em;
+                font-size: clamp(2rem, 3vw, 3rem);
+                line-height: 0.98;
+                letter-spacing: -0.06em;
+            }
+
+            .section-copy {
+                margin: 16px 0 0;
+                max-width: 560px;
+                color: var(--muted);
+                line-height: 1.7;
+            }
+
+            .pill-cluster {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 12px;
+                justify-content: flex-start;
+            }
+
+            .service-pill {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 50px;
+                padding: 0 20px;
+                border-radius: 999px;
+                background: linear-gradient(180deg, #ffffff 0%, #f6f2ff 100%);
+                border: 1px solid rgba(18, 18, 18, 0.08);
+                font-weight: 800;
+                box-shadow: 0 10px 24px rgba(17, 18, 28, 0.04);
+            }
+
+            .section-head {
+                display: flex;
+                align-items: end;
+                justify-content: space-between;
+                gap: 24px;
+                margin-bottom: 22px;
             }
 
             .section-link {
-                color: var(--accent);
-                font-size: 0.92rem;
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 0.95rem;
                 font-weight: 800;
+            }
+
+            .section-link svg {
+                width: 16px;
+                height: 16px;
             }
 
             .business-grid {
                 display: grid;
                 grid-template-columns: repeat(5, minmax(0, 1fr));
-                gap: 16px;
+                gap: 18px;
             }
 
-            .business-card,
-            .deal-card {
-                display: block;
-                background: #fff;
-                border: 1px solid #eef0f3;
-                box-shadow: 0 8px 24px rgba(17, 24, 39, 0.05);
+            .business-card {
+                overflow: hidden;
+                transition:
+                    transform 200ms ease,
+                    box-shadow 200ms ease;
             }
 
             .business-card:hover,
-            .deal-card:hover {
+            .offer-card:hover,
+            .business-cta-card:hover {
                 transform: translateY(-2px);
-                transition: transform 180ms ease;
             }
 
-            .business-image,
-            .deal-image {
-                background-image: var(--card-image);
+            .business-media {
+                aspect-ratio: 1 / 1.1;
                 background-position: center;
                 background-size: cover;
                 background-repeat: no-repeat;
             }
 
-            .business-image {
-                aspect-ratio: 1 / 0.78;
-            }
-
             .business-body {
-                padding: 12px 12px 14px;
+                padding: 18px;
             }
 
-            .business-name {
-                display: block;
-                margin-bottom: 4px;
-                font-size: 0.96rem;
-                font-weight: 800;
-                letter-spacing: -0.03em;
-            }
-
-            .business-meta {
-                color: var(--muted);
-                font-size: 0.84rem;
-                line-height: 1.5;
-            }
-
-            .business-rating {
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                margin-top: 8px;
-                font-size: 0.82rem;
-            }
-
-            .stars {
-                color: var(--star);
-                letter-spacing: 0.12em;
-            }
-
-            .daily-deals-grid {
-                display: grid;
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-                gap: 18px;
-            }
-
-            .deal-image {
-                position: relative;
-                height: 236px;
-            }
-
-            .deal-badge {
-                position: absolute;
-                top: 12px;
-                right: 12px;
-                padding: 8px 11px;
-                border-radius: 999px;
-                background: rgba(17, 24, 39, 0.88);
-                color: #fff;
-                font-size: 0.72rem;
-                font-weight: 800;
-                text-transform: uppercase;
-                letter-spacing: 0.04em;
-            }
-
-            .deal-body {
-                padding: 13px 4px 2px;
-            }
-
-            .deal-title {
-                display: block;
-                margin-bottom: 6px;
-                font-size: 1rem;
-                font-weight: 800;
-                letter-spacing: -0.03em;
-            }
-
-            .deal-location {
-                color: var(--muted);
-                font-size: 0.84rem;
-                line-height: 1.55;
-            }
-
-            .cities-section {
-                padding: 32px 0 76px;
-            }
-
-            .business-cta {
-                padding-bottom: 46px;
-            }
-
-            .business-cta-card {
+            .business-tags {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                gap: 24px;
-                padding: 28px 32px;
-                border: 1px solid #f2d3d0;
-                background: linear-gradient(90deg, #fff5f3 0%, #fff 100%);
-                box-shadow: 0 14px 36px rgba(212, 77, 68, 0.08);
+                gap: 12px;
+                margin-bottom: 14px;
             }
 
-            .business-cta-copy h2 {
-                margin: 0 0 10px;
+            .tag {
+                display: inline-flex;
+                align-items: center;
+                min-height: 32px;
+                padding: 0 12px;
+                border-radius: 999px;
+                background: #f6f2ff;
+                color: #5f5880;
+                font-size: 0.74rem;
+                font-weight: 800;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+            }
+
+            .distance {
+                color: var(--muted);
+                font-size: 0.82rem;
+                font-weight: 700;
+            }
+
+            .business-name {
+                margin: 0;
+                font-size: 1.04rem;
+                font-weight: 800;
+                letter-spacing: -0.03em;
+            }
+
+            .business-location {
+                margin: 8px 0 0;
+                color: var(--muted);
+                font-size: 0.92rem;
+                line-height: 1.55;
+            }
+
+            .business-rating {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                margin-top: 16px;
+                padding: 10px 12px;
+                border-radius: 999px;
+                background: #f7f6f2;
+                color: #262936;
+                font-size: 0.88rem;
+                font-weight: 700;
+            }
+
+            .rating-star {
+                width: 16px;
+                height: 16px;
+                color: #111;
+            }
+
+            .offer-grid {
+                display: grid;
+                grid-template-columns: repeat(12, minmax(0, 1fr));
+                gap: 18px;
+            }
+
+            .offer-card {
+                position: relative;
+                overflow: hidden;
+                min-height: 280px;
+                padding: 24px;
+                border-radius: 32px;
+                color: #fff;
+                background-position: center;
+                background-size: cover;
+                background-repeat: no-repeat;
+                box-shadow: 0 22px 48px rgba(17, 18, 28, 0.1);
+                transition:
+                    transform 200ms ease,
+                    box-shadow 200ms ease;
+            }
+
+            .offer-card::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(180deg, rgba(18, 18, 18, 0.12) 0%, rgba(18, 18, 18, 0.72) 100%);
+            }
+
+            .offer-card:first-child {
+                grid-column: span 7;
+                min-height: 420px;
+            }
+
+            .offer-card:nth-child(2) {
+                grid-column: span 5;
+            }
+
+            .offer-card:nth-child(3),
+            .offer-card:nth-child(4) {
+                grid-column: span 6;
+            }
+
+            .offer-body {
+                position: relative;
+                z-index: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end;
+                height: 100%;
+            }
+
+            .offer-badge {
+                align-self: flex-start;
+                margin-bottom: auto;
+                padding: 10px 14px;
+                border-radius: 999px;
+                background: rgba(255, 255, 255, 0.2);
+                border: 1px solid rgba(255, 255, 255, 0.22);
+                backdrop-filter: blur(10px);
+                font-size: 0.74rem;
+                font-weight: 800;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+            }
+
+            .offer-title {
+                margin: 0;
+                max-width: 18ch;
                 font-family: 'Outfit', sans-serif;
-                font-size: 2rem;
-                line-height: 1;
+                font-size: clamp(1.5rem, 2.6vw, 2.4rem);
+                line-height: 0.98;
                 letter-spacing: -0.05em;
             }
 
-            .business-cta-copy p {
-                margin: 0;
-                max-width: 700px;
-                color: var(--muted);
-                line-height: 1.7;
+            .offer-meta {
+                margin-top: 12px;
+                color: rgba(255, 255, 255, 0.86);
+                font-size: 0.96rem;
             }
 
-            .business-cta-button {
-                flex: 0 0 auto;
-                padding: 16px 24px;
-                background: var(--accent);
-                color: #fff;
-                font-weight: 800;
-                border-radius: 10px;
-                box-shadow: 0 12px 24px rgba(212, 77, 68, 0.16);
+            .city-panel {
+                padding: 34px;
             }
 
             .city-grid {
                 display: grid;
                 grid-template-columns: repeat(4, minmax(0, 1fr));
-                gap: 0 26px;
+                gap: 0 24px;
             }
 
             .city-link {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                gap: 14px;
-                padding: 16px 0;
-                border-bottom: 1px solid var(--line);
+                gap: 16px;
+                min-height: 64px;
+                border-bottom: 1px solid rgba(18, 18, 18, 0.08);
                 font-size: 0.95rem;
-                font-weight: 700;
+                font-weight: 800;
             }
 
             .city-link span:last-child {
-                color: #8f98a5;
+                color: rgba(18, 18, 18, 0.4);
+            }
+
+            .business-cta {
+                padding-bottom: 50px;
+            }
+
+            .business-cta-card {
+                position: relative;
+                overflow: hidden;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 24px;
+                padding: 34px;
+                border: 1px solid rgba(18, 18, 18, 0.08);
+                border-radius: 32px;
+                background:
+                    radial-gradient(circle at 0% 100%, rgba(247, 197, 238, 0.85), transparent 28%),
+                    radial-gradient(circle at 100% 0%, rgba(209, 205, 255, 0.92), transparent 34%),
+                    linear-gradient(140deg, rgba(255, 255, 255, 0.96) 0%, rgba(245, 242, 255, 0.94) 100%);
+                box-shadow: 0 22px 48px rgba(17, 18, 28, 0.08);
+                transition: transform 200ms ease;
+            }
+
+            .business-cta-title {
+                margin: 0;
+                font-family: 'Outfit', sans-serif;
+                font-size: clamp(2rem, 3vw, 3.1rem);
+                line-height: 0.96;
+                letter-spacing: -0.06em;
+            }
+
+            .business-cta-copy {
+                margin: 14px 0 0;
+                max-width: 760px;
+                color: var(--muted);
+                line-height: 1.7;
+            }
+
+            .business-cta-link {
+                flex: 0 0 auto;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 62px;
+                padding: 0 28px;
+                border-radius: 999px;
+                background: var(--black);
+                color: #fff;
+                font-weight: 800;
+                box-shadow: 0 16px 30px rgba(18, 18, 18, 0.16);
             }
 
             .site-footer {
-                border-top: 1px solid var(--line);
-                padding: 28px 0 40px;
-                color: var(--muted);
-                font-size: 0.92rem;
+                padding: 0 0 40px;
             }
 
-            .footer-row {
+            .footer-card {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
                 gap: 18px;
+                padding: 24px 28px;
+                border: 1px solid rgba(18, 18, 18, 0.08);
+                border-radius: 28px;
+                background: rgba(255, 255, 255, 0.72);
+                color: var(--muted);
+            }
+
+            .footer-brand {
+                color: var(--ink);
+                font-weight: 800;
             }
 
             .footer-links {
                 display: flex;
                 align-items: center;
                 gap: 18px;
+                font-weight: 700;
+            }
+
+            @keyframes rise-in {
+                from {
+                    opacity: 0;
+                    transform: translateY(18px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
             }
 
             @media (max-width: 1260px) {
-                .business-grid {
-                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                .hero-panel {
+                    min-height: 780px;
                 }
 
-                .daily-deals-grid {
+                .hero-inner {
+                    padding-top: 116px;
+                }
+
+                .search-shell {
+                    grid-template-columns: 1fr 1fr;
+                    border-radius: 34px;
+                }
+
+                .search-field {
+                    min-height: 80px;
+                }
+
+                .search-field:nth-child(2) {
+                    border-right: 0;
+                }
+
+                .search-field:nth-child(-n + 2) {
+                    border-bottom: 1px solid rgba(18, 18, 18, 0.1);
+                }
+
+                .search-submit {
+                    grid-column: 1 / -1;
+                    min-height: 78px;
+                    margin: 8px 0 0;
+                }
+
+                .browse-panel {
+                    grid-template-columns: 1fr;
+                }
+
+                .business-grid {
                     grid-template-columns: repeat(3, minmax(0, 1fr));
                 }
 
@@ -473,207 +772,284 @@
             }
 
             @media (max-width: 980px) {
-                .nav-links {
-                    gap: 8px;
-                }
-
-                .nav-link {
-                    padding-inline: 10px;
-                }
-
-                .search-bar {
-                    grid-template-columns: 1fr;
-                    max-width: 640px;
-                }
-
-                .search-segment {
-                    border-right: 0;
-                    border-bottom: 1px solid var(--line);
-                }
-
-                .business-grid,
-                .daily-deals-grid {
-                    grid-template-columns: repeat(2, minmax(0, 1fr));
-                }
-            }
-
-            @media (max-width: 760px) {
                 .page-shell {
                     width: min(100% - 20px, 1840px);
                 }
 
-                .promo-band {
-                    padding-inline: 16px;
-                    font-size: 0.9rem;
+                .hero-panel {
+                    min-height: auto;
+                    border-radius: 0 0 30px 30px;
                 }
 
-                .top-nav {
+                .hero-header {
                     flex-direction: column;
                     align-items: stretch;
-                    padding: 14px 0 16px;
+                    padding: 18px 20px 0;
                 }
 
-                .nav-links {
+                .hero-nav {
                     flex-wrap: wrap;
                     justify-content: space-between;
                 }
 
-                .brand {
-                    font-size: 1.9rem;
+                .hero-link {
+                    min-height: 54px;
+                    display: inline-flex;
+                    align-items: center;
                 }
 
-                .hero-surface {
-                    min-height: 640px;
+                .hero-pill {
+                    min-height: 58px;
+                    padding: 0 22px;
                 }
 
                 .hero-inner {
-                    padding: 52px 0 54px;
+                    padding: 76px 20px 74px;
                 }
 
                 .hero-title {
-                    max-width: none;
+                    font-size: clamp(3rem, 13vw, 4.7rem);
                 }
 
-                .hero-copy {
-                    font-size: 0.98rem;
+                .hero-subtitle {
+                    font-size: 1rem;
                 }
 
-                .service-pills {
-                    gap: 10px;
-                }
-
-                .service-pill {
-                    width: calc(50% - 5px);
-                    text-align: center;
-                    padding-inline: 14px;
-                }
-
-                .business-grid,
-                .daily-deals-grid,
-                .city-grid,
-                .footer-row {
+                .search-shell {
                     grid-template-columns: 1fr;
-                    flex-direction: column;
-                    align-items: flex-start;
+                    padding: 10px;
+                    border-radius: 32px;
+                    margin-top: 52px;
                 }
 
-                .business-cta-card {
+                .search-field {
+                    min-height: 72px;
+                    padding: 0 20px;
+                    border-right: 0;
+                    border-bottom: 1px solid rgba(18, 18, 18, 0.1);
+                }
+
+                .search-field:nth-child(-n + 2) {
+                    border-bottom: 1px solid rgba(18, 18, 18, 0.1);
+                }
+
+                .search-submit {
+                    min-height: 66px;
+                    margin-top: 8px;
+                }
+
+                .business-grid {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+
+                .offer-card:first-child,
+                .offer-card:nth-child(2),
+                .offer-card:nth-child(3),
+                .offer-card:nth-child(4) {
+                    grid-column: span 12;
+                    min-height: 320px;
+                }
+
+                .business-cta-card,
+                .footer-card {
                     flex-direction: column;
                     align-items: flex-start;
-                    padding: 24px 20px;
                 }
             }
 
-            @media (max-width: 540px) {
-                .nav-links {
+            @media (max-width: 640px) {
+                .hero-nav {
                     display: grid;
-                    grid-template-columns: repeat(2, minmax(0, 1fr));
-                    width: 100%;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 12px;
                 }
 
-                .nav-link,
-                .nav-link-primary {
-                    width: 100%;
-                    text-align: center;
+                .hero-link {
+                    grid-column: 1 / -1;
+                    justify-content: center;
                 }
 
-                .service-pill {
+                .hero-pill {
                     width: 100%;
+                    padding: 0 18px;
+                }
+
+                .hero-note {
+                    margin-top: 54px;
+                }
+
+                .browse-panel,
+                .city-panel,
+                .business-cta-card {
+                    padding: 26px 20px;
                 }
 
                 .business-grid,
-                .daily-deals-grid,
                 .city-grid {
                     grid-template-columns: 1fr;
+                }
+
+                .footer-links {
+                    flex-wrap: wrap;
+                    gap: 12px;
                 }
             }
         </style>
     </head>
     <body>
-        <div class="promo-band">
-            New on Book Rahisi: discover businesses with live availability and M-Pesa deposit options.
-            <a href="#daily-deals">Explore deals &rarr;</a>
-        </div>
+        <section class="hero-stage">
+            <div class="page-shell">
+                <div class="hero-panel">
+                    <header class="hero-header">
+                        <a class="brand" href="{{ route('home') }}">bookrahisi</a>
 
-        <header class="site-header">
-            <div class="page-shell top-nav">
-                <a class="brand" href="{{ route('home') }}">bookrahisi</a>
+                        <nav class="hero-nav" aria-label="Primary navigation">
+                            <a class="hero-link" href="{{ $customerUser ? route('customer.dashboard') : route('customer.sign-in') }}">
+                                {{ $customerUser ? 'Dashboard' : 'Log in' }}
+                            </a>
+                            <a class="hero-pill" href="{{ route('for-business') }}">List your business</a>
+                            <a class="hero-pill" href="#discover">
+                                <span>Menu</span>
+                                <span class="menu-icon" aria-hidden="true">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </span>
+                            </a>
+                        </nav>
+                    </header>
 
-                <nav class="nav-links" aria-label="Primary navigation">
-                    <a class="nav-link nav-link-primary" href="{{ route('for-business') }}">For Business</a>
-                    <a class="nav-link" href="#daily-deals">Daily Deals</a>
-                    <a class="nav-link" href="#nearby">Professionals</a>
-                    <a class="nav-link" href="#daily-deals">Gallery</a>
-                    <a class="nav-link" href="{{ $customerUser ? route('customer.dashboard') : route('customer.sign-in') }}">
-                        {{ $customerUser ? 'Dashboard' : 'Login' }}
-                    </a>
-                </nav>
+                    <div class="hero-inner">
+                        <div class="hero-copy">
+                            <h1 class="hero-title">{{ $heroTitle }}</h1>
+                            <p class="hero-subtitle">{{ $heroSubtitle }}</p>
+
+                            <form class="search-shell" action="{{ route('home') }}" method="get" aria-label="Search services">
+                                <div class="search-field">
+                                    <label class="sr-only" for="service">Service or treatment</label>
+                                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <circle cx="11" cy="11" r="7"></circle>
+                                        <path d="m20 20-3.5-3.5"></path>
+                                    </svg>
+                                    <input
+                                        id="service"
+                                        class="search-input"
+                                        type="text"
+                                        name="service"
+                                        value="{{ request('service') }}"
+                                        placeholder="All treatments"
+                                    >
+                                </div>
+
+                                <div class="search-field">
+                                    <label class="sr-only" for="location">Location</label>
+                                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M12 21s6-5.33 6-11a6 6 0 1 0-12 0c0 5.67 6 11 6 11Z"></path>
+                                        <circle cx="12" cy="10" r="2.5"></circle>
+                                    </svg>
+                                    <input
+                                        id="location"
+                                        class="search-input"
+                                        type="text"
+                                        name="location"
+                                        value="{{ request('location') }}"
+                                        placeholder="Current location"
+                                    >
+                                </div>
+
+                                <div class="search-field">
+                                    <label class="sr-only" for="when">Time</label>
+                                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <rect x="3" y="4" width="18" height="17" rx="2"></rect>
+                                        <path d="M8 2v4"></path>
+                                        <path d="M16 2v4"></path>
+                                        <path d="M3 10h18"></path>
+                                    </svg>
+                                    <select id="when" class="search-select" name="when" aria-label="Select time">
+                                        <option value="" @selected(request('when') === null || request('when') === '')>Any time</option>
+                                        <option value="open-now" @selected(request('when') === 'open-now')>Open now</option>
+                                        <option value="today" @selected(request('when') === 'today')>Today</option>
+                                        <option value="weekend" @selected(request('when') === 'weekend')>This weekend</option>
+                                    </select>
+                                </div>
+
+                                <button class="search-submit" type="submit">Search</button>
+                            </form>
+
+                            <p class="hero-note"><strong>410,147</strong> appointments booked today</p>
+
+                            <div class="hero-app">
+                                <a class="hero-app-link" href="#discover">
+                                    <span>Get the app</span>
+                                    <svg class="qr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <rect x="3" y="3" width="7" height="7" rx="1.4"></rect>
+                                        <rect x="14" y="3" width="7" height="7" rx="1.4"></rect>
+                                        <rect x="3" y="14" width="7" height="7" rx="1.4"></rect>
+                                        <path d="M14 14h3"></path>
+                                        <path d="M21 14v3"></path>
+                                        <path d="M18 17h3"></path>
+                                        <path d="M14 21h3"></path>
+                                        <path d="M18 18v3"></path>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </header>
+        </section>
 
         <main>
-            <section class="hero-stage">
-                <div class="hero-surface">
-                    <div class="page-shell hero-inner">
-                        <h1 class="hero-title">{{ $hero['title'] }}</h1>
-                        <p class="hero-copy">{{ $hero['subtitle'] }}</p>
+            <section class="section page-shell" id="discover">
+                <div class="section-card browse-panel">
+                    <div>
+                        <span class="section-kicker">Discover</span>
+                        <h2 class="section-title">Start with a treatment people already love.</h2>
+                        <p class="section-copy">
+                            Book Rahisi keeps the landing page focused like the reference, then gives visitors a quick way to jump into the categories that convert best.
+                        </p>
+                    </div>
 
-                        <form class="search-bar" action="#" method="get" aria-label="Search services">
-                            <div class="search-segment">
-                                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <circle cx="11" cy="11" r="7"></circle>
-                                    <path d="m20 20-3.5-3.5"></path>
-                                </svg>
-                                <input class="search-input" type="text" name="location" placeholder="Business Name or Location">
-                            </div>
-
-                            <div class="search-segment">
-                                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <circle cx="11" cy="11" r="7"></circle>
-                                    <path d="m20 20-3.5-3.5"></path>
-                                </svg>
-                                <input class="search-input" type="text" name="service" placeholder="Search Services and Classes">
-                            </div>
-
-                            <div class="search-segment">
-                                <select class="search-select" name="time" aria-label="Select time">
-                                    <option>Anytime</option>
-                                    <option>Open now</option>
-                                    <option>Today</option>
-                                    <option>This weekend</option>
-                                </select>
-                            </div>
-
-                            <button class="search-button" type="submit">Search</button>
-                        </form>
-
-                        <div class="service-pills" aria-label="Popular services">
-                            @foreach ($servicePills as $pill)
-                                <span class="service-pill">{{ $pill }}</span>
-                            @endforeach
-                        </div>
+                    <div class="pill-cluster" aria-label="Popular services">
+                        @foreach ($servicePills as $pill)
+                            <a class="service-pill" href="#popular">{{ $pill }}</a>
+                        @endforeach
                     </div>
                 </div>
             </section>
 
-            <section class="section page-shell" id="nearby">
+            <section class="section page-shell" id="popular">
                 <div class="section-head">
-                    <h2 class="section-title">Popular near you</h2>
-                    <a class="section-link" href="#cities">Browse all cities</a>
+                    <div>
+                        <span class="section-kicker">Nearby</span>
+                        <h2 class="section-title">Popular businesses near you</h2>
+                    </div>
+                    <a class="section-link" href="#cities">
+                        <span>Browse cities</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M5 12h14"></path>
+                            <path d="m12 5 7 7-7 7"></path>
+                        </svg>
+                    </a>
                 </div>
 
                 <div class="business-grid">
                     @foreach ($trendingBusinesses as $business)
-                        <article class="business-card" style="--card-image: url('{{ $business['image'] }}');">
-                            <div class="business-image"></div>
+                        <article class="section-card business-card">
+                            <div class="business-media" style="background-image: url('{{ $business['image'] }}');"></div>
                             <div class="business-body">
-                                <strong class="business-name">{{ $business['name'] }}</strong>
-                                <div class="business-meta">
-                                    {{ $business['location'] }} &middot; {{ $business['distance'] }}
+                                <div class="business-tags">
+                                    <span class="tag">{{ $business['category'] }}</span>
+                                    <span class="distance">{{ $business['distance'] }}</span>
                                 </div>
+                                <h3 class="business-name">{{ $business['name'] }}</h3>
+                                <p class="business-location">{{ $business['location'] }}</p>
                                 <div class="business-rating">
-                                    <span class="stars">★★★★★</span>
-                                    <span>{{ $business['rating'] }} ({{ $business['reviews'] }})</span>
+                                    <svg class="rating-star" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                        <path d="m12 3.7 2.54 5.15 5.69.83-4.11 4.01.97 5.67L12 16.71l-5.09 2.65.97-5.67-4.11-4.01 5.69-.83L12 3.7Z"></path>
+                                    </svg>
+                                    <span>{{ $business['rating'] }}</span>
+                                    <span>{{ $business['reviews'] }}</span>
                                 </div>
                             </div>
                         </article>
@@ -683,66 +1059,78 @@
 
             <section class="section page-shell" id="daily-deals">
                 <div class="section-head">
-                    <h2 class="section-title">Daily Deals</h2>
-                    <a class="section-link" href="#gallery">See all</a>
+                    <div>
+                        <span class="section-kicker">Offers</span>
+                        <h2 class="section-title">Fresh deals worth opening right now</h2>
+                    </div>
+                    <a class="section-link" href="{{ route('for-business') }}">
+                        <span>For business</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M5 12h14"></path>
+                            <path d="m12 5 7 7-7 7"></path>
+                        </svg>
+                    </a>
                 </div>
 
-                <div class="daily-deals-grid">
-                    @foreach ($dailyDeals as $deal)
-                        <article class="deal-card" style="--card-image: url('{{ $deal['image'] }}');">
-                            <div class="deal-image">
-                                <span class="deal-badge">{{ $deal['badge'] }}</span>
-                            </div>
-                            <div class="deal-body">
-                                <strong class="deal-title">{{ $deal['title'] }}</strong>
-                                <div class="deal-location">
-                                    {{ $deal['location'] }} &middot; {{ $deal['distance'] }}
-                                </div>
+                <div class="offer-grid">
+                    @foreach ($featuredDeals as $deal)
+                        <article class="offer-card" style="background-image: url('{{ $deal['image'] }}');">
+                            <div class="offer-body">
+                                <span class="offer-badge">{{ $deal['badge'] }}</span>
+                                <h3 class="offer-title">{{ $deal['title'] }}</h3>
+                                <div class="offer-meta">{{ $deal['location'] }} &middot; {{ $deal['distance'] }}</div>
                             </div>
                         </article>
                     @endforeach
                 </div>
             </section>
 
-            <section class="cities-section page-shell" id="cities">
-                <div class="section-head">
-                    <h2 class="section-title">Find a Service in a City Near You</h2>
-                </div>
-
-                <div class="city-grid">
-                    @foreach ($cityColumns as $column)
+            <section class="section page-shell" id="cities">
+                <div class="section-card city-panel">
+                    <div class="section-head">
                         <div>
-                            @foreach ($column as $city)
-                                <a class="city-link" href="#">
-                                    <span>{{ $city }}</span>
-                                    <span>&#8250;</span>
-                                </a>
-                            @endforeach
+                            <span class="section-kicker">Locations</span>
+                            <h2 class="section-title">Explore bookings across Kenya</h2>
                         </div>
-                    @endforeach
+                    </div>
+
+                    <div class="city-grid">
+                        @foreach ($cityColumns as $column)
+                            <div>
+                                @foreach ($column as $city)
+                                    <a class="city-link" href="#popular">
+                                        <span>{{ $city }}</span>
+                                        <span>&gt;</span>
+                                    </a>
+                                @endforeach
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             </section>
 
             <section class="business-cta page-shell" id="for-business">
                 <article class="business-cta-card">
-                    <div class="business-cta-copy">
-                        <h2>Grow your salon, spa, or studio with Book Rahisi.</h2>
-                        <p>
-                            Create your profile, publish services, manage staff availability, and receive online bookings with instant customer confirmations.
+                    <div>
+                        <h2 class="business-cta-title">List your salon, spa, or studio with the same polished first impression.</h2>
+                        <p class="business-cta-copy">
+                            Give customers live availability, clear pricing, staff schedules, and faster rebooking with a marketplace profile that feels premium from the first click.
                         </p>
                     </div>
-                    <a class="business-cta-button" href="{{ route('for-business') }}">List your business</a>
+                    <a class="business-cta-link" href="{{ route('for-business') }}">List your business</a>
                 </article>
             </section>
         </main>
 
-        <footer class="site-footer" id="login">
-            <div class="page-shell footer-row">
-                <div>Book Rahisi connects customers with salons, spas, barbershops, and fitness studios across Kenya.</div>
-                <div class="footer-links">
-                    <a href="{{ route('for-business') }}">For Business</a>
-                    <a href="#daily-deals">Deals</a>
-                    <a href="#cities">Cities</a>
+        <footer class="site-footer">
+            <div class="page-shell">
+                <div class="footer-card">
+                    <div><span class="footer-brand">Book Rahisi</span> connects customers with salons, spas, barbershops, and wellness studios across Kenya.</div>
+                    <div class="footer-links">
+                        <a href="{{ route('for-business') }}">For Business</a>
+                        <a href="#daily-deals">Deals</a>
+                        <a href="#cities">Cities</a>
+                    </div>
                 </div>
             </div>
         </footer>

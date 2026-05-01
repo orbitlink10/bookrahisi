@@ -41,8 +41,8 @@ class PublicSiteController extends Controller
 
         return view('home', [
             'hero' => [
-                'title' => 'Book your next self-care session',
-                'subtitle' => 'Discover salons, spas, barbershops, nail studios, massage therapy, and fitness classes across Kenya with instant online booking.',
+                'title' => 'Book local self-care services',
+                'subtitle' => 'Discover top-rated salons, barbers, medspas, wellness studios and beauty experts trusted across Kenya.',
                 'image' => 'https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&w=1800&q=80',
             ],
             'servicePills' => [
