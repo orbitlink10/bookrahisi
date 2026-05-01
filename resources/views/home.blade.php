@@ -75,26 +75,26 @@
             }
 
             .page-shell {
-                width: min(100% - 32px, 1840px);
+                width: min(100% - 20px, 1840px);
                 margin: 0 auto;
             }
 
             .hero-stage {
-                padding: 6px 0 44px;
+                padding: 0 0 28px;
             }
 
             .hero-panel {
                 position: relative;
                 overflow: hidden;
-                min-height: 860px;
+                min-height: 800px;
                 border: 1px solid rgba(18, 18, 18, 0.08);
-                border-radius: 0 0 36px 36px;
+                border-radius: 0 0 28px 28px;
                 background:
-                    radial-gradient(circle at 18% 72%, rgba(247, 197, 238, 0.96), transparent 24%),
-                    radial-gradient(circle at 50% 20%, rgba(209, 205, 255, 0.94), transparent 28%),
-                    radial-gradient(circle at 82% 34%, rgba(214, 219, 255, 0.88), transparent 30%),
-                    linear-gradient(140deg, rgba(255, 249, 241, 0.96) 4%, rgba(213, 210, 255, 0.95) 58%, rgba(240, 241, 255, 0.94) 100%);
-                box-shadow: var(--shadow);
+                    radial-gradient(circle at 18% 76%, rgba(247, 197, 238, 0.9), transparent 21%),
+                    radial-gradient(circle at 48% 22%, rgba(209, 205, 255, 0.94), transparent 30%),
+                    radial-gradient(circle at 84% 36%, rgba(218, 222, 255, 0.82), transparent 28%),
+                    linear-gradient(135deg, rgba(255, 250, 244, 0.98) 6%, rgba(213, 210, 255, 0.92) 56%, rgba(247, 247, 255, 0.96) 100%);
+                box-shadow: 0 22px 48px rgba(17, 18, 28, 0.06);
                 isolation: isolate;
             }
 
@@ -109,19 +109,19 @@
             }
 
             .hero-panel::before {
-                top: 130px;
-                left: 18%;
-                width: 260px;
-                height: 260px;
-                background: rgba(255, 255, 255, 0.62);
+                top: 122px;
+                left: 17%;
+                width: 220px;
+                height: 220px;
+                background: rgba(255, 255, 255, 0.56);
             }
 
             .hero-panel::after {
                 right: 10%;
-                bottom: 90px;
-                width: 300px;
-                height: 300px;
-                background: rgba(255, 255, 255, 0.34);
+                bottom: 72px;
+                width: 260px;
+                height: 260px;
+                background: rgba(255, 255, 255, 0.28);
             }
 
             .hero-header {
@@ -131,13 +131,13 @@
                 align-items: center;
                 justify-content: space-between;
                 gap: 20px;
-                padding: 18px 42px 0;
+                padding: 16px 34px 0;
                 animation: rise-in 560ms ease both;
             }
 
             .brand {
-                font-family: 'Outfit', sans-serif;
-                font-size: 2.15rem;
+                font-family: 'Manrope', sans-serif;
+                font-size: 1.92rem;
                 font-weight: 800;
                 letter-spacing: -0.08em;
                 text-transform: lowercase;
@@ -150,7 +150,7 @@
             }
 
             .hero-link {
-                font-size: 1rem;
+                font-size: 1.05rem;
                 font-weight: 800;
             }
 
@@ -159,13 +159,13 @@
                 align-items: center;
                 justify-content: center;
                 gap: 12px;
-                min-height: 66px;
+                min-height: 64px;
                 padding: 0 28px;
                 border: 1px solid rgba(18, 18, 18, 0.12);
                 border-radius: 999px;
-                background: rgba(255, 255, 255, 0.74);
+                background: rgba(255, 255, 255, 0.82);
                 backdrop-filter: blur(18px);
-                font-size: 0.98rem;
+                font-size: 1.04rem;
                 font-weight: 800;
                 transition:
                     transform 180ms ease,
@@ -180,8 +180,8 @@
             }
 
             .menu-icon {
-                width: 26px;
-                height: 18px;
+                width: 24px;
+                height: 17px;
                 display: inline-flex;
                 flex-direction: column;
                 justify-content: space-between;
@@ -199,54 +199,55 @@
                 z-index: 1;
                 display: grid;
                 place-items: center;
-                padding: 136px 28px 114px;
+                padding: 122px 28px 92px;
                 text-align: center;
             }
 
             .hero-copy {
-                width: min(100%, 1180px);
+                width: min(100%, 1420px);
                 animation: rise-in 680ms ease both;
             }
 
             .hero-title {
                 margin: 0;
-                font-family: 'Outfit', sans-serif;
-                font-size: clamp(3.8rem, 7vw, 6.6rem);
+                font-family: 'Manrope', sans-serif;
+                font-size: clamp(3.55rem, 5.1vw, 5.5rem);
                 font-weight: 800;
-                line-height: 0.93;
-                letter-spacing: -0.08em;
+                line-height: 0.94;
+                letter-spacing: -0.07em;
             }
 
             .hero-subtitle {
-                width: min(100%, 1020px);
-                margin: 22px auto 0;
+                width: min(100%, 1320px);
+                margin: 21px auto 0;
                 color: rgba(18, 18, 18, 0.84);
-                font-size: clamp(1.06rem, 2vw, 1.42rem);
-                line-height: 1.45;
+                font-size: clamp(1.06rem, 1.55vw, 1.58rem);
+                line-height: 1.4;
+                letter-spacing: -0.03em;
             }
 
             .search-shell {
                 display: grid;
-                grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.05fr) minmax(0, 0.85fr) auto;
+                grid-template-columns: minmax(0, 1.08fr) minmax(0, 1.08fr) minmax(0, 0.92fr) auto;
                 gap: 0;
                 width: min(100%, 1360px);
-                margin: 72px auto 0;
-                padding: 8px;
+                margin: 68px auto 0;
+                padding: 6px;
                 border-radius: 999px;
-                background: rgba(255, 255, 255, 0.94);
+                background: rgba(255, 255, 255, 0.96);
                 border: 1px solid rgba(255, 255, 255, 0.9);
                 box-shadow:
-                    0 0 0 7px var(--hero-ring),
-                    0 22px 60px rgba(86, 89, 134, 0.15);
+                    0 0 0 6px rgba(229, 191, 248, 0.85),
+                    0 18px 46px rgba(86, 89, 134, 0.12);
                 animation: rise-in 820ms ease both;
             }
 
             .search-field {
                 display: flex;
                 align-items: center;
-                gap: 16px;
-                min-height: 86px;
-                padding: 0 28px;
+                gap: 15px;
+                min-height: 78px;
+                padding: 0 26px;
                 border-right: 1px solid rgba(18, 18, 18, 0.1);
             }
 
@@ -255,9 +256,9 @@
             }
 
             .search-icon {
-                flex: 0 0 24px;
-                width: 24px;
-                height: 24px;
+                flex: 0 0 23px;
+                width: 23px;
+                height: 23px;
                 color: rgba(18, 18, 18, 0.78);
             }
 
@@ -268,8 +269,8 @@
                 outline: none;
                 background: transparent;
                 color: var(--ink);
-                font-size: 1rem;
-                font-weight: 700;
+                font-size: 1.02rem;
+                font-weight: 600;
                 appearance: none;
             }
 
@@ -278,13 +279,13 @@
             }
 
             .search-submit {
-                min-width: 176px;
-                margin-left: 8px;
+                min-width: 138px;
+                margin-left: 6px;
                 border: 0;
                 border-radius: 999px;
                 background: var(--black);
                 color: #fff;
-                font-size: 1.08rem;
+                font-size: 1rem;
                 font-weight: 800;
                 cursor: pointer;
                 transition:
@@ -300,8 +301,8 @@
             }
 
             .hero-note {
-                margin: 72px 0 0;
-                font-size: clamp(1.3rem, 3vw, 2.1rem);
+                margin: 62px 0 0;
+                font-size: clamp(1.3rem, 1.9vw, 2rem);
                 letter-spacing: -0.04em;
                 animation: rise-in 960ms ease both;
             }
@@ -311,7 +312,7 @@
             }
 
             .hero-app {
-                margin-top: 56px;
+                margin-top: 52px;
                 animation: rise-in 1080ms ease both;
             }
 
@@ -320,12 +321,12 @@
                 align-items: center;
                 gap: 14px;
                 min-height: 64px;
-                padding: 0 28px;
+                padding: 0 26px;
                 border-radius: 999px;
                 border: 1px solid rgba(18, 18, 18, 0.12);
-                background: rgba(255, 255, 255, 0.88);
-                box-shadow: 0 14px 36px rgba(74, 68, 124, 0.08);
-                font-size: 1.05rem;
+                background: rgba(255, 255, 255, 0.9);
+                box-shadow: 0 10px 24px rgba(74, 68, 124, 0.06);
+                font-size: 1rem;
                 font-weight: 800;
                 transition:
                     transform 180ms ease,
@@ -338,8 +339,8 @@
             }
 
             .qr-icon {
-                width: 24px;
-                height: 24px;
+                width: 22px;
+                height: 22px;
             }
 
             .section {
@@ -728,11 +729,11 @@
 
             @media (max-width: 1260px) {
                 .hero-panel {
-                    min-height: 780px;
+                    min-height: 740px;
                 }
 
                 .hero-inner {
-                    padding-top: 116px;
+                    padding-top: 104px;
                 }
 
                 .search-shell {
@@ -778,7 +779,7 @@
 
                 .hero-panel {
                     min-height: auto;
-                    border-radius: 0 0 30px 30px;
+                    border-radius: 0 0 24px 24px;
                 }
 
                 .hero-header {
@@ -799,19 +800,20 @@
                 }
 
                 .hero-pill {
-                    min-height: 58px;
+                    min-height: 56px;
                     padding: 0 22px;
                 }
 
                 .hero-inner {
-                    padding: 76px 20px 74px;
+                    padding: 68px 20px 66px;
                 }
 
                 .hero-title {
-                    font-size: clamp(3rem, 13vw, 4.7rem);
+                    font-size: clamp(3rem, 12vw, 4.6rem);
                 }
 
                 .hero-subtitle {
+                    width: min(100%, 720px);
                     font-size: 1rem;
                 }
 
@@ -819,11 +821,11 @@
                     grid-template-columns: 1fr;
                     padding: 10px;
                     border-radius: 32px;
-                    margin-top: 52px;
+                    margin-top: 44px;
                 }
 
                 .search-field {
-                    min-height: 72px;
+                    min-height: 68px;
                     padding: 0 20px;
                     border-right: 0;
                     border-bottom: 1px solid rgba(18, 18, 18, 0.1);
@@ -875,7 +877,7 @@
                 }
 
                 .hero-note {
-                    margin-top: 54px;
+                    margin-top: 42px;
                 }
 
                 .browse-panel,
@@ -976,7 +978,7 @@
                                 <button class="search-submit" type="submit">Search</button>
                             </form>
 
-                            <p class="hero-note"><strong>410,147</strong> appointments booked today</p>
+                            <p class="hero-note"><strong>412,355</strong> appointments booked today</p>
 
                             <div class="hero-app">
                                 <a class="hero-app-link" href="#discover">
