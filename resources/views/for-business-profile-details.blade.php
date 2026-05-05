@@ -550,6 +550,7 @@
     <body>
         @php
             $profileReady = is_array($profileDetails) && $profileDetails !== [];
+            $googleMapsApiKey = config('services.google.maps_api_key');
         @endphp
 
         <div class="console-app">
@@ -636,9 +637,16 @@
                                             id="address-line"
                                             name="address_line"
                                             type="text"
+                                            autocomplete="off"
                                             placeholder="Ngong Road, Prestige Plaza"
                                             value="{{ old('address_line', $profileDetails['address_line'] ?? '') }}"
                                         >
+                                        <span class="field-hint" id="location-picker-status">
+                                            Start typing and select an address from Google Maps suggestions to fill the street address, city, and neighborhood faster.
+                                            @if (! $googleMapsApiKey)
+                                                Google Maps suggestions are currently unavailable until `GOOGLE_MAPS_API_KEY` is configured, so manual entry still works.
+                                            @endif
+                                        </span>
                                         @error('address_line')
                                             <span class="field-error">{{ $message }}</span>
                                         @enderror
@@ -789,5 +797,111 @@
                 </div>
             </main>
         </div>
+        @if ($googleMapsApiKey)
+            <script>
+                window.initBusinessProfileAddressPicker = function () {
+                    const addressInput = document.getElementById('address-line');
+                    const cityInput = document.getElementById('city');
+                    const neighborhoodInput = document.getElementById('neighborhood');
+                    const statusNode = document.getElementById('location-picker-status');
+
+                    if (! addressInput || ! window.google || ! window.google.maps || ! window.google.maps.places) {
+                        return;
+                    }
+
+                    const autocomplete = new window.google.maps.places.Autocomplete(addressInput, {
+                        fields: ['address_components', 'formatted_address', 'name'],
+                    });
+
+                    const componentMap = function (addressComponents) {
+                        return (addressComponents || []).reduce(function (carry, component) {
+                            (component.types || []).forEach(function (type) {
+                                if (! carry[type]) {
+                                    carry[type] = component.long_name;
+                                }
+                            });
+
+                            return carry;
+                        }, {});
+                    };
+
+                    const composeAddressLine = function (components, place) {
+                        const mainStreet = [components.street_number, components.route].filter(Boolean).join(' ').trim();
+                        const secondaryLine = components.subpremise || components.premise || components.establishment || place.name || '';
+                        const parts = [];
+
+                        if (mainStreet !== '') {
+                            parts.push(mainStreet);
+                        }
+
+                        if (secondaryLine !== '' && ! parts.includes(secondaryLine)) {
+                            parts.push(secondaryLine);
+                        }
+
+                        if (parts.length > 0) {
+                            return parts.join(', ');
+                        }
+
+                        if (typeof place.formatted_address === 'string' && place.formatted_address.trim() !== '') {
+                            return place.formatted_address
+                                .split(',')
+                                .slice(0, 2)
+                                .map(function (part) {
+                                    return part.trim();
+                                })
+                                .filter(Boolean)
+                                .join(', ');
+                        }
+
+                        return addressInput.value;
+                    };
+
+                    if (statusNode) {
+                        statusNode.textContent = 'Start typing and select an address from Google Maps suggestions to fill the street address, city, and neighborhood faster.';
+                    }
+
+                    autocomplete.addListener('place_changed', function () {
+                        const place = autocomplete.getPlace();
+
+                        if (! place || ! Array.isArray(place.address_components) || place.address_components.length === 0) {
+                            if (statusNode) {
+                                statusNode.textContent = 'Select one of the Google Maps suggestions to apply the address details.';
+                            }
+
+                            return;
+                        }
+
+                        const components = componentMap(place.address_components);
+
+                        addressInput.value = composeAddressLine(components, place);
+
+                        if (cityInput) {
+                            cityInput.value = components.locality
+                                || components.administrative_area_level_2
+                                || components.administrative_area_level_1
+                                || cityInput.value;
+                        }
+
+                        if (neighborhoodInput) {
+                            neighborhoodInput.value = components.sublocality_level_1
+                                || components.sublocality
+                                || components.neighborhood
+                                || components.premise
+                                || components.establishment
+                                || neighborhoodInput.value;
+                        }
+
+                        if (statusNode) {
+                            statusNode.textContent = 'Picked from Google Maps. You can still adjust the street address, city, or neighborhood manually before saving.';
+                        }
+                    });
+                };
+            </script>
+            <script
+                async
+                defer
+                src="https://maps.googleapis.com/maps/api/js?key={{ rawurlencode($googleMapsApiKey) }}&libraries=places&callback=initBusinessProfileAddressPicker"
+            ></script>
+        @endif
     </body>
 </html>

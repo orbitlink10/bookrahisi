@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Business;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
@@ -280,7 +281,22 @@ class ExampleTest extends TestCase
             ->assertSeeText('Build the page customers will book from')
             ->assertSeeText('Business profile details')
             ->assertSeeText('YouTube link')
+            ->assertSeeText('Start typing and select an address from Google Maps suggestions')
             ->assertSee('/business/glow-house', false);
+    }
+
+    public function test_the_business_profile_details_page_loads_google_maps_when_configured(): void
+    {
+        config(['services.google.maps_api_key' => 'test-google-maps-key']);
+
+        $response = $this
+            ->withSession($this->ownerOnboardingSession())
+            ->get('/for-business/tools/profile');
+
+        $response
+            ->assertOk()
+            ->assertSee('maps.googleapis.com/maps/api/js?key=test-google-maps-key&libraries=places&callback=initBusinessProfileAddressPicker', false)
+            ->assertSee('window.initBusinessProfileAddressPicker = function () {', false);
     }
 
     public function test_the_business_profile_details_form_persists_the_business_and_redirects_to_the_dashboard(): void
@@ -323,6 +339,29 @@ class ExampleTest extends TestCase
         $response
             ->assertRedirect('/for-business/tools/profile')
             ->assertSessionHasErrors('youtube_url');
+    }
+
+    public function test_the_business_profile_details_form_still_saves_when_the_youtube_column_is_missing(): void
+    {
+        Schema::shouldReceive('hasColumn')
+            ->once()
+            ->with('businesses', 'youtube_url')
+            ->andReturn(false);
+
+        $response = $this
+            ->withSession($this->ownerOnboardingSession())
+            ->post('/for-business/tools/profile', $this->profileDetailsSession());
+
+        $response
+            ->assertRedirect('/for-business/tools')
+            ->assertSessionHas('dashboard_success');
+
+        $business = Business::query()
+            ->where('owner_email', 'owner@bookrahisi.test')
+            ->firstOrFail();
+
+        $this->assertSame('Glow House', $business->business_name);
+        $this->assertNull($business->youtube_url);
     }
 
     public function test_the_public_business_page_renders_without_an_owner_session_once_the_business_is_saved(): void

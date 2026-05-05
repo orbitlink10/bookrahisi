@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -680,24 +681,29 @@ class PublicSiteController extends Controller
 
         $request->session()->put('business_profile_details', $validated);
 
+        $businessPayload = [
+            'owner_first_name' => $accountSetup['first_name'],
+            'owner_last_name' => $accountSetup['last_name'],
+            'business_name' => $accountSetup['business_name'],
+            'slug' => Str::slug($accountSetup['business_name']),
+            'phone' => $accountSetup['phone'],
+            'business_category' => $accountSetup['business_category'],
+            'tagline' => $validated['tagline'],
+            'address_line' => $validated['address_line'],
+            'city' => $validated['city'],
+            'neighborhood' => $validated['neighborhood'],
+            'opening_time' => $validated['opening_time'],
+            'closing_time' => $validated['closing_time'],
+            'about' => $validated['about'],
+        ];
+
+        if (Schema::hasColumn('businesses', 'youtube_url')) {
+            $businessPayload['youtube_url'] = $validated['youtube_url'];
+        }
+
         $business = Business::query()->updateOrCreate(
             ['owner_email' => $email],
-            [
-                'owner_first_name' => $accountSetup['first_name'],
-                'owner_last_name' => $accountSetup['last_name'],
-                'business_name' => $accountSetup['business_name'],
-                'slug' => Str::slug($accountSetup['business_name']),
-                'phone' => $accountSetup['phone'],
-                'business_category' => $accountSetup['business_category'],
-                'tagline' => $validated['tagline'],
-                'address_line' => $validated['address_line'],
-                'city' => $validated['city'],
-                'neighborhood' => $validated['neighborhood'],
-                'opening_time' => $validated['opening_time'],
-                'closing_time' => $validated['closing_time'],
-                'about' => $validated['about'],
-                'youtube_url' => $validated['youtube_url'],
-            ]
+            $businessPayload
         );
 
         $this->syncOwnerSessionFromBusiness($request, $business);
