@@ -542,7 +542,7 @@
                             </div>
 
                             <p class="helper-text">
-                                After this step, you can add services, staff, business hours, and the public booking details customers will see.
+                                After this step, you will go straight to your dashboard to add services, staff, business hours, and the public booking details customers will see.
                             </p>
 
                             <button class="primary-button" type="submit">Create business account</button>

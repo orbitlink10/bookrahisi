@@ -17,11 +17,31 @@ class ExampleTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertSeeText('Book your next self-care session')
-            ->assertSeeText('Daily Deals')
-            ->assertSeeText('Find a Service in a City Near You')
+            ->assertSeeText('Book local self-care services')
+            ->assertSeeText('Popular businesses near you')
+            ->assertSeeText('Fresh deals worth opening right now')
             ->assertSeeText('For Business')
             ->assertSee('/customer/sign-in', false);
+    }
+
+    public function test_the_homepage_lists_approved_businesses_and_links_to_their_public_pages(): void
+    {
+        $approvedBusiness = $this->createBusiness();
+        $this->createBusiness([
+            'owner_email' => 'pending@bookrahisi.test',
+            'business_name' => 'Pending Glow House',
+            'slug' => 'pending-glow-house',
+            'approval_status' => 'pending',
+            'approved_at' => null,
+        ]);
+
+        $response = $this->get('/');
+
+        $response
+            ->assertOk()
+            ->assertSeeText($approvedBusiness->business_name)
+            ->assertSee(route('business.show', ['slug' => $approvedBusiness->slug]), false)
+            ->assertDontSeeText('Pending Glow House');
     }
 
     public function test_the_for_business_page_renders(): void
@@ -53,7 +73,7 @@ class ExampleTest extends TestCase
             ->assertSeeText('Continue with Apple');
     }
 
-    public function test_the_get_started_business_sign_up_form_advances_to_business_setup(): void
+    public function test_the_get_started_business_sign_up_form_redirects_new_owners_to_the_business_dashboard(): void
     {
         $response = $this->post('/for-business/sign-in', [
             'intent' => 'register',
@@ -68,9 +88,10 @@ class ExampleTest extends TestCase
         ]);
 
         $response
-            ->assertRedirect('/for-business/business-setup')
+            ->assertRedirect('/for-business/tools')
             ->assertSessionHas('business_signup_email', 'owner@bookrahisi.test')
-            ->assertSessionHas('business_account_setup', $this->accountSetupSession());
+            ->assertSessionHas('business_account_setup', $this->accountSetupSession())
+            ->assertSessionHas('dashboard_success', 'Business account created. Continue setting up your profile from the dashboard.');
 
         $this->assertDatabaseHas('users', [
             'name' => 'Amina Njeri',

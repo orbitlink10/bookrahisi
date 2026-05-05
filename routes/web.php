@@ -30,6 +30,7 @@ Route::get('/for-business/account-setup', [PublicSiteController::class, 'busines
 Route::post('/for-business/account-setup', [PublicSiteController::class, 'businessAccountSetupSubmit'])->name('for-business.account-setup.submit');
 Route::get('/for-business/business-setup', [PublicSiteController::class, 'businessProfileSetup'])->name('for-business.business-setup');
 Route::get('/for-business/tools', [PublicSiteController::class, 'businessTools'])->name('for-business.tools');
+Route::get('/for-business/tools/settings', [PublicSiteController::class, 'businessSettings'])->name('for-business.settings');
 Route::get('/for-business/tools/bookings', [PublicSiteController::class, 'businessBookings'])->name('for-business.bookings');
 Route::get('/for-business/tools/profile', [PublicSiteController::class, 'businessProfileDetails'])->name('for-business.profile-details');
 Route::post('/for-business/tools/profile', [PublicSiteController::class, 'businessProfileDetailsSubmit'])->name('for-business.profile-details.submit');

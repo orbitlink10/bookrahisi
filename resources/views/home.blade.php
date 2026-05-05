@@ -14,7 +14,7 @@
             content="Book Rahisi helps customers find salons, spas, barbershops, and fitness classes across Kenya with fast online booking."
         >
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=outfit:400,500,600,700,800|manrope:400,500,600,700,800" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=manrope:400,500,600,700,800" rel="stylesheet" />
         <style>
             :root {
                 --page: #f4f1ea;
@@ -79,6 +79,10 @@
                 margin: 0 auto;
             }
 
+            .hero-stage .page-shell {
+                width: min(100% - 2px, 1920px);
+            }
+
             .hero-stage {
                 padding: 0 0 28px;
             }
@@ -131,13 +135,14 @@
                 align-items: center;
                 justify-content: space-between;
                 gap: 20px;
-                padding: 16px 34px 0;
+                min-height: 72px;
+                padding: 12px 20px 0;
                 animation: rise-in 560ms ease both;
             }
 
             .brand {
                 font-family: 'Manrope', sans-serif;
-                font-size: 1.92rem;
+                font-size: 1.95rem;
                 font-weight: 800;
                 letter-spacing: -0.08em;
                 text-transform: lowercase;
@@ -150,8 +155,9 @@
             }
 
             .hero-link {
-                font-size: 1.05rem;
-                font-weight: 800;
+                font-size: 1rem;
+                line-height: 1.375rem;
+                font-weight: 700;
             }
 
             .hero-pill {
@@ -159,14 +165,15 @@
                 align-items: center;
                 justify-content: center;
                 gap: 12px;
-                min-height: 64px;
-                padding: 0 28px;
+                min-height: 48px;
+                padding: 0 24px;
                 border: 1px solid rgba(18, 18, 18, 0.12);
                 border-radius: 999px;
                 background: rgba(255, 255, 255, 0.82);
                 backdrop-filter: blur(18px);
-                font-size: 1.04rem;
-                font-weight: 800;
+                font-size: 1rem;
+                line-height: 1.375rem;
+                font-weight: 700;
                 transition:
                     transform 180ms ease,
                     background 180ms ease,
@@ -199,39 +206,42 @@
                 z-index: 1;
                 display: grid;
                 place-items: center;
-                padding: 122px 28px 92px;
+                padding: 110px 32px 92px;
                 text-align: center;
             }
 
             .hero-copy {
-                width: min(100%, 1420px);
+                width: min(100%, 1136px);
                 animation: rise-in 680ms ease both;
             }
 
             .hero-title {
                 margin: 0;
                 font-family: 'Manrope', sans-serif;
-                font-size: clamp(3.55rem, 5.1vw, 5.5rem);
+                max-width: 960px;
+                margin-inline: auto;
+                font-size: 2.5rem;
                 font-weight: 800;
-                line-height: 0.94;
-                letter-spacing: -0.07em;
+                line-height: 2.75rem;
+                letter-spacing: -0.05em;
             }
 
             .hero-subtitle {
-                width: min(100%, 1320px);
-                margin: 21px auto 0;
+                width: 100%;
+                max-width: 1136px;
+                margin: 22px auto 0;
                 color: rgba(18, 18, 18, 0.84);
-                font-size: clamp(1.06rem, 1.55vw, 1.58rem);
-                line-height: 1.4;
-                letter-spacing: -0.03em;
+                font-size: 1rem;
+                line-height: 1.375rem;
+                letter-spacing: 0;
             }
 
             .search-shell {
                 display: grid;
                 grid-template-columns: minmax(0, 1.08fr) minmax(0, 1.08fr) minmax(0, 0.92fr) auto;
                 gap: 0;
-                width: min(100%, 1360px);
-                margin: 68px auto 0;
+                width: 100%;
+                margin: 64px auto 0;
                 padding: 6px;
                 border-radius: 999px;
                 background: rgba(255, 255, 255, 0.96);
@@ -247,7 +257,7 @@
                 align-items: center;
                 gap: 15px;
                 min-height: 78px;
-                padding: 0 26px;
+                padding: 0 24px;
                 border-right: 1px solid rgba(18, 18, 18, 0.1);
             }
 
@@ -269,8 +279,9 @@
                 outline: none;
                 background: transparent;
                 color: var(--ink);
-                font-size: 1.02rem;
-                font-weight: 600;
+                font-size: 1rem;
+                line-height: 1.375rem;
+                font-weight: 500;
                 appearance: none;
             }
 
@@ -281,12 +292,14 @@
             .search-submit {
                 min-width: 138px;
                 margin-left: 6px;
+                min-height: 66px;
                 border: 0;
                 border-radius: 999px;
                 background: var(--black);
                 color: #fff;
                 font-size: 1rem;
-                font-weight: 800;
+                line-height: 1.375rem;
+                font-weight: 700;
                 cursor: pointer;
                 transition:
                     transform 180ms ease,
@@ -302,8 +315,10 @@
 
             .hero-note {
                 margin: 62px 0 0;
-                font-size: clamp(1.3rem, 1.9vw, 2rem);
-                letter-spacing: -0.04em;
+                font-size: 1rem;
+                line-height: 1.375rem;
+                letter-spacing: 0;
+                font-weight: 700;
                 animation: rise-in 960ms ease both;
             }
 
@@ -320,14 +335,15 @@
                 display: inline-flex;
                 align-items: center;
                 gap: 14px;
-                min-height: 64px;
-                padding: 0 26px;
+                min-height: 48px;
+                padding: 0 24px;
                 border-radius: 999px;
                 border: 1px solid rgba(18, 18, 18, 0.12);
                 background: rgba(255, 255, 255, 0.9);
                 box-shadow: 0 10px 24px rgba(74, 68, 124, 0.06);
                 font-size: 1rem;
-                font-weight: 800;
+                line-height: 1.375rem;
+                font-weight: 700;
                 transition:
                     transform 180ms ease,
                     box-shadow 180ms ease;
@@ -385,7 +401,7 @@
 
             .section-title {
                 margin: 0;
-                font-family: 'Outfit', sans-serif;
+                font-family: 'Manrope', sans-serif;
                 font-size: clamp(2rem, 3vw, 3rem);
                 line-height: 0.98;
                 letter-spacing: -0.06em;
@@ -446,6 +462,7 @@
             }
 
             .business-card {
+                display: block;
                 overflow: hidden;
                 transition:
                     transform 200ms ease,
@@ -456,6 +473,11 @@
             .offer-card:hover,
             .business-cta-card:hover {
                 transform: translateY(-2px);
+            }
+
+            .business-card:focus-visible {
+                outline: 3px solid rgba(111, 98, 135, 0.32);
+                outline-offset: 4px;
             }
 
             .business-media {
@@ -522,6 +544,12 @@
                 color: #262936;
                 font-size: 0.88rem;
                 font-weight: 700;
+            }
+
+            .business-empty {
+                padding: 28px 30px;
+                color: var(--muted);
+                line-height: 1.7;
             }
 
             .rating-star {
@@ -599,7 +627,7 @@
             .offer-title {
                 margin: 0;
                 max-width: 18ch;
-                font-family: 'Outfit', sans-serif;
+                font-family: 'Manrope', sans-serif;
                 font-size: clamp(1.5rem, 2.6vw, 2.4rem);
                 line-height: 0.98;
                 letter-spacing: -0.05em;
@@ -660,7 +688,7 @@
 
             .business-cta-title {
                 margin: 0;
-                font-family: 'Outfit', sans-serif;
+                font-family: 'Manrope', sans-serif;
                 font-size: clamp(2rem, 3vw, 3.1rem);
                 line-height: 0.96;
                 letter-spacing: -0.06em;
@@ -733,7 +761,7 @@
                 }
 
                 .hero-inner {
-                    padding-top: 104px;
+                    padding-top: 100px;
                 }
 
                 .search-shell {
@@ -777,6 +805,10 @@
                     width: min(100% - 20px, 1840px);
                 }
 
+                .hero-stage .page-shell {
+                    width: min(100% - 12px, 1920px);
+                }
+
                 .hero-panel {
                     min-height: auto;
                     border-radius: 0 0 24px 24px;
@@ -786,6 +818,7 @@
                     flex-direction: column;
                     align-items: stretch;
                     padding: 18px 20px 0;
+                    min-height: auto;
                 }
 
                 .hero-nav {
@@ -810,11 +843,13 @@
 
                 .hero-title {
                     font-size: clamp(3rem, 12vw, 4.6rem);
+                    line-height: 0.94;
                 }
 
                 .hero-subtitle {
                     width: min(100%, 720px);
                     font-size: 1rem;
+                    line-height: 1.5;
                 }
 
                 .search-shell {
@@ -894,6 +929,43 @@
                 .footer-links {
                     flex-wrap: wrap;
                     gap: 12px;
+                }
+            }
+
+            @media (min-width: 1024px) {
+                .hero-header {
+                    padding-inline: 32px;
+                }
+
+                .brand {
+                    font-size: 2rem;
+                }
+
+                .hero-inner {
+                    padding-top: 116px;
+                    padding-bottom: 88px;
+                }
+
+                .hero-title {
+                    font-size: 64px;
+                    line-height: 68px;
+                    letter-spacing: -0.04em;
+                }
+
+                .hero-subtitle {
+                    font-size: 22px;
+                    line-height: 28px;
+                    max-width: 1136px;
+                }
+
+                .search-shell {
+                    margin-top: 66px;
+                }
+
+                .hero-note {
+                    margin-top: 56px;
+                    font-size: 22px;
+                    line-height: 28px;
                 }
             }
         </style>
@@ -1035,28 +1107,34 @@
                     </a>
                 </div>
 
-                <div class="business-grid">
-                    @foreach ($trendingBusinesses as $business)
-                        <article class="section-card business-card">
-                            <div class="business-media" style="background-image: url('{{ $business['image'] }}');"></div>
-                            <div class="business-body">
-                                <div class="business-tags">
-                                    <span class="tag">{{ $business['category'] }}</span>
-                                    <span class="distance">{{ $business['distance'] }}</span>
+                @if ($trendingBusinesses === [])
+                    <div class="section-card business-empty">
+                        No approved businesses are live on the marketplace yet. New listings will appear here as soon as business owners finish setup and the public profile is approved.
+                    </div>
+                @else
+                    <div class="business-grid">
+                        @foreach ($trendingBusinesses as $business)
+                            <a class="section-card business-card" href="{{ route('business.show', ['slug' => $business['slug']]) }}" aria-label="View {{ $business['name'] }}">
+                                <div class="business-media" style="background-image: url('{{ $business['image'] }}');"></div>
+                                <div class="business-body">
+                                    <div class="business-tags">
+                                        <span class="tag">{{ $business['category'] }}</span>
+                                        <span class="distance">{{ $business['detail'] }}</span>
+                                    </div>
+                                    <h3 class="business-name">{{ $business['name'] }}</h3>
+                                    <p class="business-location">{{ $business['location'] }}</p>
+                                    <div class="business-rating">
+                                        <svg class="rating-star" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                            <path d="m12 3.7 2.54 5.15 5.69.83-4.11 4.01.97 5.67L12 16.71l-5.09 2.65.97-5.67-4.11-4.01 5.69-.83L12 3.7Z"></path>
+                                        </svg>
+                                        <span>{{ $business['rating'] }}</span>
+                                        <span>{{ $business['reviews'] }}</span>
+                                    </div>
                                 </div>
-                                <h3 class="business-name">{{ $business['name'] }}</h3>
-                                <p class="business-location">{{ $business['location'] }}</p>
-                                <div class="business-rating">
-                                    <svg class="rating-star" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                        <path d="m12 3.7 2.54 5.15 5.69.83-4.11 4.01.97 5.67L12 16.71l-5.09 2.65.97-5.67-4.11-4.01 5.69-.83L12 3.7Z"></path>
-                                    </svg>
-                                    <span>{{ $business['rating'] }}</span>
-                                    <span>{{ $business['reviews'] }}</span>
-                                </div>
-                            </div>
-                        </article>
-                    @endforeach
-                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
             </section>
 
             <section class="section page-shell" id="daily-deals">

@@ -19,6 +19,12 @@
             'active' => request()->routeIs('for-business.bookings'),
         ],
         [
+            'code' => 'ST',
+            'label' => 'Settings',
+            'href' => route('for-business.settings'),
+            'active' => request()->routeIs('for-business.settings'),
+        ],
+        [
             'code' => 'PR',
             'label' => 'Profile',
             'href' => route('for-business.profile-details'),

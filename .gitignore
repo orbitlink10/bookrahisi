@@ -12,6 +12,8 @@
 /.vscode
 /.zed
 /auth.json
+.codex-fresha-*.css
+.codex-fresha-home.html
 /node_modules
 /public/hot
 /public/storage

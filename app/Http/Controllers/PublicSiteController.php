@@ -56,53 +56,7 @@ class PublicSiteController extends Controller
                 'Pilates',
                 'More...',
             ],
-            'trendingBusinesses' => [
-                [
-                    'name' => 'Amani Style Studio',
-                    'category' => 'Salon',
-                    'location' => 'Westlands, Nairobi',
-                    'distance' => '1.2 km',
-                    'rating' => '4.9',
-                    'reviews' => '318 reviews',
-                    'image' => 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=900&q=80',
-                ],
-                [
-                    'name' => 'Polished by Zuri',
-                    'category' => 'Nail Studio',
-                    'location' => 'Kilimani, Nairobi',
-                    'distance' => '2.4 km',
-                    'rating' => '4.8',
-                    'reviews' => '204 reviews',
-                    'image' => 'https://images.unsplash.com/photo-1610992239169-c57b2a6f98b1?auto=format&fit=crop&w=900&q=80',
-                ],
-                [
-                    'name' => 'Baraka Grooming Club',
-                    'category' => 'Barbershop',
-                    'location' => 'Milimani, Kisumu',
-                    'distance' => '0.9 km',
-                    'rating' => '4.9',
-                    'reviews' => '175 reviews',
-                    'image' => 'https://images.unsplash.com/photo-1622286342621-4bd786c2447c?auto=format&fit=crop&w=900&q=80',
-                ],
-                [
-                    'name' => 'Maua Spa House',
-                    'category' => 'Spa',
-                    'location' => 'Nyali, Mombasa',
-                    'distance' => '1.7 km',
-                    'rating' => '4.8',
-                    'reviews' => '128 reviews',
-                    'image' => 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=900&q=80',
-                ],
-                [
-                    'name' => 'Iron District Fitness',
-                    'category' => 'Gym',
-                    'location' => 'Kilimani, Nairobi',
-                    'distance' => '3.1 km',
-                    'rating' => '4.7',
-                    'reviews' => '96 reviews',
-                    'image' => 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=900&q=80',
-                ],
-            ],
+            'trendingBusinesses' => $this->homepageMarketplaceBusinesses(),
             'dailyDeals' => [
                 [
                     'title' => 'Radiance facial treatment',
@@ -352,7 +306,9 @@ class PublicSiteController extends Controller
                 'business_category' => $validated['business_category'],
             ]);
 
-            return redirect()->route('for-business.business-setup');
+            return redirect()
+                ->route('for-business.tools')
+                ->with('dashboard_success', 'Business account created. Continue setting up your profile from the dashboard.');
         }
 
         $validated = $request->validate([
@@ -503,6 +459,157 @@ class PublicSiteController extends Controller
             'recentBookings' => $recentBookings,
             'sideImage' => 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1400&q=80',
             'todayBookingCount' => $todayBookingCount,
+        ]);
+    }
+
+    public function businessSettings(Request $request): View|RedirectResponse
+    {
+        $email = $request->session()->get('business_signup_email');
+
+        if (! $email) {
+            return redirect()->route('for-business.sign-in');
+        }
+
+        $this->hydrateOwnerSessionFromDatabase($request);
+
+        $accountSetup = $request->session()->get('business_account_setup');
+        $profileDetails = $request->session()->get('business_profile_details', []);
+
+        if (! is_array($accountSetup) || $accountSetup === []) {
+            return redirect()->route('for-business.account-setup');
+        }
+
+        $business = $this->findOwnedBusinessByEmail($email);
+        $businessSlug = Str::slug($accountSetup['business_name']);
+        $profileReady = is_array($profileDetails) && $profileDetails !== [];
+        $bookingCount = $business?->bookings()->count() ?? 0;
+        $pendingBookingCount = $business?->bookings()->where('status', 'pending')->count() ?? 0;
+        $todayBookingCount = $business?->bookings()->whereDate('appointment_date', today())->count() ?? 0;
+        $paidBookingCount = $business?->bookings()->where('payment_status', 'paid')->count() ?? 0;
+        $openPaymentCount = max($bookingCount - $paidBookingCount, 0);
+        $teamPreview = array_slice($this->previewTeamMembers($accountSetup['business_category']), 0, 3);
+        $profileHours = $profileReady
+            ? $this->formatDisplayTime($profileDetails['opening_time']).' - '.$this->formatDisplayTime($profileDetails['closing_time'])
+            : 'Add opening and closing hours';
+        $publicPageHref = $profileReady && $business
+            ? route('business.show', ['slug' => $businessSlug])
+            : route('for-business.profile-details');
+        $bookingPageHref = $profileReady && $business
+            ? route('business.book', ['slug' => $businessSlug])
+            : route('for-business.profile-details');
+        $workspaceStatus = $business
+            ? ucfirst((string) $business->approval_status)
+            : 'Draft';
+
+        $settingsCards = [
+            [
+                'icon' => 'business',
+                'title' => 'Business setup',
+                'description' => 'Customize owner details, your business identity, and the core information that anchors the workspace.',
+                'status' => $profileReady ? 'Live workspace' : 'Needs setup',
+                'tone' => $profileReady ? 'success' : 'warning',
+                'facts' => [
+                    ['label' => 'Business', 'value' => $accountSetup['business_name']],
+                    ['label' => 'Category', 'value' => $accountSetup['business_category']],
+                    ['label' => 'Owner', 'value' => $accountSetup['first_name'].' '.$accountSetup['last_name']],
+                    ['label' => 'Phone', 'value' => $accountSetup['phone']],
+                ],
+                'primary_action' => ['label' => 'Open setup flow', 'href' => route('for-business.account-setup')],
+                'secondary_action' => ['label' => 'Update profile', 'href' => route('for-business.profile-details')],
+            ],
+            [
+                'icon' => 'calendar',
+                'title' => 'Scheduling',
+                'description' => 'Control operating hours, booking readiness, and the availability signals customers rely on before they confirm an appointment.',
+                'status' => $profileReady ? 'Booking hours ready' : 'Hours missing',
+                'tone' => $profileReady ? 'success' : 'warning',
+                'facts' => [
+                    ['label' => 'Hours', 'value' => $profileHours],
+                    ['label' => 'Profile', 'value' => $profileReady ? 'Booking-ready profile' : 'Complete the public profile'],
+                    ['label' => 'Today', 'value' => $todayBookingCount.' booking '.Str::plural('slot', $todayBookingCount)],
+                    ['label' => 'Booking link', 'value' => $profileReady && $business ? 'Customer booking page available' : 'Publish profile to activate'],
+                ],
+                'primary_action' => ['label' => 'Edit hours', 'href' => route('for-business.profile-details')],
+                'secondary_action' => ['label' => $profileReady ? 'Preview booking page' : 'Finish profile', 'href' => $bookingPageHref],
+            ],
+            [
+                'icon' => 'sales',
+                'title' => 'Sales',
+                'description' => 'Track booking payment activity, open payment follow-up, and the checkout visibility currently available inside the workspace.',
+                'status' => $bookingCount > 0 ? 'Live tracking' : 'Ready for activity',
+                'tone' => $bookingCount > 0 ? 'success' : 'neutral',
+                'facts' => [
+                    ['label' => 'Paid requests', 'value' => (string) $paidBookingCount],
+                    ['label' => 'Open payments', 'value' => (string) $openPaymentCount],
+                    ['label' => 'Bookings', 'value' => (string) $bookingCount],
+                    ['label' => 'Workspace', 'value' => $profileReady ? 'Customer checkout visible from bookings' : 'Profile draft until setup is complete'],
+                ],
+                'primary_action' => ['label' => 'Review bookings', 'href' => route('for-business.bookings')],
+                'secondary_action' => ['label' => 'View dashboard', 'href' => route('for-business.tools')],
+            ],
+            [
+                'icon' => 'clients',
+                'title' => 'Clients',
+                'description' => 'Monitor booking demand, pending responses, and the day-to-day client flow from one owner-facing control surface.',
+                'status' => $pendingBookingCount > 0 ? 'Action needed' : 'Inbox clear',
+                'tone' => $pendingBookingCount > 0 ? 'warning' : 'success',
+                'facts' => [
+                    ['label' => 'All bookings', 'value' => (string) $bookingCount],
+                    ['label' => 'Pending replies', 'value' => (string) $pendingBookingCount],
+                    ['label' => 'Today', 'value' => (string) $todayBookingCount],
+                    ['label' => 'Reach', 'value' => $profileReady ? 'Customers can submit requests live' : 'Complete profile to accept requests'],
+                ],
+                'primary_action' => ['label' => 'Open customer bookings', 'href' => route('for-business.bookings')],
+                'secondary_action' => ['label' => $profileReady ? 'Preview public page' : 'Update profile', 'href' => $publicPageHref],
+            ],
+            [
+                'icon' => 'billing',
+                'title' => 'Billing details',
+                'description' => 'Keep your owner contact details, workspace records, and billing-facing information aligned while the business setup evolves.',
+                'status' => $business ? 'Workspace connected' : 'Workspace draft',
+                'tone' => $business ? 'success' : 'neutral',
+                'facts' => [
+                    ['label' => 'Owner email', 'value' => $email],
+                    ['label' => 'Owner phone', 'value' => $accountSetup['phone']],
+                    ['label' => 'Workspace', 'value' => $workspaceStatus],
+                    ['label' => 'Profile', 'value' => $profileReady ? 'Saved to the business record' : 'Still in setup mode'],
+                ],
+                'primary_action' => ['label' => 'Review owner details', 'href' => route('for-business.account-setup')],
+                'secondary_action' => ['label' => 'Back to dashboard', 'href' => route('for-business.tools')],
+            ],
+            [
+                'icon' => 'team',
+                'title' => 'Team',
+                'description' => 'Preview the staff lineup customers will expect to book with and keep your service-facing team details consistent.',
+                'status' => $profileReady ? 'Preview ready' : 'Preview draft',
+                'tone' => $profileReady ? 'success' : 'neutral',
+                'facts' => [
+                    ['label' => 'Preview roster', 'value' => implode(', ', array_map(static fn (array $member): string => $member['name'], $teamPreview))],
+                    ['label' => 'Lead role', 'value' => $teamPreview[0]['role'] ?? 'Add team information'],
+                    ['label' => 'Category', 'value' => $accountSetup['business_category']],
+                    ['label' => 'Public page', 'value' => $profileReady ? 'Customers can preview your service team' : 'Finish profile to show staff context'],
+                ],
+                'primary_action' => ['label' => $profileReady ? 'Preview customer page' : 'Update profile', 'href' => $publicPageHref],
+                'secondary_action' => ['label' => 'Edit profile details', 'href' => route('for-business.profile-details')],
+            ],
+        ];
+
+        return view('for-business-settings', [
+            'accountSetup' => $accountSetup,
+            'bookingCount' => $bookingCount,
+            'bookingPageHref' => $bookingPageHref,
+            'businessSlug' => $businessSlug,
+            'email' => $email,
+            'paidBookingCount' => $paidBookingCount,
+            'pendingBookingCount' => $pendingBookingCount,
+            'profileDetails' => $profileDetails,
+            'profileHours' => $profileHours,
+            'profileReady' => $profileReady,
+            'publicPageHref' => $publicPageHref,
+            'settingsCards' => $settingsCards,
+            'teamPreview' => $teamPreview,
+            'todayBookingCount' => $todayBookingCount,
+            'workspaceStatus' => $workspaceStatus,
         ]);
     }
 
@@ -1227,6 +1334,39 @@ class PublicSiteController extends Controller
         return [
             'embed_url' => 'https://www.openstreetmap.org/export/embed.html?bbox='.$bbox.'&layer=mapnik&marker='.$lat.','.$lng,
         ];
+    }
+
+    private function homepageMarketplaceBusinesses(): array
+    {
+        return Business::query()
+            ->where('approval_status', 'approved')
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
+            ->orderByDesc('approved_at')
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function (Business $business): array {
+                $fallbackSummary = $this->previewReviewSummary($this->previewReviews($business->business_category));
+                $reviewCount = (int) $business->reviews_count;
+                $rating = $reviewCount > 0
+                    ? number_format((float) $business->reviews_avg_rating, 1)
+                    : $fallbackSummary['rating'];
+                $reviewLabelCount = $reviewCount > 0
+                    ? $reviewCount
+                    : (int) $fallbackSummary['count'];
+
+                return [
+                    'category' => $business->business_category,
+                    'detail' => 'Open today',
+                    'image' => $this->previewGalleryImages($business->business_category)[0],
+                    'location' => $business->neighborhood.', '.$business->city,
+                    'name' => $business->business_name,
+                    'rating' => $rating,
+                    'reviews' => $reviewLabelCount.' '.Str::plural('review', $reviewLabelCount),
+                    'slug' => $business->slug,
+                ];
+            })
+            ->all();
     }
 
     private function previewBookingDates(): array
