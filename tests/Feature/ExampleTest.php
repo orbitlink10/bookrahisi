@@ -2,10 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Mail\BookingPlacedMail;
 use App\Models\Business;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
@@ -405,12 +409,16 @@ class ExampleTest extends TestCase
             ->assertSeeText('Book your appointment')
             ->assertSeeText('Choose a service')
             ->assertSeeText('Choose a date')
+            ->assertSeeText('Email address')
+            ->assertSeeText('Reference image')
             ->assertSeeText('Confirm booking request');
     }
 
     public function test_the_business_booking_form_persists_a_valid_booking_request(): void
     {
         $this->createBusiness();
+        Mail::fake();
+        Storage::fake('public');
 
         $appointmentDate = now()->format('Y-m-d');
 
@@ -420,7 +428,9 @@ class ExampleTest extends TestCase
             'appointment_time' => '9:00 am',
             'staff' => 'zuri',
             'customer_name' => 'Jane Customer',
+            'customer_email' => 'jane.customer@example.com',
             'customer_phone' => '+254700000001',
+            'customer_image' => UploadedFile::fake()->create('reference-photo.jpg', 256, 'image/jpeg'),
             'customer_notes' => 'Please keep the slot on time.',
         ]);
 
@@ -435,6 +445,7 @@ class ExampleTest extends TestCase
             'staff_slug' => 'zuri',
             'staff_name' => 'Zuri',
             'customer_name' => 'Jane Customer',
+            'customer_email' => 'jane.customer@example.com',
             'customer_phone' => '+254700000001',
             'customer_notes' => 'Please keep the slot on time.',
             'status' => 'pending',
@@ -447,6 +458,13 @@ class ExampleTest extends TestCase
             ->firstOrFail();
 
         $this->assertSame($appointmentDate, $booking->appointment_date?->format('Y-m-d'));
+        $this->assertNotNull($booking->customer_image_path);
+        Storage::disk('public')->assertExists($booking->customer_image_path);
+
+        Mail::assertSent(BookingPlacedMail::class, function (BookingPlacedMail $mail) use ($booking): bool {
+            return $mail->hasTo('jane.customer@example.com')
+                && $mail->booking->is($booking);
+        });
     }
 
     public function test_the_owner_can_view_bookings_from_the_business_tools_area(): void
@@ -461,6 +479,8 @@ class ExampleTest extends TestCase
             'staff_slug' => 'zuri',
             'staff_name' => 'Zuri',
             'customer_name' => 'Jane Customer',
+            'customer_email' => 'jane.customer@example.com',
+            'customer_image_path' => 'booking-images/reference-photo.jpg',
             'customer_phone' => '+254700000001',
             'customer_notes' => 'Please keep the slot on time.',
             'status' => 'pending',
@@ -476,7 +496,9 @@ class ExampleTest extends TestCase
             ->assertSeeText('Jane Customer')
             ->assertSeeText('Head and Shoulder Massage')
             ->assertSeeText('+254700000001')
-            ->assertSeeText('Please keep the slot on time.');
+            ->assertSeeText('jane.customer@example.com')
+            ->assertSeeText('Please keep the slot on time.')
+            ->assertSeeText('View uploaded reference image');
     }
 
     public function test_the_owner_dashboard_shows_recent_bookings_after_login(): void

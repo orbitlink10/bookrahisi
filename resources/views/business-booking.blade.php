@@ -320,6 +320,10 @@
                 padding: 0 18px;
             }
 
+            .field-input[type="file"] {
+                padding: 14px 18px;
+            }
+
             .field-textarea {
                 min-height: 140px;
                 padding: 16px 18px;
@@ -335,6 +339,13 @@
                 color: var(--danger);
                 font-size: 0.88rem;
                 font-weight: 700;
+            }
+
+            .field-helper {
+                color: var(--muted);
+                font-size: 0.88rem;
+                font-weight: 500;
+                line-height: 1.6;
             }
 
             .error-summary,
@@ -508,7 +519,7 @@
                         <div class="error-summary">Complete the highlighted booking details before continuing.</div>
                     @endif
 
-                    <form action="{{ route('business.book.submit', ['slug' => $businessSlug]) }}" method="post">
+                    <form action="{{ route('business.book.submit', ['slug' => $businessSlug]) }}" method="post" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="service" value="{{ $selectedServiceSlug }}">
                         <input type="hidden" name="staff" value="{{ $selectedStaffSlug }}">
@@ -609,9 +620,29 @@
                                 </label>
 
                                 <label class="field-label">
+                                    Email address
+                                    <input class="field-input @error('customer_email') field-error-state @enderror" type="email" name="customer_email" value="{{ old('customer_email', $customerUser?->email) }}" placeholder="you@example.com" {{ $customerUser ? 'readonly' : '' }}>
+                                    <span class="field-helper">
+                                        {{ $customerUser ? 'The confirmation email will be sent to your signed-in customer account.' : 'We will send your booking request receipt and wait-for-confirmation notice to this email.' }}
+                                    </span>
+                                    @error('customer_email')
+                                        <span class="field-error">{{ $message }}</span>
+                                    @enderror
+                                </label>
+
+                                <label class="field-label">
                                     Phone number
                                     <input class="field-input @error('customer_phone') field-error-state @enderror" type="text" name="customer_phone" value="{{ old('customer_phone', $customerUser?->phone_number) }}" placeholder="+254 7xx xxx xxx">
                                     @error('customer_phone')
+                                        <span class="field-error">{{ $message }}</span>
+                                    @enderror
+                                </label>
+
+                                <label class="field-label">
+                                    Reference image
+                                    <input class="field-input @error('customer_image') field-error-state @enderror" type="file" name="customer_image" accept="image/*">
+                                    <span class="field-helper">Upload a clear image the business should review before confirming the booking.</span>
+                                    @error('customer_image')
                                         <span class="field-error">{{ $message }}</span>
                                     @enderror
                                 </label>

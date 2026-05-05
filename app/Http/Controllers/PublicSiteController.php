@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\BookingPlacedMail;
 use App\Models\Business;
 use App\Models\Review;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -802,16 +804,20 @@ class PublicSiteController extends Controller
             'appointment_time' => ['required', 'string', 'max:20', Rule::in($timeSlots)],
             'staff' => ['required', 'string', 'max:120', Rule::in(array_column($staffMembers, 'slug'))],
             'customer_name' => ['required', 'string', 'max:100'],
+            'customer_email' => ['required', 'email', 'max:255'],
             'customer_phone' => ['required', 'string', 'max:30'],
+            'customer_image' => ['required', 'image', 'max:5120'],
             'customer_notes' => ['nullable', 'string', 'max:500'],
         ]);
 
         $selectedService = $this->resolvePreviewService($services, $validated['service']);
         $selectedStaff = $this->resolvePreviewStaff($staffMembers, $validated['staff']);
 
-        $business->bookings()->create([
+        $customerEmail = $customerUser?->email ?: $validated['customer_email'];
+
+        $bookingPayload = [
             'customer_user_id' => $customerUser?->id,
-            'customer_email' => $customerUser?->email,
+            'customer_email' => $customerEmail,
             'service_slug' => $selectedService['slug'],
             'service_name' => $selectedService['name'],
             'appointment_date' => $validated['appointment_date'],
@@ -822,7 +828,19 @@ class PublicSiteController extends Controller
             'customer_phone' => $validated['customer_phone'],
             'customer_notes' => $validated['customer_notes'] ?: null,
             'status' => 'pending',
-        ]);
+        ];
+
+        if (Schema::hasColumn('bookings', 'customer_image_path')) {
+            $bookingPayload['customer_image_path'] = $request->file('customer_image')?->store('booking-images', 'public');
+        }
+
+        $booking = $business->bookings()->create($bookingPayload);
+
+        try {
+            Mail::to($customerEmail)->send(new BookingPlacedMail($booking));
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
 
         return redirect()
             ->route('business.book', [
@@ -831,8 +849,8 @@ class PublicSiteController extends Controller
                 'staff' => $validated['staff'],
             ])
             ->with('booking_success', $customerUser
-                ? 'Booking request received. You can now manage it from your customer dashboard.'
-                : 'Booking request received. Sign in with a customer account next time to manage appointments, reviews, and payment status from one dashboard.');
+                ? 'Booking request received. A confirmation email has been sent while you wait for the business to confirm your appointment, and you can track it from your customer dashboard.'
+                : 'Booking request received. Check your email for confirmation that the request was placed while you wait for the business to confirm the appointment.');
     }
 
     public function businessBookings(Request $request): View|RedirectResponse

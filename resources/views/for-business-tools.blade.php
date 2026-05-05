@@ -12,35 +12,33 @@
         <link href="https://fonts.bunny.net/css?family=outfit:400,500,600,700,800|manrope:400,500,600,700,800" rel="stylesheet" />
         <style>
             :root {
-                --ink: #111317;
-                --muted: #6a7280;
-                --line: #e3e6ed;
-                --soft: #f6f7fb;
+                --navy: #17345d;
+                --navy-deep: #112744;
+                --navy-soft: rgba(255, 255, 255, 0.08);
+                --line: #d6e2f0;
+                --page: #eef5fb;
                 --panel: #ffffff;
-                --accent: #6956ff;
-                --accent-soft: #f1efff;
-                --gold: #ffb400;
-                --dark: #0f1012;
-                --success-soft: #edf9ef;
-                --success-ink: #197446;
-                --warning-soft: #fff5de;
-                --warning-ink: #b57608;
+                --ink: #17304d;
+                --muted: #607792;
+                --accent: #1aa0e2;
+                --accent-deep: #14898b;
+                --success-soft: #eaf8ef;
+                --success-ink: #147d46;
+                --warning-soft: #fff4dc;
+                --warning-ink: #b36c00;
                 --danger-soft: #fff0ee;
                 --danger-ink: #c24b3a;
-                --shadow: 0 18px 42px rgba(17, 19, 23, 0.06);
+                --shadow: 0 24px 44px rgba(28, 66, 104, 0.12);
             }
 
             * {
                 box-sizing: border-box;
             }
 
-            html {
-                scroll-behavior: smooth;
-            }
-
             body {
                 margin: 0;
-                background: #fff;
+                min-height: 100vh;
+                background: linear-gradient(180deg, #f6fbff 0%, var(--page) 100%);
                 color: var(--ink);
                 font-family: 'Manrope', sans-serif;
             }
@@ -50,10 +48,108 @@
                 text-decoration: none;
             }
 
-            .shell {
-                width: min(100%, 1820px);
+            .console-app {
+                display: grid;
+                grid-template-columns: 320px minmax(0, 1fr);
+                min-height: 100vh;
+            }
+
+            .console-sidebar {
+                position: sticky;
+                top: 0;
+                display: grid;
+                align-content: start;
+                gap: 28px;
+                min-height: 100vh;
+                padding: 24px 20px;
+                background: linear-gradient(180deg, var(--navy) 0%, var(--navy-deep) 100%);
+                color: #fff;
+            }
+
+            .sidebar-brand {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+            }
+
+            .brand-avatar {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 58px;
+                height: 58px;
+                border-radius: 18px;
+                background: linear-gradient(180deg, #d9ecff 0%, #a8d1ff 100%);
+                color: var(--navy);
+                font-family: 'Outfit', sans-serif;
+                font-size: 1.35rem;
+                font-weight: 800;
+                letter-spacing: -0.05em;
+            }
+
+            .brand-copy {
+                display: grid;
+                gap: 4px;
+            }
+
+            .brand-title {
+                font-family: 'Outfit', sans-serif;
+                font-size: 2rem;
+                font-weight: 800;
+                letter-spacing: -0.06em;
+            }
+
+            .brand-subtitle {
+                color: rgba(255, 255, 255, 0.74);
+                font-size: 0.96rem;
+                font-weight: 700;
+            }
+
+            .sidebar-nav {
+                display: grid;
+                gap: 10px;
+            }
+
+            .sidebar-link {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                padding: 14px 16px;
+                border: 1px solid transparent;
+                border-radius: 18px;
+                color: rgba(255, 255, 255, 0.82);
+                font-size: 0.98rem;
+                font-weight: 800;
+                transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+            }
+
+            .sidebar-link:hover,
+            .sidebar-link.is-active {
+                border-color: rgba(255, 255, 255, 0.18);
+                background: rgba(255, 255, 255, 0.12);
+                color: #fff;
+            }
+
+            .sidebar-link-icon {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 38px;
+                height: 38px;
+                border-radius: 12px;
+                border: 1px solid rgba(255, 255, 255, 0.16);
+                background: var(--navy-soft);
+                font-size: 0.86rem;
+                font-weight: 800;
+            }
+
+            .workspace {
+                padding: 26px 28px 36px;
+            }
+
+            .workspace-shell {
+                width: min(100%, 1420px);
                 margin: 0 auto;
-                padding: 0 42px 48px;
             }
 
             .topbar {
@@ -61,151 +157,41 @@
                 align-items: center;
                 justify-content: space-between;
                 gap: 18px;
-                padding: 22px 0 16px;
-            }
-
-            .brand {
-                font-family: 'Outfit', sans-serif;
-                font-size: 2rem;
-                font-weight: 800;
-                letter-spacing: -0.06em;
-            }
-
-            .search-shell {
-                display: flex;
-                align-items: center;
-                gap: 18px;
-                width: min(980px, 100%);
-                padding: 12px 16px;
-                border: 1px solid var(--line);
-                border-radius: 999px;
-                background: #fff;
-                box-shadow: var(--shadow);
-            }
-
-            .search-item {
-                flex: 1;
-                min-width: 0;
-                padding: 0 14px;
-                color: var(--ink);
-                font-size: 0.98rem;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-
-            .search-item + .search-item {
-                border-left: 1px solid var(--line);
-            }
-
-            .search-button {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                width: 54px;
-                height: 54px;
-                border-radius: 50%;
-                background: var(--dark);
-                color: #fff;
-                flex: 0 0 auto;
-            }
-
-            .search-button svg,
-            .menu-button svg {
-                width: 22px;
-                height: 22px;
-            }
-
-            .menu-button {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                gap: 12px;
-                padding: 18px 24px;
-                border: 1px solid var(--line);
-                border-radius: 999px;
-                background: #fff;
-                font-size: 0.98rem;
-                font-weight: 800;
-                flex: 0 0 auto;
-            }
-
-            .breadcrumb {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 10px;
-                margin-top: 14px;
-                color: var(--muted);
-                font-size: 0.98rem;
+                margin-bottom: 22px;
             }
 
             .eyebrow {
                 display: inline-flex;
                 align-items: center;
-                padding: 12px 18px;
-                border: 1px solid #d7d4ff;
+                gap: 10px;
+                padding: 10px 16px;
                 border-radius: 999px;
-                background: var(--accent-soft);
+                background: #def2ff;
                 color: var(--accent);
-                font-size: 0.92rem;
+                font-size: 0.88rem;
                 font-weight: 800;
             }
 
-            .hero-header {
-                margin-top: 26px;
-            }
-
-            .hero-header h1 {
-                margin: 20px 0 0;
+            h1 {
+                margin: 0;
                 font-family: 'Outfit', sans-serif;
-                font-size: clamp(3rem, 5vw, 4.7rem);
-                line-height: 0.94;
-                letter-spacing: -0.08em;
+                font-size: clamp(2.3rem, 4vw, 3.9rem);
+                letter-spacing: -0.06em;
+                line-height: 1;
             }
 
-            .hero-tagline {
-                max-width: 900px;
-                margin: 16px 0 0;
+            .subtitle {
+                margin: 14px 0 0;
+                max-width: 860px;
                 color: var(--muted);
-                font-size: 1.08rem;
-                line-height: 1.8;
+                font-size: 1rem;
+                line-height: 1.75;
             }
 
-            .hero-meta {
+            .toolbar {
                 display: flex;
                 flex-wrap: wrap;
-                align-items: center;
-                gap: 14px;
-                margin-top: 18px;
-                color: var(--muted);
-                font-size: 1.08rem;
-            }
-
-            .hero-meta strong {
-                color: var(--ink);
-            }
-
-            .directions-link {
-                color: var(--accent);
-                font-weight: 700;
-            }
-
-            .success-banner {
-                margin-top: 22px;
-                padding: 16px 18px;
-                border: 1px solid rgba(25, 116, 70, 0.14);
-                border-radius: 24px;
-                background: var(--success-soft);
-                color: var(--success-ink);
-                font-size: 0.96rem;
-                font-weight: 700;
-            }
-
-            .hero-actions {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 12px;
-                margin-top: 24px;
+                gap: 10px;
             }
 
             .button-dark,
@@ -213,152 +199,131 @@
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
-                min-height: 54px;
-                padding: 0 22px;
-                border-radius: 999px;
-                font-size: 0.98rem;
+                padding: 14px 20px;
+                border-radius: 16px;
+                font-size: 0.96rem;
                 font-weight: 800;
             }
 
             .button-dark {
-                background: var(--dark);
+                background: var(--navy);
                 color: #fff;
+                box-shadow: 0 14px 30px rgba(23, 52, 93, 0.16);
             }
 
             .button-light {
                 border: 1px solid var(--line);
-                background: #fff;
+                background: rgba(255, 255, 255, 0.9);
                 color: var(--ink);
             }
 
-            .overview-grid {
-                display: grid;
-                grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.82fr);
-                gap: 24px;
-                margin-top: 30px;
-            }
-
-            .overview-card,
-            .snapshot-card,
-            .stat-card,
-            .panel {
-                border: 1px solid var(--line);
-                border-radius: 28px;
-                background: var(--panel);
-                box-shadow: var(--shadow);
-            }
-
-            .overview-card {
-                padding: 30px 32px;
-                background:
-                    radial-gradient(circle at top right, rgba(105, 86, 255, 0.08), transparent 34%),
-                    linear-gradient(180deg, #ffffff 0%, #fbfbff 100%);
-            }
-
-            .overview-card h2 {
-                margin: 0;
-                font-family: 'Outfit', sans-serif;
-                font-size: clamp(2.2rem, 3vw, 3.3rem);
-                letter-spacing: -0.06em;
-                line-height: 0.98;
-            }
-
-            .overview-copy {
-                margin: 14px 0 0;
-                max-width: 760px;
-                color: var(--muted);
-                font-size: 1rem;
-                line-height: 1.75;
-            }
-
-            .hero-alert {
-                margin-top: 20px;
+            .success-banner {
+                margin-bottom: 18px;
                 padding: 16px 18px;
+                border: 1px solid rgba(20, 125, 70, 0.14);
                 border-radius: 20px;
-                background: var(--danger-soft);
-                color: var(--danger-ink);
+                background: var(--success-soft);
+                color: var(--success-ink);
                 font-size: 0.96rem;
                 font-weight: 700;
             }
 
-            .overview-actions {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 12px;
-                margin-top: 22px;
-            }
-
-            .snapshot-card {
+            .hero-card {
                 display: grid;
-                gap: 20px;
-                padding: 28px;
+                grid-template-columns: minmax(0, 1.2fr) auto;
+                gap: 24px;
+                align-items: center;
+                margin-bottom: 22px;
+                padding: 28px 30px;
+                border-radius: 26px;
+                background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
+                color: #fff;
+                box-shadow: var(--shadow);
             }
 
-            .snapshot-card h3,
-            .panel-title {
-                margin: 0;
+            .hero-card h2 {
+                margin: 14px 0 0;
                 font-family: 'Outfit', sans-serif;
-                font-size: 1.7rem;
-                letter-spacing: -0.05em;
+                font-size: clamp(2.5rem, 4vw, 3.6rem);
+                letter-spacing: -0.06em;
+                line-height: 0.96;
+                max-width: 10ch;
             }
 
-            .snapshot-copy,
-            .panel-copy {
-                margin: 10px 0 0;
-                color: var(--muted);
+            .hero-copy {
+                margin: 14px 0 0;
+                max-width: 780px;
+                color: rgba(255, 255, 255, 0.94);
+                font-size: 1rem;
                 line-height: 1.7;
             }
 
-            .snapshot-list,
-            .profile-list,
-            .booking-list {
+            .hero-actions {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 12px;
+                margin-top: 20px;
+            }
+
+            .hero-actions .button-dark,
+            .hero-actions .button-light {
+                background: rgba(255, 255, 255, 0.95);
+                color: var(--ink);
+                box-shadow: none;
+            }
+
+            .hero-side {
                 display: grid;
+                justify-items: end;
                 gap: 14px;
+                min-width: 240px;
+                text-align: right;
             }
 
-            .snapshot-row,
-            .profile-row,
-            .booking-row {
-                padding: 18px 18px;
-                border: 1px solid var(--line);
-                border-radius: 22px;
-                background: #fff;
-            }
-
-            .snapshot-label,
-            .profile-title {
-                font-size: 0.82rem;
+            .hero-tag {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 12px 16px;
+                border-radius: 16px;
+                background: rgba(255, 255, 255, 0.9);
+                color: var(--accent);
+                font-size: 0.92rem;
                 font-weight: 800;
-                letter-spacing: 0.08em;
-                text-transform: uppercase;
-                color: var(--muted);
             }
 
-            .snapshot-value {
-                margin-top: 8px;
-                font-size: 1rem;
+            .hero-metric {
+                font-family: 'Outfit', sans-serif;
+                font-size: clamp(2.6rem, 5vw, 4.2rem);
                 font-weight: 800;
-                line-height: 1.6;
+                letter-spacing: -0.06em;
+                line-height: 0.92;
             }
 
-            .snapshot-value.is-muted,
-            .profile-subtitle,
-            .booking-meta,
-            .booking-note {
-                color: var(--muted);
-                font-weight: 500;
-                line-height: 1.65;
+            .hero-side-copy {
+                max-width: 280px;
+                color: rgba(255, 255, 255, 0.92);
+                font-size: 0.98rem;
+                line-height: 1.7;
             }
 
             .stats-grid {
                 display: grid;
                 grid-template-columns: repeat(5, minmax(0, 1fr));
-                gap: 18px;
-                margin-top: 26px;
+                gap: 16px;
+                margin-bottom: 22px;
+            }
+
+            .stat-card,
+            .panel {
+                border: 1px solid var(--line);
+                border-radius: 24px;
+                background: rgba(255, 255, 255, 0.94);
+                box-shadow: var(--shadow);
             }
 
             .stat-card {
-                padding: 22px 22px 20px;
+                padding: 20px 20px 18px;
             }
 
             .stat-label {
@@ -382,9 +347,9 @@
                 justify-content: center;
                 margin-top: 14px;
                 padding: 10px 14px;
-                border-radius: 999px;
-                background: var(--soft);
-                color: var(--ink);
+                border-radius: 16px;
+                background: #e8f4ff;
+                color: #0f69ad;
                 font-size: 0.9rem;
                 font-weight: 800;
             }
@@ -400,15 +365,20 @@
             }
 
             .stat-pill.is-danger {
-                background: var(--accent-soft);
-                color: var(--accent);
+                background: rgba(255, 255, 255, 0.74);
+                color: var(--navy);
             }
 
-            .content-grid {
+            .dashboard-grid {
                 display: grid;
-                grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+                grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.82fr);
                 gap: 24px;
-                margin-top: 28px;
+                align-items: start;
+            }
+
+            .summary-stack {
+                display: grid;
+                gap: 24px;
             }
 
             .panel {
@@ -421,6 +391,33 @@
                 justify-content: space-between;
                 gap: 16px;
                 margin-bottom: 18px;
+            }
+
+            .panel-title {
+                margin: 0;
+                font-family: 'Outfit', sans-serif;
+                font-size: 1.7rem;
+                letter-spacing: -0.05em;
+            }
+
+            .panel-copy {
+                margin: 10px 0 0;
+                color: var(--muted);
+                line-height: 1.7;
+            }
+
+            .booking-list,
+            .summary-list {
+                display: grid;
+                gap: 14px;
+            }
+
+            .booking-row,
+            .summary-row {
+                padding: 18px;
+                border: 1px solid var(--line);
+                border-radius: 20px;
+                background: #fff;
             }
 
             .booking-top {
@@ -437,9 +434,29 @@
                 letter-spacing: -0.04em;
             }
 
+            .booking-meta,
+            .booking-note,
+            .summary-value {
+                margin-top: 8px;
+                color: var(--muted);
+                line-height: 1.65;
+            }
+
+            .summary-label {
+                font-size: 0.82rem;
+                font-weight: 800;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: var(--muted);
+            }
+
+            .summary-value {
+                font-weight: 500;
+            }
+
             .booking-status {
                 padding: 8px 12px;
-                border-radius: 999px;
+                border-radius: 14px;
                 background: var(--warning-soft);
                 color: var(--warning-ink);
                 font-size: 0.82rem;
@@ -448,63 +465,55 @@
                 white-space: nowrap;
             }
 
+            .booking-link {
+                color: var(--accent);
+                font-weight: 800;
+            }
+
             .empty-state {
                 padding: 24px;
                 border: 1px dashed var(--line);
-                border-radius: 22px;
-                background: var(--soft);
+                border-radius: 20px;
+                background: #fafdff;
                 color: var(--muted);
                 line-height: 1.7;
             }
 
-            @media (max-width: 1320px) {
+            @media (max-width: 1360px) {
                 .stats-grid {
                     grid-template-columns: repeat(3, minmax(0, 1fr));
                 }
             }
 
-            @media (max-width: 1260px) {
-                .overview-grid,
-                .content-grid {
+            @media (max-width: 1120px) {
+                .console-app {
                     grid-template-columns: 1fr;
                 }
-            }
 
-            @media (max-width: 980px) {
-                .shell {
-                    padding: 0 18px 36px;
+                .console-sidebar {
+                    position: static;
+                    min-height: 0;
                 }
 
-                .topbar {
-                    flex-direction: column;
-                    align-items: stretch;
+                .hero-card,
+                .dashboard-grid {
+                    grid-template-columns: 1fr;
                 }
 
-                .search-shell {
-                    width: 100%;
+                .hero-side {
+                    justify-items: start;
+                    text-align: left;
                 }
             }
 
             @media (max-width: 760px) {
-                .search-shell {
-                    flex-wrap: wrap;
-                    border-radius: 28px;
+                .workspace {
+                    padding: 18px 16px 28px;
                 }
 
-                .search-item {
-                    width: 100%;
-                    padding: 0;
-                }
-
-                .search-item + .search-item {
-                    border-left: 0;
-                    padding-top: 12px;
-                    margin-top: 12px;
-                    border-top: 1px solid var(--line);
-                }
-
+                .topbar,
+                .toolbar,
                 .hero-actions,
-                .overview-actions,
                 .panel-head,
                 .booking-top {
                     flex-direction: column;
@@ -517,7 +526,8 @@
 
                 .button-dark,
                 .button-light,
-                .menu-button {
+                .hero-actions .button-dark,
+                .hero-actions .button-light {
                     width: 100%;
                 }
             }
@@ -536,240 +546,208 @@
                 : 'Your dashboard is ready. Complete the public profile to start receiving bookings from customers.';
         @endphp
 
-        <div class="shell">
-            <header class="topbar">
-                <a class="brand" href="{{ route('home') }}">bookrahisi</a>
+        <div class="console-app">
+            @include('partials.business-console-sidebar', ['profileReady' => $profileReady])
 
-                <div class="search-shell" aria-label="Dashboard overview bar">
-                    <div class="search-item">Business dashboard</div>
-                    <div class="search-item">{{ $accountSetup['business_name'] }}</div>
-                    <div class="search-item">{{ $profileReady ? 'Profile live' : 'Setup needed' }}</div>
-                    <span class="search-button" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="7"></circle>
-                            <path d="m20 20-3.5-3.5"></path>
-                        </svg>
-                    </span>
-                </div>
-
-                <a class="menu-button" href="{{ route('home') }}">
-                    Menu
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                        <path d="M4 7h16"></path>
-                        <path d="M4 12h16"></path>
-                        <path d="M4 17h16"></path>
-                    </svg>
-                </a>
-            </header>
-
-            <nav class="breadcrumb" aria-label="Breadcrumb">
-                <a href="{{ route('home') }}">Home</a>
-                <span>&bull;</span>
-                <span>Business dashboard</span>
-                <span>&bull;</span>
-                <span>{{ $accountSetup['business_category'] }}</span>
-                <span>&bull;</span>
-                <span>{{ $accountSetup['business_name'] }}</span>
-            </nav>
-
-            @if (session('dashboard_success'))
-                <div class="success-banner">{{ session('dashboard_success') }}</div>
-            @endif
-
-            <section class="hero-header">
-                <span class="eyebrow">Business dashboard</span>
-                <h1>{{ $accountSetup['business_name'] }}</h1>
-                <p class="hero-tagline">{{ $profileSummary }}</p>
-                <div class="hero-meta">
-                    <strong>{{ $bookingCount }}</strong>
-                    <span>Total booking requests</span>
-                    <span>&bull;</span>
-                    <strong>{{ $pendingBookingCount }}</strong>
-                    <span>Pending responses</span>
-                    <span>&bull;</span>
-                    <span>{{ $profileReady ? 'Profile live for customers' : 'Profile draft' }}</span>
-                    @if ($profileReady)
-                        <span>&bull;</span>
-                        <span>{{ $profileLocation }}</span>
-                        <a class="directions-link" href="{{ route('business.show', ['slug' => $businessSlug]) }}">View public page</a>
-                    @endif
-                </div>
-
-                <div class="hero-actions">
-                    <a class="button-dark" href="{{ route('for-business.profile-details') }}">Update profile</a>
-                    <a class="button-light" href="{{ route('for-business.settings') }}">Settings</a>
-                    <a class="button-light" href="{{ route('for-business.bookings') }}">Customer bookings</a>
-                    @if ($profileReady)
-                        <a class="button-light" href="{{ route('business.show', ['slug' => $businessSlug]) }}">Preview customer page</a>
-                    @endif
-                </div>
-            </section>
-
-            <section class="overview-grid">
-                <article class="overview-card">
-                    <h2>Your dashboard is ready</h2>
-                    <p class="overview-copy">
-                        @if ($profileReady)
-                            Customers can discover {{ $accountSetup['business_name'] }}, place bookings, and send appointment notes directly into your workspace.
-                        @else
-                            Finish the public profile first so customers can discover your business and start sending booking requests.
-                        @endif
-                    </p>
-
-                    <div class="hero-alert">
-                        @if ($bookingCount === 0)
-                            No booking requests have been received yet. Share the public page once the profile is complete.
-                        @elseif ($bookingCount === 1)
-                            1 booking request is currently waiting for review. Open the bookings page to follow up.
-                        @else
-                            {{ $bookingCount }} booking requests are currently active in your workflow. Open the inbox to review them.
-                        @endif
-                    </div>
-
-                    <div class="overview-actions">
-                        <a class="button-dark" href="{{ route('for-business.bookings') }}">Open bookings</a>
-                        <a class="button-light" href="{{ route('for-business.profile-details') }}">Edit profile</a>
-                        <a class="button-light" href="{{ route('for-business.settings') }}">Settings</a>
-                        @if ($profileReady)
-                            <a class="button-light" href="{{ route('business.show', ['slug' => $businessSlug]) }}">View public page</a>
-                        @endif
-                    </div>
-                </article>
-
-                <aside class="snapshot-card">
-                    <div>
-                        <h3>Workspace snapshot</h3>
-                        <p class="snapshot-copy">A quick view of what customers and staff will depend on once the business profile is live.</p>
-                    </div>
-
-                    <div class="snapshot-list">
-                        <article class="snapshot-row">
-                            <div class="snapshot-label">Profile status</div>
-                            <div class="snapshot-value">{{ $profileReady ? 'Published for customers' : 'Setup needed before bookings' }}</div>
-                        </article>
-                        <article class="snapshot-row">
-                            <div class="snapshot-label">Business hours</div>
-                            <div class="snapshot-value {{ $profileReady ? '' : 'is-muted' }}">{{ $profileHours }}</div>
-                        </article>
-                        <article class="snapshot-row">
-                            <div class="snapshot-label">Location</div>
-                            <div class="snapshot-value {{ $profileReady ? '' : 'is-muted' }}">{{ $profileLocation }}</div>
-                        </article>
-                        <article class="snapshot-row">
-                            <div class="snapshot-label">Owner account</div>
-                            <div class="snapshot-value">{{ $accountSetup['first_name'] }} {{ $accountSetup['last_name'] }} / {{ $email }}</div>
-                        </article>
-                    </div>
-                </aside>
-            </section>
-
-            <section class="stats-grid">
-                <article class="stat-card">
-                    <div class="stat-label">All bookings</div>
-                    <div class="stat-value">{{ $bookingCount }}</div>
-                    <div class="stat-pill">Workspace total</div>
-                </article>
-                <article class="stat-card">
-                    <div class="stat-label">Pending bookings</div>
-                    <div class="stat-value">{{ $pendingBookingCount }}</div>
-                    <div class="stat-pill is-success">Needs response</div>
-                </article>
-                <article class="stat-card">
-                    <div class="stat-label">Today's bookings</div>
-                    <div class="stat-value">{{ $todayBookingCount }}</div>
-                    <div class="stat-pill">Daily activity</div>
-                </article>
-                <article class="stat-card">
-                    <div class="stat-label">Profile status</div>
-                    <div class="stat-value">{{ $profileReady ? 'Live' : 'Draft' }}</div>
-                    <div class="stat-pill {{ $profileReady ? 'is-success' : 'is-warning' }}">{{ $profileReady ? 'Published' : 'Setup needed' }}</div>
-                </article>
-                <article class="stat-card">
-                    <div class="stat-label">Business category</div>
-                    <div class="stat-value">{{ $accountSetup['business_category'] }}</div>
-                    <div class="stat-pill is-danger">Owner workspace</div>
-                </article>
-            </section>
-
-            <section class="content-grid">
-                <section class="panel">
-                    <div class="panel-head">
+            <main class="workspace">
+                <div class="workspace-shell">
+                    <div class="topbar">
                         <div>
-                            <h3 class="panel-title">Recent bookings</h3>
-                            <p class="panel-copy">The latest booking activity is shown here so the owner can act quickly after login.</p>
+                            <span class="eyebrow">Business dashboard</span>
+                            <h1>{{ $accountSetup['business_name'] }}</h1>
+                            <p class="subtitle">
+                                {{ $profileSummary }}
+                            </p>
                         </div>
-                        <a class="button-light" href="{{ route('for-business.bookings') }}">Open full inbox</a>
-                    </div>
 
-                    @if ($recentBookings->isEmpty())
-                        <div class="empty-state">
+                        <div class="toolbar">
+                            <a class="button-light" href="{{ route('for-business.settings') }}">Settings</a>
+                            <a class="button-light" href="{{ route('for-business.bookings') }}">Customer bookings</a>
                             @if ($profileReady)
-                                Your booking page is live. As soon as customers place bookings, they will appear here.
+                                <a class="button-dark" href="{{ route('business.show', ['slug' => $businessSlug]) }}">View public page</a>
                             @else
-                                Finish the profile setup to activate the public business page and start receiving bookings.
+                                <a class="button-dark" href="{{ route('for-business.profile-details') }}">Update profile</a>
                             @endif
                         </div>
-                    @else
-                        <div class="booking-list">
-                            @foreach ($recentBookings as $booking)
-                                <article class="booking-row">
-                                    <div class="booking-top">
-                                        <div>
-                                            <h4 class="booking-name">{{ $booking->customer_name }}</h4>
-                                            <div class="booking-meta">
-                                                {{ $booking->service_name }} with {{ $booking->staff_name }} on
-                                                {{ $booking->appointment_date?->format('D, j M Y') ?? $booking->appointment_date }}
-                                                at {{ $booking->appointment_time }}
-                                            </div>
-                                        </div>
-                                        <span class="booking-status">{{ $booking->status }}</span>
-                                    </div>
-                                    <div class="booking-note">
-                                        Contact: {{ $booking->customer_phone }}
-                                        @if ($booking->customer_notes)
-                                            <br>{{ $booking->customer_notes }}
-                                        @endif
-                                    </div>
-                                </article>
-                            @endforeach
-                        </div>
+                    </div>
+
+                    @if (session('dashboard_success'))
+                        <div class="success-banner">{{ session('dashboard_success') }}</div>
                     @endif
-                </section>
 
-                <aside class="panel">
-                    <div class="panel-head">
+                    <section class="hero-card">
                         <div>
-                            <h3 class="panel-title">Business profile</h3>
-                            <p class="panel-copy">This is the current public-facing snapshot customers will use before they place a booking.</p>
-                        </div>
-                    </div>
-
-                    <div class="profile-list">
-                        <article class="profile-row">
-                            <div class="profile-title">Profile status</div>
-                            <div class="profile-subtitle">{{ $profileReady ? 'Published for customers' : 'Needs setup before customers can book' }}</div>
-                        </article>
-                        <article class="profile-row">
-                            <div class="profile-title">Business hours</div>
-                            <div class="profile-subtitle">{{ $profileHours }}</div>
-                        </article>
-                        <article class="profile-row">
-                            <div class="profile-title">Location</div>
-                            <div class="profile-subtitle">{{ $profileLocation }}</div>
-                        </article>
-                        <article class="profile-row">
-                            <div class="profile-title">Tagline</div>
-                            <div class="profile-subtitle">
-                                {{ $profileReady ? $profileDetails['tagline'] : 'Add a clear business promise so customers know what makes your business worth booking.' }}
+                            <span class="eyebrow" style="background: rgba(255, 255, 255, 0.16); color: #fff;">Owner workspace</span>
+                            <h2>Your dashboard is ready</h2>
+                            <p class="hero-copy">
+                                @if ($profileReady)
+                                    Customers can discover {{ $accountSetup['business_name'] }}, place bookings, upload reference images, and send appointment notes directly into your workspace.
+                                @else
+                                    Finish the public profile first so customers can discover your business and start sending booking requests into this dashboard.
+                                @endif
+                            </p>
+                            <div class="hero-actions">
+                                <a class="button-dark" href="{{ route('for-business.profile-details') }}">Update profile</a>
+                                <a class="button-light" href="{{ route('for-business.bookings') }}">Customer bookings</a>
+                                @if ($profileReady)
+                                    <a class="button-light" href="{{ route('business.show', ['slug' => $businessSlug]) }}">Preview customer page</a>
+                                @endif
                             </div>
+                        </div>
+
+                        <div class="hero-side">
+                            <span class="hero-tag">{{ $profileReady ? 'Profile live for customers' : 'Setup needed' }}</span>
+                            <div class="hero-metric">{{ $bookingCount }}</div>
+                            <div class="hero-side-copy">
+                                {{ $pendingBookingCount }} pending response{{ $pendingBookingCount === 1 ? '' : 's' }} and {{ $todayBookingCount }} booking{{ $todayBookingCount === 1 ? '' : 's' }} scheduled for today.
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="stats-grid">
+                        <article class="stat-card">
+                            <div class="stat-label">All bookings</div>
+                            <div class="stat-value">{{ $bookingCount }}</div>
+                            <div class="stat-pill">Workspace total</div>
                         </article>
-                        <article class="profile-row">
-                            <div class="profile-title">Owner account</div>
-                            <div class="profile-subtitle">{{ $accountSetup['first_name'] }} {{ $accountSetup['last_name'] }} / {{ $email }}</div>
+                        <article class="stat-card">
+                            <div class="stat-label">Pending bookings</div>
+                            <div class="stat-value">{{ $pendingBookingCount }}</div>
+                            <div class="stat-pill is-warning">Needs response</div>
                         </article>
-                    </div>
-                </aside>
-            </section>
+                        <article class="stat-card">
+                            <div class="stat-label">Today's bookings</div>
+                            <div class="stat-value">{{ $todayBookingCount }}</div>
+                            <div class="stat-pill">Daily activity</div>
+                        </article>
+                        <article class="stat-card">
+                            <div class="stat-label">Profile status</div>
+                            <div class="stat-value">{{ $profileReady ? 'Live' : 'Draft' }}</div>
+                            <div class="stat-pill {{ $profileReady ? 'is-success' : 'is-warning' }}">{{ $profileReady ? 'Published' : 'Setup needed' }}</div>
+                        </article>
+                        <article class="stat-card">
+                            <div class="stat-label">Business category</div>
+                            <div class="stat-value">{{ $accountSetup['business_category'] }}</div>
+                            <div class="stat-pill is-danger">Owner workspace</div>
+                        </article>
+                    </section>
+
+                    <section class="dashboard-grid">
+                        <section class="panel">
+                            <div class="panel-head">
+                                <div>
+                                    <h3 class="panel-title">Recent bookings</h3>
+                                    <p class="panel-copy">The latest booking activity is shown here so the owner can act quickly after login.</p>
+                                </div>
+                                <a class="button-light" href="{{ route('for-business.bookings') }}">Open full inbox</a>
+                            </div>
+
+                            @if ($recentBookings->isEmpty())
+                                <div class="empty-state">
+                                    @if ($profileReady)
+                                        Your booking page is live. As soon as customers place bookings, they will appear here.
+                                    @else
+                                        Finish the profile setup to activate the public business page and start receiving bookings.
+                                    @endif
+                                </div>
+                            @else
+                                <div class="booking-list">
+                                    @foreach ($recentBookings as $booking)
+                                        <article class="booking-row">
+                                            <div class="booking-top">
+                                                <div>
+                                                    <h4 class="booking-name">{{ $booking->customer_name }}</h4>
+                                                    <div class="booking-meta">
+                                                        {{ $booking->service_name }} with {{ $booking->staff_name }} on
+                                                        {{ $booking->appointment_date?->format('D, j M Y') ?? $booking->appointment_date }}
+                                                        at {{ $booking->appointment_time }}
+                                                    </div>
+                                                </div>
+                                                <span class="booking-status">{{ $booking->status }}</span>
+                                            </div>
+                                            <div class="booking-note">
+                                                Contact: {{ $booking->customer_phone }}
+                                                @if ($booking->customer_email)
+                                                    <br>{{ $booking->customer_email }}
+                                                @endif
+                                                @if ($booking->customer_notes)
+                                                    <br>{{ $booking->customer_notes }}
+                                                @endif
+                                                @if ($booking->customer_image_path)
+                                                    <br>
+                                                    <a class="booking-link" href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($booking->customer_image_path) }}" target="_blank" rel="noopener noreferrer">View uploaded reference image</a>
+                                                @endif
+                                            </div>
+                                        </article>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </section>
+
+                        <aside class="summary-stack">
+                            <section class="panel">
+                                <div class="panel-head">
+                                    <div>
+                                        <h3 class="panel-title">Workspace snapshot</h3>
+                                        <p class="panel-copy">A quick view of what customers and staff will depend on once the business profile is live.</p>
+                                    </div>
+                                </div>
+
+                                <div class="summary-list">
+                                    <article class="summary-row">
+                                        <div class="summary-label">Profile status</div>
+                                        <div class="summary-value">{{ $profileReady ? 'Published for customers' : 'Setup needed before bookings' }}</div>
+                                    </article>
+                                    <article class="summary-row">
+                                        <div class="summary-label">Business hours</div>
+                                        <div class="summary-value">{{ $profileHours }}</div>
+                                    </article>
+                                    <article class="summary-row">
+                                        <div class="summary-label">Location</div>
+                                        <div class="summary-value">{{ $profileLocation }}</div>
+                                    </article>
+                                    <article class="summary-row">
+                                        <div class="summary-label">Owner account</div>
+                                        <div class="summary-value">{{ $accountSetup['first_name'] }} {{ $accountSetup['last_name'] }} / {{ $email }}</div>
+                                    </article>
+                                </div>
+                            </section>
+
+                            <section class="panel">
+                                <div class="panel-head">
+                                    <div>
+                                        <h3 class="panel-title">Business profile</h3>
+                                        <p class="panel-copy">This is the current public-facing snapshot customers will use before they place a booking.</p>
+                                    </div>
+                                </div>
+
+                                <div class="summary-list">
+                                    <article class="summary-row">
+                                        <div class="summary-label">Tagline</div>
+                                        <div class="summary-value">
+                                            {{ $profileReady ? $profileDetails['tagline'] : 'Add a clear business promise so customers know what makes your business worth booking.' }}
+                                        </div>
+                                    </article>
+                                    <article class="summary-row">
+                                        <div class="summary-label">Public page</div>
+                                        <div class="summary-value">{{ $profileReady ? 'Customers can browse and place bookings live.' : 'Complete the profile to publish your public page.' }}</div>
+                                    </article>
+                                    <article class="summary-row">
+                                        <div class="summary-label">Business category</div>
+                                        <div class="summary-value">{{ $accountSetup['business_category'] }}</div>
+                                    </article>
+                                    <article class="summary-row">
+                                        <div class="summary-label">Quick action</div>
+                                        <div class="summary-value">
+                                            <a class="booking-link" href="{{ route('for-business.profile-details') }}">Open profile editor</a>
+                                        </div>
+                                    </article>
+                                </div>
+                            </section>
+                        </aside>
+                    </section>
+                </div>
+            </main>
         </div>
     </body>
 </html>

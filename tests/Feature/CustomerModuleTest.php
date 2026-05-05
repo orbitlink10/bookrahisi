@@ -2,10 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Mail\BookingPlacedMail;
 use App\Models\Business;
 use App\Models\Booking;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class CustomerModuleTest extends TestCase
@@ -90,6 +94,8 @@ class CustomerModuleTest extends TestCase
     {
         $customer = $this->createCustomer();
         $this->createBusiness();
+        Mail::fake();
+        Storage::fake('public');
 
         $response = $this
             ->withSession(['customer_user_id' => $customer->id])
@@ -99,7 +105,9 @@ class CustomerModuleTest extends TestCase
                 'appointment_time' => '9:00 am',
                 'staff' => 'zuri',
                 'customer_name' => 'Jane Customer',
+                'customer_email' => $customer->email,
                 'customer_phone' => '+254700000001',
+                'customer_image' => UploadedFile::fake()->create('customer-reference.png', 256, 'image/png'),
                 'customer_notes' => 'Please confirm the appointment.',
             ]);
 
@@ -113,6 +121,16 @@ class CustomerModuleTest extends TestCase
             'customer_name' => 'Jane Customer',
             'customer_phone' => '+254700000001',
         ]);
+
+        $booking = Booking::query()->latest('id')->firstOrFail();
+
+        $this->assertNotNull($booking->customer_image_path);
+        Storage::disk('public')->assertExists($booking->customer_image_path);
+
+        Mail::assertSent(BookingPlacedMail::class, function (BookingPlacedMail $mail) use ($customer, $booking): bool {
+            return $mail->hasTo($customer->email)
+                && $mail->booking->is($booking);
+        });
     }
 
     public function test_a_customer_can_view_and_cancel_their_own_booking(): void

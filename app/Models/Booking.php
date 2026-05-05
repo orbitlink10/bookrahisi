@@ -15,6 +15,7 @@ class Booking extends Model
         'business_id',
         'customer_user_id',
         'customer_email',
+        'customer_image_path',
         'service_slug',
         'service_name',
         'appointment_date',

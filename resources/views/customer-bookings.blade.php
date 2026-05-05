@@ -92,6 +92,9 @@
                                                         {{ $booking->business?->business_name ?? 'Business unavailable' }} / {{ $booking->appointment_date?->format('D, j M Y') ?? $booking->appointment_date }} at {{ $booking->appointment_time }}
                                                     </div>
                                                     <div class="helper-copy">Professional: {{ $booking->staff_name }} / Contact used: {{ $booking->customer_phone }}</div>
+                                                    @if ($booking->customer_image_path)
+                                                        <div class="helper-copy">Reference image attached to this booking request.</div>
+                                                    @endif
                                                 </div>
                                                 <div class="chip-row">
                                                     <span class="status-chip is-warning">{{ $booking->status }}</span>
@@ -144,6 +147,9 @@
                                                             / Notes: {{ $booking->customer_notes }}
                                                         @endif
                                                     </div>
+                                                    @if ($booking->customer_image_path)
+                                                        <div class="helper-copy">Reference image attached to this booking request.</div>
+                                                    @endif
                                                 </div>
                                                 <div class="chip-row">
                                                     <span class="status-chip {{ $booking->status === 'completed' ? 'is-success' : 'is-danger' }}">{{ $booking->status }}</span>

@@ -424,6 +424,11 @@
                 line-height: 1.65;
             }
 
+            .booking-link {
+                color: var(--accent);
+                font-weight: 800;
+            }
+
             .booking-status {
                 padding: 8px 12px;
                 border-radius: 14px;
@@ -603,8 +608,15 @@
                                         </div>
                                         <div class="booking-note">
                                             Phone number: {{ $booking->customer_phone }}
+                                            @if ($booking->customer_email)
+                                                <br>Email: {{ $booking->customer_email }}
+                                            @endif
                                             @if ($booking->customer_notes)
                                                 <br>{{ $booking->customer_notes }}
+                                            @endif
+                                            @if ($booking->customer_image_path)
+                                                <br>
+                                                <a class="booking-link" href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($booking->customer_image_path) }}" target="_blank" rel="noopener noreferrer">View uploaded reference image</a>
                                             @endif
                                         </div>
                                     </article>

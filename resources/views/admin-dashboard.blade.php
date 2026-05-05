@@ -473,6 +473,11 @@
                 line-height: 1.65;
             }
 
+            .entity-link {
+                color: var(--accent);
+                font-weight: 800;
+            }
+
             .status-chip {
                 display: inline-flex;
                 align-items: center;
@@ -883,7 +888,18 @@
                                                     <div class="entity-meta">
                                                         {{ $booking->service_name }} / {{ $booking->business?->business_name ?? 'Business unavailable' }} / {{ $booking->appointment_date?->format('D, j M Y') ?? $booking->appointment_date }} at {{ $booking->appointment_time }}
                                                     </div>
-                                                    <div class="entity-extra">Phone: {{ $booking->customer_phone }} @if ($booking->customer_notes) / Notes: {{ $booking->customer_notes }} @endif</div>
+                                                    <div class="entity-extra">
+                                                        Phone: {{ $booking->customer_phone }}
+                                                        @if ($booking->customer_email)
+                                                            / Email: {{ $booking->customer_email }}
+                                                        @endif
+                                                        @if ($booking->customer_notes)
+                                                            / Notes: {{ $booking->customer_notes }}
+                                                        @endif
+                                                        @if ($booking->customer_image_path)
+                                                            / <a class="entity-link" href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($booking->customer_image_path) }}" target="_blank" rel="noopener noreferrer">Reference image</a>
+                                                        @endif
+                                                    </div>
                                                 </div>
                                                 <span class="status-chip {{ $booking->status === 'completed' ? 'is-success' : ($booking->status === 'cancelled' ? 'is-danger' : 'is-warning') }}">
                                                     {{ $booking->status }}
