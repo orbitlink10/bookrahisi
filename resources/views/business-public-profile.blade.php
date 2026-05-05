@@ -190,6 +190,10 @@
                 margin-top: 28px;
             }
 
+            .gallery-grid.is-single {
+                grid-template-columns: 1fr;
+            }
+
             .gallery-primary,
             .gallery-secondary {
                 border-radius: 24px;
@@ -842,12 +846,20 @@
                 </div>
             </section>
 
-            <section class="gallery-grid" aria-label="Business gallery">
-                <div class="gallery-primary" style="background-image: url('{{ $galleryImages[0] }}');"></div>
-                <div class="gallery-stack">
-                    <div class="gallery-secondary" style="background-image: url('{{ $galleryImages[1] }}');"></div>
-                    <div class="gallery-secondary" style="background-image: url('{{ $galleryImages[2] }}');"></div>
-                </div>
+            @php
+                $primaryGalleryImage = $galleryImages[0] ?? null;
+                $secondaryGalleryImages = array_slice($galleryImages, 1, 2);
+            @endphp
+
+            <section class="gallery-grid {{ $secondaryGalleryImages === [] ? 'is-single' : '' }}" aria-label="Business gallery">
+                <div class="gallery-primary" style="background-image: url('{{ $primaryGalleryImage }}');"></div>
+                @if ($secondaryGalleryImages !== [])
+                    <div class="gallery-stack">
+                        @foreach ($secondaryGalleryImages as $secondaryGalleryImage)
+                            <div class="gallery-secondary" style="background-image: url('{{ $secondaryGalleryImage }}');"></div>
+                        @endforeach
+                    </div>
+                @endif
             </section>
 
             <nav class="page-tabs" aria-label="Page sections">

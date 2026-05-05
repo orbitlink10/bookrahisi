@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -636,7 +637,9 @@ class PublicSiteController extends Controller
             'accountSetup' => $accountSetup,
             'businessSlug' => Str::slug($accountSetup['business_name']),
             'email' => $email,
+            'galleryPreviewImages' => $this->galleryImageUrls($request->session()->get('business_profile_details.gallery_images', [])),
             'profileDetails' => $request->session()->get('business_profile_details', []),
+            'previewImageUrl' => $this->galleryImageUrls($request->session()->get('business_profile_details.gallery_images', []))[0] ?? 'https://images.unsplash.com/photo-1493256338651-d82f7acb2b38?auto=format&fit=crop&w=1400&q=80',
             'sideImage' => 'https://images.unsplash.com/photo-1493256338651-d82f7acb2b38?auto=format&fit=crop&w=1400&q=80',
         ]);
     }
@@ -652,6 +655,10 @@ class PublicSiteController extends Controller
         $this->hydrateOwnerSessionFromDatabase($request);
 
         $accountSetup = $request->session()->get('business_account_setup');
+        $existingProfileDetails = $request->session()->get('business_profile_details', []);
+        $existingGalleryImages = is_array($existingProfileDetails['gallery_images'] ?? null)
+            ? array_values(array_filter($existingProfileDetails['gallery_images']))
+            : [];
 
         if (! is_array($accountSetup) || $accountSetup === []) {
             return redirect()->route('for-business.account-setup');
@@ -665,6 +672,8 @@ class PublicSiteController extends Controller
             'opening_time' => ['required', 'date_format:H:i'],
             'closing_time' => ['required', 'date_format:H:i', 'after:opening_time'],
             'about' => ['required', 'string', 'max:1000'],
+            'gallery_images' => ['nullable', 'array', 'max:6'],
+            'gallery_images.*' => ['image', 'max:5120'],
             'youtube_url' => [
                 'nullable',
                 'string',
@@ -681,7 +690,25 @@ class PublicSiteController extends Controller
             ? trim((string) $validated['youtube_url'])
             : null;
 
-        $request->session()->put('business_profile_details', $validated);
+        $galleryImagePaths = $existingGalleryImages;
+        $replacedGalleryImages = false;
+
+        if ($request->hasFile('gallery_images')) {
+            $galleryImagePaths = collect($request->file('gallery_images', []))
+                ->filter()
+                ->map(fn ($file): string => $file->store('business-gallery', 'public'))
+                ->values()
+                ->all();
+            $replacedGalleryImages = $galleryImagePaths !== [];
+        }
+
+        $profileDetailsPayload = $validated;
+
+        if ($galleryImagePaths !== []) {
+            $profileDetailsPayload['gallery_images'] = $galleryImagePaths;
+        }
+
+        $request->session()->put('business_profile_details', $profileDetailsPayload);
 
         $businessPayload = [
             'owner_first_name' => $accountSetup['first_name'],
@@ -703,10 +730,18 @@ class PublicSiteController extends Controller
             $businessPayload['youtube_url'] = $validated['youtube_url'];
         }
 
+        if ($galleryImagePaths !== [] && Schema::hasColumn('businesses', 'gallery_images')) {
+            $businessPayload['gallery_images'] = $galleryImagePaths;
+        }
+
         $business = Business::query()->updateOrCreate(
             ['owner_email' => $email],
             $businessPayload
         );
+
+        if ($replacedGalleryImages && Schema::hasColumn('businesses', 'gallery_images')) {
+            $this->deleteStoredImages($existingGalleryImages);
+        }
 
         $this->syncOwnerSessionFromBusiness($request, $business);
 
@@ -742,7 +777,7 @@ class PublicSiteController extends Controller
             'businessSlug' => $business->slug,
             'directionsUrl' => 'https://www.google.com/maps/search/?api=1&query='.urlencode($profileDetails['address_line'].', '.$location),
             'email' => $business->owner_email,
-            'galleryImages' => $this->previewGalleryImages($accountSetup['business_category']),
+            'galleryImages' => $this->resolvedBusinessGalleryImages($business),
             'location' => $location,
             'mapEmbedUrl' => $mapData['embed_url'],
             'openSummary' => 'Open today from '.$this->formatDisplayTime($profileDetails['opening_time']).' to '.$this->formatDisplayTime($profileDetails['closing_time']),
@@ -1033,7 +1068,7 @@ class PublicSiteController extends Controller
 
     private function profileDetailsFromBusiness(Business $business): array
     {
-        return [
+        $profileDetails = [
             'tagline' => $business->tagline,
             'address_line' => $business->address_line,
             'city' => $business->city,
@@ -1043,6 +1078,50 @@ class PublicSiteController extends Controller
             'about' => $business->about,
             'youtube_url' => $business->youtube_url,
         ];
+
+        if (is_array($business->gallery_images) && $business->gallery_images !== []) {
+            $profileDetails['gallery_images'] = $business->gallery_images;
+        }
+
+        return $profileDetails;
+    }
+
+    private function galleryImageUrls(array $images): array
+    {
+        return collect($images)
+            ->filter(fn ($image) => is_string($image) && trim($image) !== '')
+            ->map(function (string $image): string {
+                if (Str::startsWith($image, ['http://', 'https://'])) {
+                    return $image;
+                }
+
+                return Storage::disk('public')->url($image);
+            })
+            ->values()
+            ->all();
+    }
+
+    private function deleteStoredImages(array $images): void
+    {
+        $paths = collect($images)
+            ->filter(fn ($image) => is_string($image) && trim($image) !== '' && ! Str::startsWith($image, ['http://', 'https://']))
+            ->values()
+            ->all();
+
+        if ($paths !== []) {
+            Storage::disk('public')->delete($paths);
+        }
+    }
+
+    private function resolvedBusinessGalleryImages(Business $business): array
+    {
+        $storedImages = is_array($business->gallery_images) ? $business->gallery_images : [];
+
+        if ($storedImages !== []) {
+            return $this->galleryImageUrls($storedImages);
+        }
+
+        return $this->previewGalleryImages($business->business_category);
     }
 
     private function youtubeEmbedUrl(?string $url): ?string

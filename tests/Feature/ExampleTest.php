@@ -284,6 +284,7 @@ class ExampleTest extends TestCase
             ->assertOk()
             ->assertSeeText('Build the page customers will book from')
             ->assertSeeText('Business profile details')
+            ->assertSeeText('Profile images')
             ->assertSeeText('YouTube link')
             ->assertSeeText('Start typing and select an address from Google Maps suggestions')
             ->assertSee('/business/glow-house', false);
@@ -329,6 +330,45 @@ class ExampleTest extends TestCase
             'about' => 'We focus on precision cuts, healthy hair routines, and a calm guest experience.',
             'youtube_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
         ]);
+    }
+
+    public function test_the_business_profile_details_form_persists_uploaded_gallery_images(): void
+    {
+        Storage::fake('public');
+
+        $response = $this
+            ->withSession($this->ownerOnboardingSession())
+            ->post('/for-business/tools/profile', array_merge($this->profileDetailsSession(), [
+                'gallery_images' => [
+                    UploadedFile::fake()->create('space-1.jpg', 256, 'image/jpeg'),
+                    UploadedFile::fake()->create('space-2.jpg', 256, 'image/jpeg'),
+                ],
+            ]));
+
+        $response
+            ->assertRedirect('/for-business/tools')
+            ->assertSessionHas('dashboard_success')
+            ->assertSessionHas('business_profile_details', function (array $profileDetails): bool {
+                return isset($profileDetails['gallery_images']) && count($profileDetails['gallery_images']) === 2;
+            });
+
+        $business = Business::query()
+            ->where('owner_email', 'owner@bookrahisi.test')
+            ->firstOrFail();
+
+        $this->assertIsArray($business->gallery_images);
+        $this->assertCount(2, $business->gallery_images);
+
+        foreach ($business->gallery_images as $galleryImage) {
+            Storage::disk('public')->assertExists($galleryImage);
+        }
+
+        $publicPage = $this->get('/business/glow-house');
+
+        $publicPage
+            ->assertOk()
+            ->assertSee(Storage::disk('public')->url($business->gallery_images[0]), false)
+            ->assertSee(Storage::disk('public')->url($business->gallery_images[1]), false);
     }
 
     public function test_the_business_profile_details_form_rejects_an_invalid_youtube_link(): void

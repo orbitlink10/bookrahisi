@@ -373,6 +373,11 @@
                 min-height: 62px;
             }
 
+            .field-input[type="file"] {
+                padding-top: 16px;
+                padding-bottom: 16px;
+            }
+
             .field-textarea {
                 min-height: 170px;
                 resize: vertical;
@@ -399,6 +404,22 @@
                 color: var(--muted);
                 font-size: 0.9rem;
                 line-height: 1.6;
+            }
+
+            .gallery-preview-grid {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 12px;
+                margin-top: 12px;
+            }
+
+            .gallery-preview-item {
+                aspect-ratio: 1;
+                border-radius: 18px;
+                background-position: center;
+                background-size: cover;
+                background-repeat: no-repeat;
+                border: 1px solid var(--line);
             }
 
             .actions {
@@ -538,6 +559,10 @@
                     grid-template-columns: 1fr;
                 }
 
+                .gallery-preview-grid {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+
                 .button-dark,
                 .button-light,
                 .hero-actions .button-dark,
@@ -605,7 +630,7 @@
                                 Enter the public information customers rely on before they place a booking.
                             </p>
 
-                            <form action="{{ route('for-business.profile-details.submit') }}" method="post">
+                            <form action="{{ route('for-business.profile-details.submit') }}" method="post" enctype="multipart/form-data">
                                 @csrf
 
                                 @if ($errors->any())
@@ -738,6 +763,32 @@
                                             <span class="field-error">{{ $message }}</span>
                                         @enderror
                                     </div>
+
+                                    <div class="field-group field-group-full">
+                                        <label class="field-label" for="gallery-images">Profile images</label>
+                                        <input
+                                            class="field-input @error('gallery_images') field-error-state @enderror @error('gallery_images.*') field-error-state @enderror"
+                                            id="gallery-images"
+                                            name="gallery_images[]"
+                                            type="file"
+                                            accept="image/*"
+                                            multiple
+                                        >
+                                        <span class="field-hint">Upload up to 6 images for your public business page. Adding new files replaces the current photo gallery.</span>
+                                        @if ($galleryPreviewImages !== [])
+                                            <div class="gallery-preview-grid" aria-label="Current profile images">
+                                                @foreach ($galleryPreviewImages as $galleryPreviewImage)
+                                                    <div class="gallery-preview-item" style="background-image: url('{{ $galleryPreviewImage }}');"></div>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                        @error('gallery_images')
+                                            <span class="field-error">{{ $message }}</span>
+                                        @enderror
+                                        @error('gallery_images.*')
+                                            <span class="field-error">{{ $message }}</span>
+                                        @enderror
+                                    </div>
                                 </div>
 
                                 <div class="actions">
@@ -754,7 +805,9 @@
                             </p>
 
                             <div class="preview-card">
-                                <div class="preview-image"></div>
+                                <div class="preview-image" style="background-image:
+                                    linear-gradient(180deg, rgba(17, 19, 23, 0.04) 0%, rgba(17, 19, 23, 0.2) 100%),
+                                    url('{{ $previewImageUrl }}');"></div>
                                 <div class="preview-body">
                                     <span class="pill">Featured listing</span>
                                     <h3 class="preview-name">{{ $accountSetup['business_name'] }}</h3>
@@ -783,6 +836,12 @@
                                         <div class="preview-item">
                                             <span class="preview-label">YouTube</span>
                                             <span class="preview-value">{{ $profileDetails['youtube_url'] ?? 'Add a YouTube link if you want customers to preview your work or space.' }}</span>
+                                        </div>
+                                        <div class="preview-item">
+                                            <span class="preview-label">Images</span>
+                                            <span class="preview-value">
+                                                {{ $galleryPreviewImages !== [] ? count($galleryPreviewImages).' uploaded image'.(count($galleryPreviewImages) === 1 ? '' : 's').' ready for the public gallery.' : 'Upload images so customers can preview your space, services, or finished work.' }}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
