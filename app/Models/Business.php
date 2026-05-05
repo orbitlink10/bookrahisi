@@ -25,6 +25,7 @@ class Business extends Model
         'opening_time',
         'closing_time',
         'about',
+        'youtube_url',
         'approval_status',
         'approved_at',
         'approval_notes',

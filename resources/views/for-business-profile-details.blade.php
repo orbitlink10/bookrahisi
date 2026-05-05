@@ -395,6 +395,12 @@
                 font-weight: 700;
             }
 
+            .field-hint {
+                color: var(--muted);
+                font-size: 0.9rem;
+                line-height: 1.6;
+            }
+
             .actions {
                 display: flex;
                 flex-wrap: wrap;
@@ -556,7 +562,7 @@
                             <span class="eyebrow">Public profile setup</span>
                             <h1>Build the page customers will book from</h1>
                             <p class="subtitle">
-                                Add your location, hours, tagline, and about copy. This powers the customer-facing business page for {{ $accountSetup['business_name'] }}.
+                                Add your location, hours, tagline, about copy, and an optional YouTube link. This powers the customer-facing business page for {{ $accountSetup['business_name'] }}.
                             </p>
                         </div>
 
@@ -573,7 +579,7 @@
                             <span class="eyebrow" style="background: rgba(255, 255, 255, 0.16); color: #fff;">Profile editor</span>
                             <h2>Build the page customers will book from</h2>
                             <p class="hero-copy">
-                                This step defines the top section, address block, business hours, and about area on your public listing. Keep it current so customers can trust what they see before booking.
+                                This step defines the top section, address block, business hours, about area, and optional video section on your public listing. Keep it current so customers can trust what they see before booking.
                             </p>
                             <div class="hero-actions">
                                 <a class="button-dark" href="{{ route('for-business.tools') }}">Back to dashboard</a>
@@ -708,6 +714,22 @@
                                             <span class="field-error">{{ $message }}</span>
                                         @enderror
                                     </div>
+
+                                    <div class="field-group field-group-full">
+                                        <label class="field-label" for="youtube-url">YouTube link</label>
+                                        <input
+                                            class="field-input @error('youtube_url') field-error-state @enderror"
+                                            id="youtube-url"
+                                            name="youtube_url"
+                                            type="url"
+                                            placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                                            value="{{ old('youtube_url', $profileDetails['youtube_url'] ?? '') }}"
+                                        >
+                                        <span class="field-hint">Optional. Paste a YouTube video link to feature it on the public business page.</span>
+                                        @error('youtube_url')
+                                            <span class="field-error">{{ $message }}</span>
+                                        @enderror
+                                    </div>
                                 </div>
 
                                 <div class="actions">
@@ -720,7 +742,7 @@
                         <aside class="panel preview-panel">
                             <h2 class="panel-title">Preview summary</h2>
                             <p class="panel-copy">
-                                As soon as you save this step, Book Rahisi will generate a public page with photos, services, team, and about sections.
+                                As soon as you save this step, Book Rahisi will generate a public page with photos, services, team, video, and about sections.
                             </p>
 
                             <div class="preview-card">
@@ -749,6 +771,10 @@
                                             <span class="preview-value">
                                                 {{ $profileDetails['opening_time'] ?? '09:00' }} - {{ $profileDetails['closing_time'] ?? '19:00' }}
                                             </span>
+                                        </div>
+                                        <div class="preview-item">
+                                            <span class="preview-label">YouTube</span>
+                                            <span class="preview-value">{{ $profileDetails['youtube_url'] ?? 'Add a YouTube link if you want customers to preview your work or space.' }}</span>
                                         </div>
                                     </div>
                                 </div>

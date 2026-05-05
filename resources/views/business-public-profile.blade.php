@@ -485,6 +485,7 @@
             }
 
             .info-card,
+            .video-card,
             .portfolio-card,
             .sidebar-card {
                 border: 1px solid var(--line);
@@ -493,16 +494,39 @@
             }
 
             .info-card,
+            .video-card,
             .portfolio-card {
                 padding: 26px 28px;
             }
 
             .info-card h3,
+            .video-card h3,
             .portfolio-card h3 {
                 margin: 0 0 18px;
                 font-family: 'Outfit', sans-serif;
                 font-size: 1.55rem;
                 letter-spacing: -0.04em;
+            }
+
+            .video-frame {
+                overflow: hidden;
+                border: 1px solid var(--line);
+                border-radius: 24px;
+                background: var(--soft);
+            }
+
+            .video-frame iframe {
+                display: block;
+                width: 100%;
+                aspect-ratio: 16 / 9;
+                border: 0;
+            }
+
+            .video-copy {
+                margin: 18px 0 0;
+                color: var(--muted);
+                font-size: 1rem;
+                line-height: 1.75;
             }
 
             .opening-list,
@@ -753,6 +777,10 @@
                 .map-frame iframe {
                     height: 360px;
                 }
+
+                .video-frame iframe {
+                    min-height: 240px;
+                }
             }
         </style>
     </head>
@@ -930,6 +958,28 @@
                             </div>
                         </div>
                     </section>
+
+                    @if ($youtubeEmbedUrl)
+                        <section class="section" id="video">
+                            <h2>Video</h2>
+                            <div class="video-card">
+                                <h3>Watch before you book</h3>
+                                <div class="video-frame">
+                                    <iframe
+                                        src="{{ $youtubeEmbedUrl }}"
+                                        title="YouTube video for {{ $accountSetup['business_name'] }}"
+                                        loading="lazy"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowfullscreen
+                                    ></iframe>
+                                </div>
+                                <p class="video-copy">
+                                    Preview the space, experience, or recent work from {{ $accountSetup['business_name'] }} before sending a booking request.
+                                    <a class="directions-link" href="{{ $profileDetails['youtube_url'] }}" target="_blank" rel="noreferrer">Watch on YouTube</a>
+                                </p>
+                            </div>
+                        </section>
+                    @endif
 
                     <section class="section" id="about">
                         <h2>{{ $aboutHeading }}</h2>

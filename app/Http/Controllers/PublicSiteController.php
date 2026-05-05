@@ -662,7 +662,21 @@ class PublicSiteController extends Controller
             'opening_time' => ['required', 'date_format:H:i'],
             'closing_time' => ['required', 'date_format:H:i', 'after:opening_time'],
             'about' => ['required', 'string', 'max:1000'],
+            'youtube_url' => [
+                'nullable',
+                'string',
+                'max:255',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (is_string($value) && trim($value) !== '' && $this->extractYouTubeVideoId($value) === null) {
+                        $fail('Enter a valid YouTube link.');
+                    }
+                },
+            ],
         ]);
+
+        $validated['youtube_url'] = isset($validated['youtube_url']) && trim((string) $validated['youtube_url']) !== ''
+            ? trim((string) $validated['youtube_url'])
+            : null;
 
         $request->session()->put('business_profile_details', $validated);
 
@@ -682,6 +696,7 @@ class PublicSiteController extends Controller
                 'opening_time' => $validated['opening_time'],
                 'closing_time' => $validated['closing_time'],
                 'about' => $validated['about'],
+                'youtube_url' => $validated['youtube_url'],
             ]
         );
 
@@ -702,6 +717,14 @@ class PublicSiteController extends Controller
         $reviews = $this->resolvedBusinessReviews($business, $accountSetup['business_category']);
         $reviewSummary = $this->resolvedBusinessReviewSummary($business, $reviews);
         $mapData = $this->previewMapData($profileDetails['city'], $profileDetails['neighborhood']);
+        $youtubeEmbedUrl = $this->youtubeEmbedUrl($profileDetails['youtube_url'] ?? null);
+        $tabs = ['Photos', 'Services', 'Team', 'Reviews', 'Portfolio'];
+
+        if ($youtubeEmbedUrl) {
+            $tabs[] = 'Video';
+        }
+
+        $tabs[] = 'About';
 
         return view('business-public-profile', [
             'aboutHeading' => 'About '.$accountSetup['business_name'],
@@ -721,9 +744,10 @@ class PublicSiteController extends Controller
             'reviews' => $reviews,
             'serviceFilters' => $this->previewServiceFilters($accountSetup['business_category']),
             'services' => $this->previewServices($accountSetup['business_category']),
-            'tabs' => ['Photos', 'Services', 'Team', 'Reviews', 'Portfolio', 'About'],
+            'tabs' => $tabs,
             'teamMembers' => $this->previewTeamMembers($accountSetup['business_category']),
             'weeklyHours' => $this->previewWeeklyHours($profileDetails['opening_time'], $profileDetails['closing_time']),
+            'youtubeEmbedUrl' => $youtubeEmbedUrl,
         ]);
     }
 
@@ -993,7 +1017,58 @@ class PublicSiteController extends Controller
             'opening_time' => substr((string) $business->opening_time, 0, 5),
             'closing_time' => substr((string) $business->closing_time, 0, 5),
             'about' => $business->about,
+            'youtube_url' => $business->youtube_url,
         ];
+    }
+
+    private function youtubeEmbedUrl(?string $url): ?string
+    {
+        $videoId = $this->extractYouTubeVideoId($url);
+
+        if ($videoId === null) {
+            return null;
+        }
+
+        return 'https://www.youtube.com/embed/'.$videoId;
+    }
+
+    private function extractYouTubeVideoId(?string $url): ?string
+    {
+        if (! is_string($url) || trim($url) === '') {
+            return null;
+        }
+
+        $parts = parse_url(trim($url));
+
+        if ($parts === false) {
+            return null;
+        }
+
+        $host = strtolower($parts['host'] ?? '');
+        $path = trim((string) ($parts['path'] ?? ''), '/');
+        $candidate = null;
+
+        if (in_array($host, ['youtu.be', 'www.youtu.be'], true)) {
+            $candidate = explode('/', $path)[0] ?? null;
+        }
+
+        if (in_array($host, ['youtube.com', 'www.youtube.com', 'm.youtube.com'], true)) {
+            parse_str((string) ($parts['query'] ?? ''), $query);
+
+            if ($path === 'watch') {
+                $candidate = $query['v'] ?? null;
+            } elseif (str_starts_with($path, 'shorts/')) {
+                $candidate = explode('/', substr($path, strlen('shorts/')))[0] ?? null;
+            } elseif (str_starts_with($path, 'embed/')) {
+                $candidate = explode('/', substr($path, strlen('embed/')))[0] ?? null;
+            }
+        }
+
+        if (! is_string($candidate) || ! preg_match('/^[A-Za-z0-9_-]{11}$/', $candidate)) {
+            return null;
+        }
+
+        return $candidate;
     }
 
     private function previewGalleryImages(string $category): array

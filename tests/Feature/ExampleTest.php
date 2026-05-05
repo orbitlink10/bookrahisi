@@ -279,6 +279,7 @@ class ExampleTest extends TestCase
             ->assertOk()
             ->assertSeeText('Build the page customers will book from')
             ->assertSeeText('Business profile details')
+            ->assertSeeText('YouTube link')
             ->assertSee('/business/glow-house', false);
     }
 
@@ -306,7 +307,22 @@ class ExampleTest extends TestCase
             'city' => 'Nairobi',
             'neighborhood' => 'Kilimani',
             'about' => 'We focus on precision cuts, healthy hair routines, and a calm guest experience.',
+            'youtube_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
         ]);
+    }
+
+    public function test_the_business_profile_details_form_rejects_an_invalid_youtube_link(): void
+    {
+        $response = $this
+            ->from('/for-business/tools/profile')
+            ->withSession($this->ownerOnboardingSession())
+            ->post('/for-business/tools/profile', array_merge($this->profileDetailsSession(), [
+                'youtube_url' => 'https://example.com/not-youtube',
+            ]));
+
+        $response
+            ->assertRedirect('/for-business/tools/profile')
+            ->assertSessionHasErrors('youtube_url');
     }
 
     public function test_the_public_business_page_renders_without_an_owner_session_once_the_business_is_saved(): void
@@ -324,8 +340,10 @@ class ExampleTest extends TestCase
             ->assertSeeText('Reviews')
             ->assertSeeText('Opening times')
             ->assertSeeText('Additional information')
+            ->assertSeeText('Video')
             ->assertSeeText('About Glow House')
             ->assertSeeText('Get directions')
+            ->assertSee('youtube.com/embed/dQw4w9WgXcQ', false)
             ->assertSee('/business/glow-house/book', false)
             ->assertSeeText('Book now');
     }
@@ -488,6 +506,7 @@ class ExampleTest extends TestCase
             'opening_time' => '09:00',
             'closing_time' => '19:00',
             'about' => 'We focus on precision cuts, healthy hair routines, and a calm guest experience.',
+            'youtube_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
         ];
     }
 
@@ -508,6 +527,7 @@ class ExampleTest extends TestCase
             'opening_time' => '09:00',
             'closing_time' => '19:00',
             'about' => 'We focus on precision cuts, healthy hair routines, and a calm guest experience.',
+            'youtube_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
             'approval_status' => 'approved',
             'approved_at' => now(),
         ], $overrides));
