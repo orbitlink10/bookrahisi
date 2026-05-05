@@ -2,6 +2,7 @@
     $heroTitle = $hero['title'] ?? 'Book local self-care services';
     $heroSubtitle = $hero['subtitle'] ?? 'Discover top-rated salons, barbers, medspas, wellness studios and beauty experts trusted across Kenya.';
     $featuredDeals = array_slice($dailyDeals, 0, 4);
+    $googleMapsApiKey = config('services.google.maps_api_key');
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -265,6 +266,18 @@
                 border-right: 0;
             }
 
+            .search-field-location {
+                position: relative;
+            }
+
+            .search-location-shell {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                flex: 1;
+                min-width: 0;
+            }
+
             .search-icon {
                 flex: 0 0 23px;
                 width: 23px;
@@ -287,6 +300,103 @@
 
             .search-input::placeholder {
                 color: rgba(18, 18, 18, 0.76);
+            }
+
+            .search-clear {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 32px;
+                height: 32px;
+                border: 0;
+                border-radius: 999px;
+                background: rgba(18, 18, 18, 0.08);
+                color: rgba(18, 18, 18, 0.72);
+                cursor: pointer;
+                flex: 0 0 auto;
+            }
+
+            .search-clear[hidden] {
+                display: none;
+            }
+
+            .search-clear:hover {
+                background: rgba(18, 18, 18, 0.14);
+            }
+
+            .location-dropdown {
+                position: absolute;
+                top: calc(100% + 14px);
+                left: 18px;
+                right: 18px;
+                z-index: 35;
+                max-height: 340px;
+                overflow-y: auto;
+                padding: 10px 0;
+                border: 1px solid rgba(18, 18, 18, 0.08);
+                border-radius: 28px;
+                background: rgba(255, 255, 255, 0.98);
+                box-shadow: 0 24px 48px rgba(17, 18, 28, 0.12);
+                backdrop-filter: blur(18px);
+            }
+
+            .location-dropdown[hidden] {
+                display: none;
+            }
+
+            .location-option {
+                display: grid;
+                grid-template-columns: auto minmax(0, 1fr);
+                gap: 14px;
+                align-items: flex-start;
+                width: 100%;
+                padding: 14px 20px;
+                border: 0;
+                background: transparent;
+                color: var(--ink);
+                text-align: left;
+                cursor: pointer;
+            }
+
+            .location-option:hover,
+            .location-option.is-active {
+                background: rgba(18, 18, 18, 0.04);
+            }
+
+            .location-option-icon {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: rgba(18, 18, 18, 0.06);
+                color: rgba(18, 18, 18, 0.62);
+                flex: 0 0 auto;
+            }
+
+            .location-option-copy {
+                display: grid;
+                gap: 2px;
+            }
+
+            .location-option-primary {
+                font-size: 1rem;
+                line-height: 1.4;
+                font-weight: 700;
+            }
+
+            .location-option-secondary {
+                color: var(--muted);
+                font-size: 0.96rem;
+                line-height: 1.45;
+            }
+
+            .location-empty {
+                padding: 14px 20px;
+                color: var(--muted);
+                font-size: 0.96rem;
+                line-height: 1.6;
             }
 
             .search-submit {
@@ -1015,20 +1125,34 @@
                                     >
                                 </div>
 
-                                <div class="search-field">
+                                <div class="search-field search-field-location">
                                     <label class="sr-only" for="location">Location</label>
                                     <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                         <path d="M12 21s6-5.33 6-11a6 6 0 1 0-12 0c0 5.67 6 11 6 11Z"></path>
                                         <circle cx="12" cy="10" r="2.5"></circle>
                                     </svg>
-                                    <input
-                                        id="location"
-                                        class="search-input"
-                                        type="text"
-                                        name="location"
-                                        value="{{ request('location') }}"
-                                        placeholder="Current location"
-                                    >
+                                    <div class="search-location-shell">
+                                        <input
+                                            id="location"
+                                            class="search-input"
+                                            type="text"
+                                            name="location"
+                                            value="{{ request('location') }}"
+                                            placeholder="Current location"
+                                            autocomplete="off"
+                                            aria-autocomplete="list"
+                                            aria-controls="location-suggestions"
+                                            aria-expanded="false"
+                                        >
+                                        <input type="hidden" name="location_place_id" id="location-place-id" value="{{ request('location_place_id') }}">
+                                        <button class="search-clear" id="location-clear" type="button" aria-label="Clear location" @if (! request('location')) hidden @endif>
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <path d="M18 6 6 18"></path>
+                                                <path d="m6 6 12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="location-dropdown" id="location-suggestions" hidden></div>
                                 </div>
 
                                 <div class="search-field">
@@ -1214,5 +1338,226 @@
                 </div>
             </div>
         </footer>
+        @if ($googleMapsApiKey)
+            <script>
+                window.initHomepageLocationPicker = function () {
+                    const locationInput = document.getElementById('location');
+                    const placeIdInput = document.getElementById('location-place-id');
+                    const clearButton = document.getElementById('location-clear');
+                    const dropdown = document.getElementById('location-suggestions');
+
+                    if (! locationInput || ! dropdown || ! window.google || ! window.google.maps || ! window.google.maps.places) {
+                        return;
+                    }
+
+                    const autocompleteService = new window.google.maps.places.AutocompleteService();
+                    let activeIndex = -1;
+                    let debounceTimer = null;
+                    let predictions = [];
+
+                    const updateClearButton = function () {
+                        if (! clearButton) {
+                            return;
+                        }
+
+                        clearButton.hidden = locationInput.value.trim() === '';
+                    };
+
+                    const hideDropdown = function () {
+                        dropdown.hidden = true;
+                        dropdown.innerHTML = '';
+                        locationInput.setAttribute('aria-expanded', 'false');
+                        activeIndex = -1;
+                    };
+
+                    const locationOptionIcon = function () {
+                        return `
+                            <span class="location-option-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 21s6-5.33 6-11a6 6 0 1 0-12 0c0 5.67 6 11 6 11Z"></path>
+                                    <circle cx="12" cy="10" r="2.5"></circle>
+                                </svg>
+                            </span>
+                        `;
+                    };
+
+                    const escapeHtml = function (value) {
+                        return String(value)
+                            .replaceAll('&', '&amp;')
+                            .replaceAll('<', '&lt;')
+                            .replaceAll('>', '&gt;')
+                            .replaceAll('"', '&quot;')
+                            .replaceAll("'", '&#039;');
+                    };
+
+                    const renderEmptyState = function (message) {
+                        dropdown.innerHTML = '<div class="location-empty">' + message + '</div>';
+                        dropdown.hidden = false;
+                        locationInput.setAttribute('aria-expanded', 'true');
+                        activeIndex = -1;
+                    };
+
+                    const selectPrediction = function (prediction) {
+                        const mainText = prediction.structured_formatting && prediction.structured_formatting.main_text
+                            ? prediction.structured_formatting.main_text
+                            : prediction.description;
+
+                        locationInput.value = mainText;
+
+                        if (placeIdInput) {
+                            placeIdInput.value = prediction.place_id || '';
+                        }
+
+                        updateClearButton();
+                        hideDropdown();
+                    };
+
+                    const renderPredictions = function () {
+                        if (predictions.length === 0) {
+                            renderEmptyState('No Google Maps locations matched that search yet.');
+                            return;
+                        }
+
+                        dropdown.innerHTML = predictions.map(function (prediction, index) {
+                            const mainText = prediction.structured_formatting && prediction.structured_formatting.main_text
+                                ? prediction.structured_formatting.main_text
+                                : prediction.description;
+                            const secondaryText = prediction.structured_formatting && prediction.structured_formatting.secondary_text
+                                ? prediction.structured_formatting.secondary_text
+                                : prediction.description;
+
+                            return `
+                                <button class="location-option${index === activeIndex ? ' is-active' : ''}" type="button" data-index="${index}">
+                                    ${locationOptionIcon()}
+                                    <span class="location-option-copy">
+                                        <span class="location-option-primary">${escapeHtml(mainText)}</span>
+                                        <span class="location-option-secondary">${escapeHtml(secondaryText)}</span>
+                                    </span>
+                                </button>
+                            `;
+                        }).join('');
+
+                        dropdown.hidden = false;
+                        locationInput.setAttribute('aria-expanded', 'true');
+
+                        Array.from(dropdown.querySelectorAll('.location-option')).forEach(function (button) {
+                            button.addEventListener('mousedown', function (event) {
+                                event.preventDefault();
+                            });
+
+                            button.addEventListener('click', function () {
+                                const index = Number(button.getAttribute('data-index'));
+
+                                if (! Number.isNaN(index) && predictions[index]) {
+                                    selectPrediction(predictions[index]);
+                                }
+                            });
+                        });
+                    };
+
+                    const fetchPredictions = function (query) {
+                        if (query.length < 2) {
+                            predictions = [];
+                            hideDropdown();
+                            return;
+                        }
+
+                        autocompleteService.getPlacePredictions({
+                            input: query,
+                            componentRestrictions: { country: 'ke' },
+                        }, function (results, status) {
+                            if (status === window.google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
+                                predictions = [];
+                                renderEmptyState('No Google Maps locations matched that search yet.');
+                                return;
+                            }
+
+                            if (status !== window.google.maps.places.PlacesServiceStatus.OK || ! results) {
+                                predictions = [];
+                                renderEmptyState('Keep typing to search for a city, neighborhood, or area in Kenya.');
+                                return;
+                            }
+
+                            predictions = results.slice(0, 5);
+                            activeIndex = 0;
+                            renderPredictions();
+                        });
+                    };
+
+                    locationInput.addEventListener('input', function () {
+                        updateClearButton();
+
+                        if (placeIdInput) {
+                            placeIdInput.value = '';
+                        }
+
+                        window.clearTimeout(debounceTimer);
+                        debounceTimer = window.setTimeout(function () {
+                            fetchPredictions(locationInput.value.trim());
+                        }, 160);
+                    });
+
+                    locationInput.addEventListener('focus', function () {
+                        if (locationInput.value.trim().length >= 2) {
+                            fetchPredictions(locationInput.value.trim());
+                        }
+                    });
+
+                    locationInput.addEventListener('keydown', function (event) {
+                        if (dropdown.hidden || predictions.length === 0) {
+                            return;
+                        }
+
+                        if (event.key === 'ArrowDown') {
+                            event.preventDefault();
+                            activeIndex = (activeIndex + 1) % predictions.length;
+                            renderPredictions();
+                            return;
+                        }
+
+                        if (event.key === 'ArrowUp') {
+                            event.preventDefault();
+                            activeIndex = (activeIndex - 1 + predictions.length) % predictions.length;
+                            renderPredictions();
+                            return;
+                        }
+
+                        if (event.key === 'Enter' && activeIndex >= 0 && predictions[activeIndex]) {
+                            event.preventDefault();
+                            selectPrediction(predictions[activeIndex]);
+                            return;
+                        }
+
+                        if (event.key === 'Escape') {
+                            hideDropdown();
+                        }
+                    });
+
+                    document.addEventListener('click', function (event) {
+                        if (! dropdown.contains(event.target) && event.target !== locationInput && event.target !== clearButton) {
+                            hideDropdown();
+                        }
+                    });
+
+                    if (clearButton) {
+                        clearButton.addEventListener('click', function () {
+                            locationInput.value = '';
+
+                            if (placeIdInput) {
+                                placeIdInput.value = '';
+                            }
+
+                            predictions = [];
+                            updateClearButton();
+                            hideDropdown();
+                            locationInput.focus();
+                        });
+                    }
+
+                    updateClearButton();
+                };
+            </script>
+            <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ $googleMapsApiKey }}&libraries=places&callback=initHomepageLocationPicker"></script>
+        @endif
     </body>
 </html>

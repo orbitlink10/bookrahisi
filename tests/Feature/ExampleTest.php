@@ -49,6 +49,19 @@ class ExampleTest extends TestCase
             ->assertDontSeeText('Pending Glow House');
     }
 
+    public function test_the_homepage_loads_google_maps_location_picker_when_configured(): void
+    {
+        config(['services.google.maps_api_key' => 'test-google-maps-key']);
+
+        $response = $this->get('/');
+
+        $response
+            ->assertOk()
+            ->assertSee('maps.googleapis.com/maps/api/js?key=test-google-maps-key&libraries=places&callback=initHomepageLocationPicker', false)
+            ->assertSee('window.initHomepageLocationPicker = function () {', false)
+            ->assertSee('location-suggestions', false);
+    }
+
     public function test_the_for_business_page_renders(): void
     {
         $response = $this->get('/for-business');
