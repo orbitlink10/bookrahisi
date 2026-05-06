@@ -95,20 +95,24 @@ class AdminDashboardTest extends TestCase
         $this->withSession(['admin_user_id' => $admin->id])
             ->get(route('admin.dashboard', ['section' => 'pages']))
             ->assertOk()
-            ->assertSeeText('Admin dashboard')
             ->assertSeeText('Pages')
+            ->assertSeeText('Manage site pages and published content.')
             ->assertSeeText('Post List')
             ->assertSeeText('Add Page')
-            ->assertDontSeeText('Content Admin');
+            ->assertDontSeeText('Content Admin')
+            ->assertDontSeeText('Admin dashboard');
 
         $this->withSession(['admin_user_id' => $admin->id])
             ->get(route('admin.dashboard', ['section' => 'pages', 'pages_mode' => 'create']))
             ->assertOk()
-            ->assertSeeText('Admin dashboard')
-            ->assertSeeText('Add Page')
-            ->assertSeeText('Page editor')
+            ->assertSeeText('Manage Pages')
+            ->assertSeeText('Add New Post')
+            ->assertSeeText('Meta Title')
+            ->assertSeeText('Meta Description')
+            ->assertSeeText('Page Description:')
             ->assertSeeText('Create page')
-            ->assertDontSeeText('Content Admin');
+            ->assertDontSeeText('Content Admin')
+            ->assertDontSeeText('Admin dashboard');
     }
 
     public function test_admin_can_approve_a_business_and_publish_it_to_the_marketplace(): void
@@ -244,12 +248,16 @@ class AdminDashboardTest extends TestCase
         $response = $this
             ->withSession(['admin_user_id' => $admin->id])
             ->post(route('admin.pages.store'), [
+                'meta_title' => 'First Spa Visit Guide',
+                'meta_description' => 'A short guide for customers who want a smoother first spa booking experience.',
                 'title' => 'How to prepare for your first spa visit',
+                'heading_two' => 'What to know before you arrive',
                 'slug' => '',
                 'cover_image_url' => 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1200&q=80',
+                'image_alt_text' => 'Woman enjoying a calming spa treatment',
                 'status' => 'published',
-                'excerpt' => 'A short guide for customers who want a smoother first spa booking experience.',
-                'body' => 'Arrive early, confirm your preferred treatment, and communicate any sensitivities before your appointment starts.',
+                'content_type' => 'post',
+                'body' => '<p><strong>Arrive early</strong>, confirm your preferred treatment, and communicate any sensitivities before your appointment starts.</p>',
             ]);
 
         $blogPost = BlogPost::query()->firstOrFail();
@@ -258,7 +266,11 @@ class AdminDashboardTest extends TestCase
             ->assertRedirect(route('admin.dashboard', ['section' => 'pages', 'pages_edit' => $blogPost->id]))
             ->assertSessionHas('admin_success');
 
+        $this->assertSame('First Spa Visit Guide', $blogPost->meta_title);
         $this->assertSame('How to prepare for your first spa visit', $blogPost->title);
+        $this->assertSame('What to know before you arrive', $blogPost->heading_two);
+        $this->assertSame('Woman enjoying a calming spa treatment', $blogPost->image_alt_text);
+        $this->assertSame('post', $blogPost->content_type);
         $this->assertSame('how-to-prepare-for-your-first-spa-visit', $blogPost->slug);
         $this->assertSame('published', $blogPost->status);
         $this->assertNotNull($blogPost->published_at);
@@ -266,7 +278,7 @@ class AdminDashboardTest extends TestCase
         $this->withSession(['admin_user_id' => $admin->id])
             ->get(route('admin.dashboard', ['section' => 'pages', 'pages_edit' => $blogPost->id]))
             ->assertOk()
-            ->assertSeeText('Update Page')
+            ->assertSeeText('Update Post')
             ->assertSee($blogPost->title, false);
 
         $this->get(route('blog.index'))
@@ -277,7 +289,8 @@ class AdminDashboardTest extends TestCase
         $this->get(route('blog.show', ['slug' => $blogPost->slug]))
             ->assertOk()
             ->assertSeeText($blogPost->title)
-            ->assertSeeText('Arrive early');
+            ->assertSeeText('What to know before you arrive')
+            ->assertSee('<strong>Arrive early</strong>', false);
     }
 
     public function test_admin_blog_post_creation_fails_cleanly_when_the_blog_posts_table_is_missing(): void
@@ -288,11 +301,14 @@ class AdminDashboardTest extends TestCase
 
         $this->withSession(['admin_user_id' => $admin->id])
             ->post(route('admin.pages.store'), [
+                'meta_title' => 'Server not migrated yet',
+                'meta_description' => 'This should not crash when the table is missing.',
                 'title' => 'Server not migrated yet',
                 'slug' => '',
                 'cover_image_url' => '',
+                'image_alt_text' => 'Server not migrated yet',
                 'status' => 'draft',
-                'excerpt' => 'This should not crash when the table is missing.',
+                'content_type' => 'post',
                 'body' => 'The request should redirect back to the dashboard with an actionable error.',
             ])
             ->assertRedirect(route('admin.dashboard', ['section' => 'pages']))
@@ -309,11 +325,14 @@ class AdminDashboardTest extends TestCase
 
         $response = $this->withSession(['admin_user_id' => $admin->id])
             ->post(route('admin.pages.store'), [
+                'meta_title' => 'Draft only story',
+                'meta_description' => 'This should stay private until an admin publishes it.',
                 'title' => 'Draft only story',
                 'slug' => '',
                 'cover_image_url' => '',
+                'image_alt_text' => 'Draft only story',
                 'status' => 'draft',
-                'excerpt' => 'This should stay private until an admin publishes it.',
+                'content_type' => 'post',
                 'body' => 'Internal draft content that should not appear on the public blog.',
             ]);
 
@@ -345,12 +364,16 @@ class AdminDashboardTest extends TestCase
         $response = $this
             ->withSession(['admin_user_id' => $admin->id])
             ->post(route('admin.pages.update', ['blogPost' => $blogPost]), [
+                'meta_title' => 'Quiet Draft Now Live',
+                'meta_description' => 'The draft has been updated and moved to the live blog.',
                 'title' => 'Quiet draft now live',
+                'heading_two' => 'The page is now public',
                 'slug' => 'quiet-draft-now-live',
                 'cover_image_url' => 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1200&q=80',
+                'image_alt_text' => 'Relaxing spa scene for a published article',
                 'status' => 'published',
-                'excerpt' => 'The draft has been updated and moved to the live blog.',
-                'body' => 'This article is now visible to readers on the public blog.',
+                'content_type' => 'post',
+                'body' => '<p>This article is now visible to readers on the public blog.</p>',
             ]);
 
         $response->assertRedirect(route('admin.dashboard', ['section' => 'pages', 'pages_edit' => $blogPost->id]));
@@ -358,6 +381,8 @@ class AdminDashboardTest extends TestCase
         $blogPost->refresh();
 
         $this->assertSame('Quiet draft now live', $blogPost->title);
+        $this->assertSame('Quiet Draft Now Live', $blogPost->meta_title);
+        $this->assertSame('The page is now public', $blogPost->heading_two);
         $this->assertSame('quiet-draft-now-live', $blogPost->slug);
         $this->assertSame('published', $blogPost->status);
         $this->assertNotNull($blogPost->published_at);
@@ -466,10 +491,14 @@ class AdminDashboardTest extends TestCase
         return BlogPost::query()->create(array_merge([
             'admin_user_id' => $admin->id,
             'author_name' => $admin->name,
+            'meta_title' => 'Sample blog post',
             'title' => 'Sample blog post',
+            'heading_two' => 'Sample supporting heading',
             'slug' => 'sample-blog-post-'.uniqid(),
             'cover_image_url' => 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=1200&q=80',
+            'image_alt_text' => 'Sample blog post',
             'status' => 'published',
+            'content_type' => 'post',
             'excerpt' => 'Sample excerpt for a published blog post.',
             'body' => 'Sample body copy for a published blog post.',
             'published_at' => now(),

@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{{ $blogPost->title }} | Book Rahisi Blog</title>
+        <title>{{ $blogPost->meta_title ?: $blogPost->title }} | Book Rahisi Blog</title>
         <meta
             name="description"
             content="{{ $blogPost->excerpt }}"
@@ -85,10 +85,15 @@
             }
 
             .cover {
+                background: #eef4fb;
+            }
+
+            .cover-image {
+                display: block;
+                width: 100%;
                 min-height: 360px;
-                background-position: center;
-                background-size: cover;
-                background-repeat: no-repeat;
+                max-height: 560px;
+                object-fit: cover;
             }
 
             .article-body {
@@ -129,12 +134,47 @@
                 font-weight: 700;
             }
 
+            .heading-two {
+                margin: 24px 0 0;
+                font-family: 'Outfit', sans-serif;
+                font-size: clamp(1.6rem, 3vw, 2.2rem);
+                letter-spacing: -0.05em;
+                line-height: 1.12;
+            }
+
             .body-copy {
                 margin-top: 30px;
                 color: #20242c;
                 font-size: 1rem;
                 line-height: 1.95;
-                white-space: pre-line;
+            }
+
+            .body-copy p,
+            .body-copy h2,
+            .body-copy h3,
+            .body-copy h4,
+            .body-copy ul,
+            .body-copy ol,
+            .body-copy blockquote,
+            .body-copy figure {
+                margin: 0 0 18px;
+            }
+
+            .body-copy img,
+            .body-copy iframe,
+            .body-copy video {
+                display: block;
+                max-width: 100%;
+                margin: 24px 0;
+                border-radius: 24px;
+            }
+
+            .body-copy iframe,
+            .body-copy video {
+                width: 100%;
+                min-height: 320px;
+                border: 0;
+                background: #eef4fb;
             }
 
             .related {
@@ -211,6 +251,11 @@
         </style>
     </head>
     <body>
+        @php
+            $bodyHtml = $blogPost->body === strip_tags($blogPost->body)
+                ? nl2br(e($blogPost->body))
+                : $blogPost->body;
+        @endphp
         <div class="shell">
             <header class="topbar">
                 <a class="brand" href="{{ route('home') }}">bookrahisi</a>
@@ -222,7 +267,9 @@
 
             <article class="article">
                 @if ($blogPost->cover_image_url)
-                    <div class="cover" style="background-image: linear-gradient(180deg, rgba(17, 19, 23, 0.08), rgba(17, 19, 23, 0.18)), url('{{ $blogPost->cover_image_url }}');"></div>
+                    <div class="cover">
+                        <img class="cover-image" src="{{ $blogPost->cover_image_url }}" alt="{{ $blogPost->image_alt_text ?: $blogPost->title }}">
+                    </div>
                 @endif
 
                 <div class="article-body">
@@ -235,7 +282,11 @@
                         <span>{{ $blogPost->published_at?->format('j M Y \a\t g:i a') }}</span>
                     </div>
 
-                    <div class="body-copy">{!! nl2br(e($blogPost->body)) !!}</div>
+                    @if ($blogPost->heading_two)
+                        <h2 class="heading-two">{{ $blogPost->heading_two }}</h2>
+                    @endif
+
+                    <div class="body-copy">{!! $bodyHtml !!}</div>
                 </div>
             </article>
 

@@ -599,33 +599,205 @@
             }
 
             .pages-head {
-                display: flex;
-                align-items: flex-start;
-                justify-content: space-between;
-                gap: 18px;
-                margin-bottom: 22px;
-            }
-
-            .pages-stats-grid {
-                display: grid;
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-                gap: 16px;
-                margin-bottom: 22px;
-            }
-
-            .pages-stat-card,
-            .pages-meta-card {
-                padding: 22px;
-                border: 1px solid var(--line);
-                border-radius: 24px;
-                background: rgba(255, 255, 255, 0.94);
-                box-shadow: var(--shadow);
+                margin-bottom: 26px;
             }
 
             .pages-panel,
-            .pages-editor-shell {
+            .pages-compose-panel {
                 padding: 0;
                 overflow: hidden;
+                border-radius: 8px;
+                box-shadow: 0 16px 34px rgba(28, 66, 104, 0.08);
+            }
+
+            .pages-compose-head {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+                margin-bottom: 26px;
+            }
+
+            .pages-compose-panel {
+                background: #fff;
+            }
+
+            .pages-compose-banner {
+                padding: 20px 30px;
+                background: #1a73e8;
+                color: #0d2344;
+                font-family: 'Outfit', sans-serif;
+                font-size: 2rem;
+                font-weight: 800;
+                letter-spacing: -0.04em;
+            }
+
+            .pages-compose-form {
+                padding: 28px 30px 34px;
+            }
+
+            .pages-form-stack {
+                display: grid;
+                gap: 24px;
+            }
+
+            .pages-field-group {
+                display: grid;
+                gap: 12px;
+            }
+
+            .pages-field-group-full {
+                grid-column: 1 / -1;
+            }
+
+            .pages-field-label {
+                font-size: 0.94rem;
+                font-weight: 900;
+                color: #10284a;
+            }
+
+            .pages-field-input {
+                width: 100%;
+                min-height: 58px;
+                padding: 0 18px;
+                border: 1px solid #d5dfec;
+                border-radius: 22px;
+                background: #fff;
+                color: #17304d;
+                font-size: 1rem;
+                outline: none;
+            }
+
+            .pages-field-input::placeholder {
+                color: #96a6b8;
+            }
+
+            .pages-field-input:focus {
+                border-color: #1a73e8;
+                box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.08);
+            }
+
+            .pages-field-select {
+                appearance: none;
+                background-image: linear-gradient(45deg, transparent 50%, #7f8fa3 50%), linear-gradient(135deg, #7f8fa3 50%, transparent 50%);
+                background-position: calc(100% - 22px) calc(50% - 4px), calc(100% - 14px) calc(50% - 4px);
+                background-size: 8px 8px, 8px 8px;
+                background-repeat: no-repeat;
+                padding-right: 48px;
+            }
+
+            .pages-settings-grid {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 18px;
+            }
+
+            .pages-compose-actions {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 12px;
+                margin-top: 8px;
+            }
+
+            .pages-rich-editor {
+                border: 1px solid #dfe6ef;
+                border-radius: 22px;
+                background: #fff;
+                overflow: hidden;
+                box-shadow: 0 12px 28px rgba(18, 36, 62, 0.08);
+            }
+
+            .pages-rich-editor.is-fullscreen {
+                position: fixed;
+                inset: 22px;
+                z-index: 50;
+                display: grid;
+                grid-template-rows: auto auto minmax(0, 1fr);
+                border-radius: 24px;
+            }
+
+            .pages-editor-menu {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                padding: 18px 22px 14px;
+                border-bottom: 1px solid #ecf1f7;
+                color: #17304d;
+                font-size: 0.98rem;
+            }
+
+            .pages-editor-toolbar {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                padding: 12px 18px;
+                border-bottom: 1px solid #ecf1f7;
+                background: #fff;
+            }
+
+            .pages-toolbar-button {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 38px;
+                height: 38px;
+                padding: 0 10px;
+                border: 0;
+                border-radius: 12px;
+                background: transparent;
+                color: #2b3d57;
+                font-size: 1.12rem;
+                cursor: pointer;
+            }
+
+            .pages-toolbar-button:hover {
+                background: #eef4fb;
+            }
+
+            .pages-editor-surface,
+            .pages-editor-source {
+                min-height: 360px;
+                padding: 22px;
+                outline: none;
+                font-size: 1rem;
+                line-height: 1.9;
+                color: #1c2b43;
+                background: #fff;
+            }
+
+            .pages-editor-source {
+                width: 100%;
+                border: 0;
+                resize: vertical;
+                font-family: Consolas, 'Courier New', monospace;
+            }
+
+            .pages-editor-surface p,
+            .pages-editor-surface h2,
+            .pages-editor-surface h3,
+            .pages-editor-surface h4,
+            .pages-editor-surface ul,
+            .pages-editor-surface ol,
+            .pages-editor-surface blockquote,
+            .pages-editor-surface figure {
+                margin: 0 0 16px;
+            }
+
+            .pages-editor-surface img,
+            .pages-editor-surface iframe,
+            .pages-editor-surface video {
+                display: block;
+                max-width: 100%;
+                margin: 20px 0;
+                border-radius: 18px;
+            }
+
+            .pages-editor-surface iframe,
+            .pages-editor-surface video {
+                width: 100%;
+                min-height: 320px;
+                border: 0;
+                background: #eef4fb;
             }
 
             .pages-panel-head {
@@ -633,30 +805,40 @@
                 align-items: flex-start;
                 justify-content: space-between;
                 gap: 16px;
-                padding: 28px 30px;
+                padding: 18px 30px;
                 border-bottom: 1px solid var(--line);
             }
 
             .pages-table-toolbar {
-                padding: 24px 30px 0;
+                padding: 30px 30px 0;
             }
 
-            .pages-bulk-form,
-            .pages-row-actions {
+            .pages-bulk-form {
                 display: flex;
                 align-items: center;
                 gap: 12px;
                 flex-wrap: wrap;
             }
 
+            .pages-row-actions {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .pages-row-actions form {
+                margin: 0;
+            }
+
             .pages-table-wrap {
-                padding: 24px 30px 30px;
+                padding: 24px 30px 0;
                 overflow-x: auto;
             }
 
             .pages-table {
                 width: 100%;
-                min-width: 940px;
+                min-width: 1080px;
                 border-collapse: collapse;
             }
 
@@ -674,9 +856,10 @@
             }
 
             .pages-table tbody td {
-                padding: 18px 16px;
+                padding: 22px 16px;
                 border-bottom: 1px solid rgba(214, 226, 240, 0.78);
                 vertical-align: middle;
+                font-size: 1rem;
             }
 
             .pages-field-checkbox {
@@ -687,9 +870,9 @@
             }
 
             .pages-thumb {
-                width: 170px;
-                height: 110px;
-                border-radius: 18px;
+                width: 226px;
+                height: 128px;
+                border-radius: 2px;
                 background-position: center;
                 background-repeat: no-repeat;
                 background-size: cover;
@@ -697,35 +880,15 @@
             }
 
             .pages-post-number {
-                font-size: 1.45rem;
-                font-weight: 800;
+                font-size: 1.2rem;
+                font-weight: 700;
             }
 
             .pages-post-title {
                 font-size: 1.2rem;
-                font-weight: 800;
-                line-height: 1.35;
-            }
-
-            .pages-status-pill {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                padding: 8px 12px;
-                border-radius: 999px;
-                font-size: 0.8rem;
-                font-weight: 800;
-                text-transform: capitalize;
-            }
-
-            .pages-status-pill.is-published {
-                background: var(--success-soft);
-                color: var(--success-ink);
-            }
-
-            .pages-status-pill.is-draft {
-                background: var(--warning-soft);
-                color: var(--warning-ink);
+                font-weight: 500;
+                line-height: 1.45;
+                color: #132a4d;
             }
 
             .pages-empty-state {
@@ -739,14 +902,18 @@
             }
 
             .button-primary,
+            .button-page-add,
             .button-soft,
+            .button-preview,
+            .button-warning,
             .button-danger,
-            .button-muted {
+            .button-draft {
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
                 gap: 10px;
-                padding: 12px 18px;
+                min-width: 142px;
+                padding: 10px 18px;
                 border-radius: 999px;
                 border: 1px solid transparent;
                 font-size: 0.92rem;
@@ -754,79 +921,50 @@
             }
 
             .button-primary {
-                background: #1a75ff;
+                background: #1a73e8;
                 color: #fff;
-                box-shadow: 0 18px 32px rgba(26, 117, 255, 0.18);
+                box-shadow: none;
+                min-width: 0;
+            }
+
+            .button-page-add {
+                background: #f8fafc;
+                border-color: transparent;
+                color: #1a73e8;
+                min-width: 0;
             }
 
             .button-soft {
                 background: rgba(255, 255, 255, 0.94);
                 border-color: #21a1c5;
                 color: #1294b8;
+                min-width: 0;
+            }
+
+            .button-preview {
+                background: #fff;
+                border-color: #1ca4de;
+                color: #1898cf;
+            }
+
+            .button-warning {
+                background: #fff;
+                border-color: #f5b400;
+                color: #efb100;
             }
 
             .button-danger {
                 background: #fff;
-                border-color: #f2a4ad;
-                color: #ef4444;
+                border-color: #ff5b63;
+                color: #f33d49;
                 cursor: pointer;
             }
 
-            .button-muted {
+            .button-draft {
                 background: #fff;
                 border-color: var(--line);
                 color: var(--muted);
                 opacity: 0.7;
-            }
-
-            .pages-editor-grid {
-                display: grid;
-                grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
-                gap: 20px;
-                padding: 24px 30px 30px;
-            }
-
-            .pages-editor-card {
-                padding: 28px;
-                border: 1px solid var(--line);
-                border-radius: 28px;
-                background: #fff;
-            }
-
-            .pages-meta-stack {
-                display: grid;
-                align-content: start;
-                gap: 18px;
-            }
-
-            .pages-meta-label {
-                color: #8aa0bb;
-                font-size: 0.8rem;
-                font-weight: 800;
-                letter-spacing: 0.16em;
-                text-transform: uppercase;
-            }
-
-            .pages-meta-value {
-                margin-top: 12px;
-                font-family: 'Outfit', sans-serif;
-                font-size: 1.7rem;
-                font-weight: 800;
-                letter-spacing: -0.05em;
-            }
-
-            .pages-cover-preview {
-                min-height: 220px;
-                margin-top: 14px;
-                border-radius: 22px;
-                background-position: center;
-                background-repeat: no-repeat;
-                background-size: cover;
-                background-color: #eef4fb;
-            }
-
-            .pages-field-body {
-                min-height: 340px;
             }
 
             .report-card {
@@ -881,7 +1019,6 @@
                     grid-template-columns: repeat(3, minmax(0, 1fr));
                 }
 
-                .pages-stats-grid,
                 .reports-grid {
                     grid-template-columns: repeat(2, minmax(0, 1fr));
                 }
@@ -905,10 +1042,6 @@
                     justify-items: start;
                     text-align: left;
                 }
-
-                .pages-editor-grid {
-                    grid-template-columns: 1fr;
-                }
             }
 
             @media (max-width: 760px) {
@@ -917,7 +1050,7 @@
                 }
 
                 .topbar,
-                .pages-head,
+                .pages-compose-head,
                 .pages-panel-head,
                 .toolbar,
                 .hero-actions,
@@ -928,15 +1061,15 @@
                 }
 
                 .stats-grid,
-                .pages-stats-grid,
                 .reports-grid,
                 .inline-form-row,
                 .form-grid,
-                .entity-form-grid {
+                .entity-form-grid,
+                .pages-settings-grid {
                     grid-template-columns: 1fr;
                 }
 
-                .pages-editor-grid,
+                .pages-compose-form,
                 .pages-table-wrap,
                 .pages-table-toolbar {
                     padding-left: 20px;
@@ -948,10 +1081,19 @@
                     margin-right: 20px;
                 }
 
+                .pages-compose-banner {
+                    padding-left: 20px;
+                    padding-right: 20px;
+                    font-size: 1.6rem;
+                }
+
                 .button-dark,
                 .button-light,
                 .button-primary,
+                .button-page-add,
                 .button-soft,
+                .button-preview,
+                .button-warning,
                 .button-danger,
                 .hero-actions .button-dark,
                 .hero-actions .button-light,
@@ -1009,24 +1151,26 @@
 
             <main class="workspace">
                 <div class="workspace-shell">
-                    <div class="topbar" id="overview">
-                        <div>
-                            <span class="eyebrow">Marketplace control center</span>
-                            <h1>Admin dashboard</h1>
-                            <p class="subtitle">
-                                Approve businesses, manage platform users, work on content pages, monitor bookings, control payments, and review marketplace performance from one owner-only console.
-                            </p>
-                        </div>
+                    @if (! $isPagesSection)
+                        <div class="topbar" id="overview">
+                            <div>
+                                <span class="eyebrow">Marketplace control center</span>
+                                <h1>Admin dashboard</h1>
+                                <p class="subtitle">
+                                    Approve businesses, manage platform users, work on content pages, monitor bookings, control payments, and review marketplace performance from one owner-only console.
+                                </p>
+                            </div>
 
-                        <div class="toolbar">
-                            <a class="button-light" href="{{ route('home') }}">View marketplace</a>
-                            <a class="button-light" href="{{ route('blog.index') }}">Open blog</a>
-                            <form action="{{ route('admin.sign-out') }}" method="post">
-                                @csrf
-                                <button class="button-dark" type="submit">Sign out</button>
-                            </form>
+                            <div class="toolbar">
+                                <a class="button-light" href="{{ route('home') }}">View marketplace</a>
+                                <a class="button-light" href="{{ route('blog.index') }}">Open blog</a>
+                                <form action="{{ route('admin.sign-out') }}" method="post">
+                                    @csrf
+                                    <button class="button-dark" type="submit">Sign out</button>
+                                </form>
+                            </div>
                         </div>
-                    </div>
+                    @endif
 
                     @if (session('admin_success'))
                         <div class="success-banner">{{ session('admin_success') }}</div>

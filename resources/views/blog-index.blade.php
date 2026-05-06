@@ -130,10 +130,15 @@
             }
 
             .cover {
-                min-height: 320px;
-                background-position: center;
-                background-size: cover;
-                background-repeat: no-repeat;
+                background: #eef4fb;
+            }
+
+            .cover-image {
+                display: block;
+                width: 100%;
+                min-height: 220px;
+                height: 100%;
+                object-fit: cover;
             }
 
             .post-kicker {
@@ -254,14 +259,11 @@
                         </div>
                         <a class="read-link" href="{{ route('blog.show', ['slug' => $featuredPost->slug]) }}">Read article</a>
                     </div>
-                    <div
-                        class="cover"
+                    <div class="cover">
                         @if ($featuredPost->cover_image_url)
-                            style="background-image: linear-gradient(180deg, rgba(17, 19, 23, 0.06), rgba(17, 19, 23, 0.18)), url('{{ $featuredPost->cover_image_url }}');"
-                        @else
-                            style="background: linear-gradient(135deg, #dbeeff 0%, #f7f8fb 100%);"
+                            <img class="cover-image" src="{{ $featuredPost->cover_image_url }}" alt="{{ $featuredPost->image_alt_text ?: $featuredPost->title }}" style="min-height: 320px;">
                         @endif
-                    ></div>
+                    </div>
                 </article>
             @endif
 
@@ -273,16 +275,13 @@
                 <section class="grid">
                     @foreach ($blogPosts as $blogPost)
                         <article class="post-card">
-                            <div
-                                class="cover"
+                            <div class="cover">
                                 @if ($blogPost->cover_image_url)
-                                    style="min-height: 220px; background-image: linear-gradient(180deg, rgba(17, 19, 23, 0.05), rgba(17, 19, 23, 0.16)), url('{{ $blogPost->cover_image_url }}');"
-                                @else
-                                    style="min-height: 220px; background: linear-gradient(135deg, #edf6ff 0%, #f9fbfd 100%);"
+                                    <img class="cover-image" src="{{ $blogPost->cover_image_url }}" alt="{{ $blogPost->image_alt_text ?: $blogPost->title }}">
                                 @endif
-                            ></div>
+                            </div>
                             <div class="post-body">
-                                <span class="post-kicker">Published story</span>
+                                <span class="post-kicker">{{ ucfirst($blogPost->content_type ?: 'post') }}</span>
                                 <h2 class="post-title">{{ $blogPost->title }}</h2>
                                 <p class="excerpt">{{ $blogPost->excerpt }}</p>
                                 <div class="post-meta">
