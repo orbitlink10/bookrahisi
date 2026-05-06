@@ -46,7 +46,7 @@ class AdminDashboardTest extends TestCase
             ->assertSeeText('Users')
             ->assertSeeText('Bookings')
             ->assertSeeText('Payments')
-            ->assertSeeText('Blog posts')
+            ->assertSeeText('Pages')
             ->assertSeeText('Reports');
     }
 
@@ -86,6 +86,25 @@ class AdminDashboardTest extends TestCase
             ->assertOk()
             ->assertSeeText('Admin dashboard')
             ->assertSeeText('Blog setup is incomplete on this server');
+    }
+
+    public function test_admin_can_view_the_pages_manager_and_create_page_screen(): void
+    {
+        $admin = $this->createAdminUser();
+
+        $this->withSession(['admin_user_id' => $admin->id])
+            ->get(route('admin.pages.index'))
+            ->assertOk()
+            ->assertSeeText('Pages')
+            ->assertSeeText('Post List')
+            ->assertSeeText('Add Page');
+
+        $this->withSession(['admin_user_id' => $admin->id])
+            ->get(route('admin.pages.create'))
+            ->assertOk()
+            ->assertSeeText('Add Page')
+            ->assertSeeText('Page editor')
+            ->assertSeeText('Create page');
     }
 
     public function test_admin_can_approve_a_business_and_publish_it_to_the_marketplace(): void
@@ -220,7 +239,7 @@ class AdminDashboardTest extends TestCase
 
         $response = $this
             ->withSession(['admin_user_id' => $admin->id])
-            ->post(route('admin.blog-posts.store'), [
+            ->post(route('admin.pages.store'), [
                 'title' => 'How to prepare for your first spa visit',
                 'slug' => '',
                 'cover_image_url' => 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1200&q=80',
@@ -229,16 +248,22 @@ class AdminDashboardTest extends TestCase
                 'body' => 'Arrive early, confirm your preferred treatment, and communicate any sensitivities before your appointment starts.',
             ]);
 
-        $response
-            ->assertRedirect(route('admin.dashboard').'#blog-posts')
-            ->assertSessionHas('admin_success');
-
         $blogPost = BlogPost::query()->firstOrFail();
+
+        $response
+            ->assertRedirect(route('admin.pages.edit', ['blogPost' => $blogPost]))
+            ->assertSessionHas('admin_success');
 
         $this->assertSame('How to prepare for your first spa visit', $blogPost->title);
         $this->assertSame('how-to-prepare-for-your-first-spa-visit', $blogPost->slug);
         $this->assertSame('published', $blogPost->status);
         $this->assertNotNull($blogPost->published_at);
+
+        $this->withSession(['admin_user_id' => $admin->id])
+            ->get(route('admin.pages.edit', ['blogPost' => $blogPost]))
+            ->assertOk()
+            ->assertSeeText('Update Page')
+            ->assertSee($blogPost->title, false);
 
         $this->get(route('blog.index'))
             ->assertOk()
@@ -258,7 +283,7 @@ class AdminDashboardTest extends TestCase
         Schema::drop('blog_posts');
 
         $this->withSession(['admin_user_id' => $admin->id])
-            ->post(route('admin.blog-posts.store'), [
+            ->post(route('admin.pages.store'), [
                 'title' => 'Server not migrated yet',
                 'slug' => '',
                 'cover_image_url' => '',
@@ -266,7 +291,7 @@ class AdminDashboardTest extends TestCase
                 'excerpt' => 'This should not crash when the table is missing.',
                 'body' => 'The request should redirect back to the dashboard with an actionable error.',
             ])
-            ->assertRedirect(route('admin.dashboard').'#blog-posts')
+            ->assertRedirect(route('admin.pages.index'))
             ->assertSessionHasErrors('blog_posts');
 
         $this->get(route('blog.index'))
@@ -278,18 +303,19 @@ class AdminDashboardTest extends TestCase
     {
         $admin = $this->createAdminUser();
 
-        $this->withSession(['admin_user_id' => $admin->id])
-            ->post(route('admin.blog-posts.store'), [
+        $response = $this->withSession(['admin_user_id' => $admin->id])
+            ->post(route('admin.pages.store'), [
                 'title' => 'Draft only story',
                 'slug' => '',
                 'cover_image_url' => '',
                 'status' => 'draft',
                 'excerpt' => 'This should stay private until an admin publishes it.',
                 'body' => 'Internal draft content that should not appear on the public blog.',
-            ])
-            ->assertRedirect(route('admin.dashboard').'#blog-posts');
+            ]);
 
         $blogPost = BlogPost::query()->firstOrFail();
+
+        $response->assertRedirect(route('admin.pages.edit', ['blogPost' => $blogPost]));
 
         $this->assertSame('draft', $blogPost->status);
         $this->assertNull($blogPost->published_at);
@@ -314,7 +340,7 @@ class AdminDashboardTest extends TestCase
 
         $response = $this
             ->withSession(['admin_user_id' => $admin->id])
-            ->post(route('admin.blog-posts.update', ['blogPost' => $blogPost]), [
+            ->post(route('admin.pages.update', ['blogPost' => $blogPost]), [
                 'title' => 'Quiet draft now live',
                 'slug' => 'quiet-draft-now-live',
                 'cover_image_url' => 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1200&q=80',
@@ -323,7 +349,7 @@ class AdminDashboardTest extends TestCase
                 'body' => 'This article is now visible to readers on the public blog.',
             ]);
 
-        $response->assertRedirect(route('admin.dashboard').'#blog-posts');
+        $response->assertRedirect(route('admin.pages.edit', ['blogPost' => $blogPost]));
 
         $blogPost->refresh();
 
@@ -336,6 +362,44 @@ class AdminDashboardTest extends TestCase
             ->assertOk()
             ->assertSeeText('Quiet draft now live')
             ->assertSeeText('This article is now visible');
+    }
+
+    public function test_admin_can_publish_pages_in_bulk_from_the_pages_manager(): void
+    {
+        $admin = $this->createAdminUser();
+        $first = $this->createBlogPost(['status' => 'draft', 'published_at' => null]);
+        $second = $this->createBlogPost(['status' => 'draft', 'published_at' => null]);
+
+        $this->withSession(['admin_user_id' => $admin->id])
+            ->post(route('admin.pages.bulk'), [
+                'action' => 'publish',
+                'selected_posts' => [$first->id, $second->id],
+            ])
+            ->assertRedirect(route('admin.pages.index'))
+            ->assertSessionHas('admin_success');
+
+        $first->refresh();
+        $second->refresh();
+
+        $this->assertSame('published', $first->status);
+        $this->assertSame('published', $second->status);
+        $this->assertNotNull($first->published_at);
+        $this->assertNotNull($second->published_at);
+    }
+
+    public function test_admin_can_delete_a_page_from_the_pages_manager(): void
+    {
+        $admin = $this->createAdminUser();
+        $blogPost = $this->createBlogPost();
+
+        $this->withSession(['admin_user_id' => $admin->id])
+            ->post(route('admin.pages.destroy', ['blogPost' => $blogPost]))
+            ->assertRedirect(route('admin.pages.index'))
+            ->assertSessionHas('admin_success');
+
+        $this->assertDatabaseMissing('blog_posts', [
+            'id' => $blogPost->id,
+        ]);
     }
 
     private function createAdminUser(array $overrides = []): User

@@ -19,6 +19,13 @@ Route::get('/admin/sign-in', [AdminController::class, 'signIn'])->name('admin.si
 Route::post('/admin/sign-in', [AdminController::class, 'signInSubmit'])->name('admin.sign-in.submit');
 Route::post('/admin/sign-out', [AdminController::class, 'signOut'])->name('admin.sign-out');
 Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+Route::get('/admin/pages', [AdminController::class, 'pagesIndex'])->name('admin.pages.index');
+Route::get('/admin/pages/create', [AdminController::class, 'createPage'])->name('admin.pages.create');
+Route::post('/admin/pages', [AdminController::class, 'storeBlogPost'])->name('admin.pages.store');
+Route::post('/admin/pages/bulk', [AdminController::class, 'bulkUpdateBlogPosts'])->name('admin.pages.bulk');
+Route::get('/admin/pages/{blogPost}/edit', [AdminController::class, 'editPage'])->name('admin.pages.edit');
+Route::post('/admin/pages/{blogPost}', [AdminController::class, 'updateBlogPost'])->name('admin.pages.update');
+Route::post('/admin/pages/{blogPost}/delete', [AdminController::class, 'deleteBlogPost'])->name('admin.pages.destroy');
 Route::post('/admin/blog-posts', [AdminController::class, 'storeBlogPost'])->name('admin.blog-posts.store');
 Route::post('/admin/blog-posts/{blogPost}', [AdminController::class, 'updateBlogPost'])->name('admin.blog-posts.update');
 Route::post('/admin/businesses/{business}/approval', [AdminController::class, 'updateBusinessApproval'])->name('admin.businesses.approval');
