@@ -393,6 +393,40 @@ class AdminDashboardTest extends TestCase
             ->assertSeeText('This article is now visible');
     }
 
+    public function test_admin_can_save_rich_text_page_content_with_nested_disallowed_markup(): void
+    {
+        $admin = $this->createAdminUser();
+
+        $response = $this
+            ->withSession(['admin_user_id' => $admin->id])
+            ->post(route('admin.pages.store'), [
+                'meta_title' => 'Rich editor page',
+                'meta_description' => 'Rich editor payload with extra markup should still save cleanly.',
+                'title' => 'Rich editor page',
+                'heading_two' => 'Formatted page content',
+                'slug' => '',
+                'cover_image_url' => 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1200&q=80',
+                'image_alt_text' => 'Rich editor page',
+                'status' => 'published',
+                'content_type' => 'post',
+                'body' => '<table><tbody><tr><td>Cell content</td></tr></tbody></table><script>alert("bad")</script><p>After the table</p>',
+            ]);
+
+        $blogPost = BlogPost::query()->firstOrFail();
+
+        $response->assertRedirect(route('admin.dashboard', ['section' => 'pages', 'pages_edit' => $blogPost->id]));
+
+        $this->assertStringContainsString('Cell content', $blogPost->body);
+        $this->assertStringContainsString('<p>After the table</p>', $blogPost->body);
+        $this->assertStringNotContainsString('<script', $blogPost->body);
+        $this->assertStringNotContainsString('alert("bad")', $blogPost->body);
+
+        $this->get(route('blog.show', ['slug' => $blogPost->slug]))
+            ->assertOk()
+            ->assertSeeText('Cell content')
+            ->assertSeeText('After the table');
+    }
+
     public function test_admin_can_publish_pages_in_bulk_from_the_pages_manager(): void
     {
         $admin = $this->createAdminUser();

@@ -595,7 +595,9 @@ class AdminController extends Controller
     {
         foreach (iterator_to_array($node->childNodes) as $childNode) {
             if ($childNode instanceof \DOMComment) {
-                $node->removeChild($childNode);
+                if ($childNode->parentNode === $node) {
+                    $node->removeChild($childNode);
+                }
 
                 continue;
             }
@@ -606,13 +608,24 @@ class AdminController extends Controller
 
             $tagName = strtolower($childNode->tagName);
 
+            $this->sanitizeRichTextNode($childNode, $allowedTags, $allowedAttributes);
+
+            if (in_array($tagName, ['script', 'style', 'meta', 'link'], true)) {
+                if ($childNode->parentNode === $node) {
+                    $node->removeChild($childNode);
+                }
+
+                continue;
+            }
+
             if (! in_array($tagName, $allowedTags, true)) {
                 while ($childNode->firstChild) {
                     $node->insertBefore($childNode->firstChild, $childNode);
                 }
 
-                $node->removeChild($childNode);
-                $this->sanitizeRichTextNode($node, $allowedTags, $allowedAttributes);
+                if ($childNode->parentNode === $node) {
+                    $node->removeChild($childNode);
+                }
 
                 continue;
             }
@@ -644,8 +657,6 @@ class AdminController extends Controller
             if ($tagName === 'video' && ! $childNode->hasAttribute('controls')) {
                 $childNode->setAttribute('controls', 'controls');
             }
-
-            $this->sanitizeRichTextNode($childNode, $allowedTags, $allowedAttributes);
         }
     }
 
