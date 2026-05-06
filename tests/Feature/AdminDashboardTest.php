@@ -352,6 +352,39 @@ class AdminDashboardTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_admin_can_preview_draft_blog_posts_privately(): void
+    {
+        $admin = $this->createAdminUser();
+
+        $response = $this->withSession(['admin_user_id' => $admin->id])
+            ->post(route('admin.pages.store'), [
+                'meta_title' => 'Preview only story',
+                'meta_description' => 'Draft preview should stay private but still open for admins.',
+                'title' => 'Preview only story',
+                'slug' => '',
+                'cover_image_url' => '',
+                'image_alt_text' => 'Preview only story',
+                'status' => 'draft',
+                'content_type' => 'post',
+                'body' => 'Draft preview content for admins only.',
+            ]);
+
+        $blogPost = BlogPost::query()->firstOrFail();
+
+        $response->assertRedirect(route('admin.dashboard', ['section' => 'pages', 'pages_edit' => $blogPost->id]));
+
+        $this->withSession(['admin_user_id' => $admin->id])
+            ->get(route('admin.dashboard', ['section' => 'pages']))
+            ->assertOk()
+            ->assertSee(route('admin.pages.preview', ['blogPost' => $blogPost->id]), false);
+
+        $this->withSession(['admin_user_id' => $admin->id])
+            ->get(route('admin.pages.preview', ['blogPost' => $blogPost->id]))
+            ->assertOk()
+            ->assertSeeText('Preview only story')
+            ->assertSeeText('Draft preview content for admins only.');
+    }
+
     public function test_admin_can_update_and_publish_an_existing_blog_post(): void
     {
         $admin = $this->createAdminUser();

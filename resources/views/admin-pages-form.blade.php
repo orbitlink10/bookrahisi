@@ -441,10 +441,19 @@
                             <p class="page-subtitle">{{ $pageSubtitle }}</p>
                         </div>
 
+                        @php
+                            $resolvedPreviewUrl = $previewUrl
+                                ?? (($blogPost ?? null)
+                                    ? (($blogPost->status === 'published' && $blogPost->published_at !== null)
+                                        ? route('blog.show', ['slug' => $blogPost->slug])
+                                        : route('admin.pages.preview', ['blogPost' => $blogPost->id]))
+                                    : null);
+                        @endphp
+
                         <div class="page-toolbar">
                             <a class="button-light" href="{{ route('admin.dashboard', ['section' => 'pages']) }}">Back to pages</a>
-                            @if ($previewUrl)
-                                <a class="button-preview action-button" href="{{ $previewUrl }}" target="_blank" rel="noopener noreferrer" title="Preview and open page">
+                            @if ($resolvedPreviewUrl)
+                                <a class="button-preview action-button" href="{{ $resolvedPreviewUrl }}" target="_blank" rel="noopener noreferrer" title="Preview and open page">
                                     <svg viewBox="0 0 24 24" aria-hidden="true">
                                         <path d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12s-4 7.5-10.5 7.5S1.5 12 1.5 12Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
                                         <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7" />
@@ -535,7 +544,7 @@
                                     <p class="meta-copy">
                                         {{ $currentStatus === 'published'
                                             ? 'Published pages can be previewed and visited on the public blog immediately.'
-                                            : 'Draft pages stay private until you switch them to published.' }}
+                                            : 'Draft pages stay private on the public blog, but you can still preview them from the admin area.' }}
                                     </p>
                                 </section>
 

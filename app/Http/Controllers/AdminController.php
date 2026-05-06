@@ -158,9 +158,7 @@ class AdminController extends Controller
                 $pagesFormAction = route('admin.pages.update', ['blogPost' => $pageEditorPost]);
                 $pagesPageHeading = 'Update Post';
                 $pagesPageSubtitle = 'Refine the page metadata, layout copy, and publishing settings from the same dashboard workspace.';
-                $pagesPreviewUrl = $pageEditorPost->status === 'published'
-                    ? route('blog.show', ['slug' => $pageEditorPost->slug])
-                    : null;
+                $pagesPreviewUrl = $this->previewUrlForBlogPost($pageEditorPost);
             }
         }
 
@@ -220,6 +218,33 @@ class AdminController extends Controller
         return redirect()->route('admin.dashboard', [
             'section' => 'pages',
             'pages_edit' => $blogPost,
+        ]);
+    }
+
+    public function previewPage(Request $request, string $blogPost): View|RedirectResponse
+    {
+        $admin = $this->authenticatedAdmin($request);
+
+        if (! $admin) {
+            return redirect()->route('admin.sign-in');
+        }
+
+        if (! $this->blogPostsTableExists()) {
+            abort(404);
+        }
+
+        $blogPostRecord = BlogPost::query()->findOrFail($blogPost);
+        $relatedPosts = BlogPost::query()
+            ->where('status', 'published')
+            ->whereNotNull('published_at')
+            ->where('id', '!=', $blogPostRecord->id)
+            ->orderByDesc('published_at')
+            ->take(3)
+            ->get();
+
+        return view('blog-show', [
+            'blogPost' => $blogPostRecord,
+            'relatedPosts' => $relatedPosts,
         ]);
     }
 
@@ -452,6 +477,15 @@ class AdminController extends Controller
     private function blogPostsTableExists(): bool
     {
         return Schema::hasTable('blog_posts');
+    }
+
+    private function previewUrlForBlogPost(BlogPost $blogPost): string
+    {
+        if ($blogPost->status === 'published' && $blogPost->published_at !== null) {
+            return route('blog.show', ['slug' => $blogPost->slug]);
+        }
+
+        return route('admin.pages.preview', ['blogPost' => $blogPost->id]);
     }
 
     private function blogPostColumnNames(): array

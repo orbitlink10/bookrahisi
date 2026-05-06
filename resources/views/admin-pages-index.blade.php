@@ -580,7 +580,7 @@
                         <div class="panel-head">
                             <div>
                                 <h2>Post List</h2>
-                                <p class="list-copy">Review each page, preview published entries, and keep editing focused inside a dedicated page editor.</p>
+                                <p class="list-copy">Review each page, preview draft or live entries, and keep editing focused inside a dedicated page editor.</p>
                             </div>
                             <a class="button-primary" href="{{ route('admin.dashboard', ['section' => 'pages', 'pages_mode' => 'create']) }}">
                                 <span style="font-size: 1.2rem; line-height: 1;">+</span>
@@ -650,17 +650,19 @@
                                                     <td>Post</td>
                                                     <td>
                                                         <div class="row-actions">
-                                                            @if ($blogPost->status === 'published')
-                                                                <a class="button-preview action-button" href="{{ route('blog.show', ['slug' => $blogPost->slug]) }}" target="_blank" rel="noopener noreferrer" title="Preview and open page">
-                                                                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                                                                        <path d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12s-4 7.5-10.5 7.5S1.5 12 1.5 12Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
-                                                                        <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7" />
-                                                                    </svg>
-                                                                    <span>Preview</span>
-                                                                </a>
-                                                            @else
-                                                                <span class="button-soft action-button is-disabled">Draft</span>
-                                                            @endif
+                                                            <a
+                                                                class="button-preview action-button"
+                                                                href="{{ $blogPost->status === 'published' && $blogPost->published_at !== null ? route('blog.show', ['slug' => $blogPost->slug]) : route('admin.pages.preview', ['blogPost' => $blogPost->id]) }}"
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                title="Preview and open page"
+                                                            >
+                                                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                                                    <path d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12s-4 7.5-10.5 7.5S1.5 12 1.5 12Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+                                                                    <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7" />
+                                                                </svg>
+                                                                <span>Preview</span>
+                                                            </a>
                                                             <a class="button-warning action-button" href="{{ route('admin.dashboard', ['section' => 'pages', 'pages_edit' => $blogPost->id]) }}">
                                                                 <svg viewBox="0 0 24 24" aria-hidden="true">
                                                                     <path d="M3 17.25V21h3.75L19.81 7.94l-3.75-3.75L3 17.25Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
