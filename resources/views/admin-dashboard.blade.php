@@ -606,8 +606,9 @@
             .pages-compose-panel {
                 padding: 0;
                 overflow: hidden;
-                border-radius: 8px;
-                box-shadow: 0 16px 34px rgba(28, 66, 104, 0.08);
+                border-radius: 24px;
+                border: 1px solid rgba(214, 226, 240, 0.9);
+                box-shadow: 0 18px 38px rgba(28, 66, 104, 0.08);
             }
 
             .pages-compose-head {
@@ -802,15 +803,61 @@
 
             .pages-panel-head {
                 display: flex;
-                align-items: flex-start;
+                align-items: center;
                 justify-content: space-between;
                 gap: 16px;
-                padding: 18px 30px;
+                padding: 24px 30px 20px;
                 border-bottom: 1px solid var(--line);
             }
 
+            .pages-panel-title-row {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+
+            .pages-count-badge {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 44px;
+                padding: 7px 14px;
+                border-radius: 999px;
+                background: #edf5ff;
+                color: #1a73e8;
+                font-size: 0.88rem;
+                font-weight: 800;
+                line-height: 1;
+            }
+
+            .pages-panel-copy {
+                margin: 10px 0 0;
+                color: #6b8097;
+                font-size: 0.96rem;
+                line-height: 1.65;
+            }
+
+            .pages-button-plus {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 22px;
+                height: 22px;
+                border-radius: 999px;
+                font-size: 1.1rem;
+                line-height: 1;
+            }
+
             .pages-table-toolbar {
-                padding: 30px 30px 0;
+                padding: 22px 30px 0;
+            }
+
+            .pages-toolbar-shell {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 16px;
             }
 
             .pages-bulk-form {
@@ -820,11 +867,16 @@
                 flex-wrap: wrap;
             }
 
+            .pages-bulk-form .field-select {
+                min-width: 160px;
+                border-radius: 12px;
+            }
+
             .pages-row-actions {
                 display: flex;
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 10px;
+                gap: 12px;
             }
 
             .pages-row-actions form {
@@ -832,21 +884,22 @@
             }
 
             .pages-table-wrap {
-                padding: 24px 30px 0;
+                padding: 18px 30px 0;
                 overflow-x: auto;
             }
 
             .pages-table {
                 width: 100%;
                 min-width: 1080px;
-                border-collapse: collapse;
+                border-collapse: separate;
+                border-spacing: 0;
             }
 
             .pages-table thead th {
                 padding: 18px 16px;
-                border-top: 1px solid var(--line);
-                border-bottom: 1px solid var(--line);
-                background: #f7faff;
+                border-top: 1px solid #dbe7f3;
+                border-bottom: 1px solid #dbe7f3;
+                background: #f7fbff;
                 color: #5f7a9d;
                 font-size: 0.9rem;
                 font-weight: 800;
@@ -855,8 +908,25 @@
                 text-align: left;
             }
 
+            .pages-table thead th:first-child {
+                border-top-left-radius: 18px;
+            }
+
+            .pages-table thead th:last-child {
+                border-top-right-radius: 18px;
+            }
+
+            .pages-table tbody tr {
+                background: #fff;
+                transition: background-color 160ms ease;
+            }
+
+            .pages-table tbody tr:hover {
+                background: #fbfdff;
+            }
+
             .pages-table tbody td {
-                padding: 22px 16px;
+                padding: 18px 16px;
                 border-bottom: 1px solid rgba(214, 226, 240, 0.78);
                 vertical-align: middle;
                 font-size: 1rem;
@@ -867,28 +937,73 @@
                 height: 22px;
                 border: 1px solid var(--line);
                 border-radius: 6px;
+                accent-color: #1a73e8;
+                cursor: pointer;
             }
 
             .pages-thumb {
                 width: 226px;
                 height: 128px;
-                border-radius: 2px;
+                border-radius: 14px;
                 background-position: center;
                 background-repeat: no-repeat;
                 background-size: cover;
                 background-color: #eef4fb;
+                box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
             }
 
             .pages-post-number {
-                font-size: 1.2rem;
-                font-weight: 700;
+                font-size: 1.15rem;
+                font-weight: 800;
+                color: #17304d;
             }
 
             .pages-post-title {
-                font-size: 1.2rem;
-                font-weight: 500;
-                line-height: 1.45;
+                font-size: 1.18rem;
+                font-weight: 700;
+                line-height: 1.5;
                 color: #132a4d;
+            }
+
+            .pages-alt-text {
+                max-width: 280px;
+                color: #4c667f;
+                line-height: 1.65;
+            }
+
+            .pages-type-badge {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 10px 16px;
+                border-radius: 999px;
+                background: #f3f8fd;
+                color: #365877;
+                font-size: 0.88rem;
+                font-weight: 800;
+                line-height: 1;
+                text-transform: capitalize;
+            }
+
+            .pages-action-button {
+                min-width: 0;
+                padding: 9px 16px;
+                gap: 8px;
+                justify-content: flex-start;
+            }
+
+            .pages-action-button svg {
+                width: 18px;
+                height: 18px;
+                flex: none;
+            }
+
+            .pages-status-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 999px;
+                background: currentColor;
+                opacity: 0.45;
             }
 
             .pages-empty-state {
@@ -928,8 +1043,8 @@
             }
 
             .button-page-add {
-                background: #f8fafc;
-                border-color: transparent;
+                background: #fff;
+                border-color: #edf3fb;
                 color: #1a73e8;
                 min-width: 0;
             }
@@ -1074,6 +1189,10 @@
                 .pages-table-toolbar {
                     padding-left: 20px;
                     padding-right: 20px;
+                }
+
+                .pages-toolbar-shell {
+                    align-items: stretch;
                 }
 
                 .pages-empty-state {

@@ -10,6 +10,7 @@
     $currentContentType = old('content_type', $pageEditorPost?->content_type ?? 'post');
     $currentBody = old('body', $pageEditorPost?->body ?? '');
     $isEditingPage = ($pagesViewMode ?? 'list') !== 'list';
+    $pagesCountLabel = number_format($totalBlogPosts ?? 0).' '.(($totalBlogPosts ?? 0) === 1 ? 'page' : 'pages');
     $editorBodyHtml = old('body') !== null
         ? nl2br(e($currentBody))
         : ($currentBody === strip_tags($currentBody)
@@ -163,10 +164,22 @@
     <section class="panel pages-panel">
         <div class="pages-panel-head">
             <div>
-                <h2 class="panel-title">Post List</h2>
+                <div class="pages-panel-title-row">
+                    <h2 class="panel-title">Post List</h2>
+                    @if ($blogPostsTableExists)
+                        <span class="pages-count-badge">{{ number_format($totalBlogPosts) }}</span>
+                    @endif
+                </div>
+                <p class="pages-panel-copy">
+                    @if ($blogPostsTableExists)
+                        {{ $pagesCountLabel }} in the content manager. Published: {{ number_format($publishedBlogPosts) }}. Drafts: {{ number_format($draftBlogPosts) }}.
+                    @else
+                        Manage all site pages from one clean workspace.
+                    @endif
+                </p>
             </div>
             <a class="button-page-add" href="{{ route('admin.dashboard', ['section' => 'pages', 'pages_mode' => 'create']) }}">
-                <span style="font-size: 1.2rem; line-height: 1;">+</span>
+                <span class="pages-button-plus">+</span>
                 <span>Add Page</span>
             </a>
         </div>
@@ -181,16 +194,18 @@
             @endif
 
             <div class="pages-table-toolbar">
-                <form class="pages-bulk-form" id="bulk-pages-form" action="{{ route('admin.pages.bulk') }}" method="post">
-                    @csrf
-                    <select class="field-select" name="action">
-                        <option value="">Bulk actions</option>
-                        <option value="publish">Publish</option>
-                        <option value="draft">Move to draft</option>
-                        <option value="delete">Delete</option>
-                    </select>
-                    <button class="button-primary" type="submit">Apply</button>
-                </form>
+                <div class="pages-toolbar-shell">
+                    <form class="pages-bulk-form" id="bulk-pages-form" action="{{ route('admin.pages.bulk') }}" method="post">
+                        @csrf
+                        <select class="field-select" name="action">
+                            <option value="">Bulk actions</option>
+                            <option value="publish">Publish</option>
+                            <option value="draft">Move to draft</option>
+                            <option value="delete">Delete</option>
+                        </select>
+                        <button class="button-primary" type="submit">Apply</button>
+                    </form>
+                </div>
             </div>
 
             <div class="pages-table-wrap">
@@ -235,19 +250,46 @@
                                 <td>
                                     <div class="pages-post-title">{{ $blogPost->title }}</div>
                                 </td>
-                                <td>{{ $blogPost->image_alt_text ?: $blogPost->title }}</td>
-                                <td>{{ ucfirst($blogPost->content_type ?: 'post') }}</td>
+                                <td>
+                                    <div class="pages-alt-text">{{ $blogPost->image_alt_text ?: $blogPost->title }}</div>
+                                </td>
+                                <td>
+                                    <span class="pages-type-badge">{{ ucfirst($blogPost->content_type ?: 'post') }}</span>
+                                </td>
                                 <td>
                                     <div class="pages-row-actions">
                                         @if ($blogPost->status === 'published')
-                                            <a class="button-preview" href="{{ route('blog.show', ['slug' => $blogPost->slug]) }}" target="_blank" rel="noopener noreferrer">Preview</a>
+                                            <a class="button-preview pages-action-button" href="{{ route('blog.show', ['slug' => $blogPost->slug]) }}" target="_blank" rel="noopener noreferrer">
+                                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                                    <path d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12s-4 7.5-10.5 7.5S1.5 12 1.5 12Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+                                                    <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7" />
+                                                </svg>
+                                                <span>Preview</span>
+                                            </a>
                                         @else
-                                            <span class="button-draft">Draft</span>
+                                            <span class="button-draft pages-action-button">
+                                                <span class="pages-status-dot" aria-hidden="true"></span>
+                                                <span>Draft</span>
+                                            </span>
                                         @endif
-                                        <a class="button-warning" href="{{ route('admin.dashboard', ['section' => 'pages', 'pages_edit' => $blogPost->id]) }}">Update</a>
+                                        <a class="button-warning pages-action-button" href="{{ route('admin.dashboard', ['section' => 'pages', 'pages_edit' => $blogPost->id]) }}">
+                                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                                <path d="M3 17.25V21h3.75L19.81 7.94l-3.75-3.75L3 17.25Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+                                                <path d="M14.06 4.19 17.81 7.94" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+                                            </svg>
+                                            <span>Update</span>
+                                        </a>
                                         <form action="{{ route('admin.pages.destroy', ['blogPost' => $blogPost]) }}" method="post" onsubmit="return confirm('Delete this page?');">
                                             @csrf
-                                            <button class="button-danger" type="submit">Delete</button>
+                                            <button class="button-danger pages-action-button" type="submit">
+                                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                                    <path d="M4 7h16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+                                                    <path d="M9 7V4h6v3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+                                                    <path d="M6 7l1 13h10l1-13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+                                                    <path d="M10 11v6M14 11v6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+                                                </svg>
+                                                <span>Delete</span>
+                                            </button>
                                         </form>
                                     </div>
                                 </td>
