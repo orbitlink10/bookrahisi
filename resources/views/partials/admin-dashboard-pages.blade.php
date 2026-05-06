@@ -13,8 +13,8 @@
     $editorBodyHtml = old('body') !== null
         ? nl2br(e($currentBody))
         : ($currentBody === strip_tags($currentBody)
-        ? nl2br(e($currentBody))
-        : $currentBody);
+            ? nl2br(e($currentBody))
+            : $currentBody);
 @endphp
 
 @if ($isEditingPage)
@@ -37,6 +37,12 @@
         @if (! $blogPostsTableExists)
             <div class="pages-empty-state">The `blog_posts` table is missing on this server, so the page editor is unavailable until the latest migrations are run.</div>
         @else
+            @if (($blogPostMissingEnhancedColumns ?? []) !== [])
+                <div class="pages-empty-state" style="margin-top: 28px; margin-bottom: 0;">
+                    This server is still using the older blog schema. You can keep posting pages, but fields like Meta Title, Heading 2, Image Alt Text, and Type will only save separately after the latest migrations are run.
+                </div>
+            @endif
+
             <form action="{{ $pagesFormAction }}" method="post" class="pages-compose-form">
                 @csrf
 
@@ -88,21 +94,21 @@
                             </div>
 
                             <div class="pages-editor-toolbar" data-editor-toolbar>
-                                <button class="pages-toolbar-button" type="button" data-command="undo" aria-label="Undo">↶</button>
-                                <button class="pages-toolbar-button" type="button" data-command="redo" aria-label="Redo">↷</button>
+                                <button class="pages-toolbar-button" type="button" data-command="undo" aria-label="Undo">&#8630;</button>
+                                <button class="pages-toolbar-button" type="button" data-command="redo" aria-label="Redo">&#8631;</button>
                                 <button class="pages-toolbar-button" type="button" data-command="bold" aria-label="Bold"><strong>B</strong></button>
                                 <button class="pages-toolbar-button" type="button" data-command="italic" aria-label="Italic"><em>I</em></button>
-                                <button class="pages-toolbar-button" type="button" data-command="justifyLeft" aria-label="Align left">☰</button>
-                                <button class="pages-toolbar-button" type="button" data-command="justifyCenter" aria-label="Align center">☷</button>
-                                <button class="pages-toolbar-button" type="button" data-command="justifyRight" aria-label="Align right">≣</button>
-                                <button class="pages-toolbar-button" type="button" data-command="insertUnorderedList" aria-label="Bulleted list">•⋮</button>
-                                <button class="pages-toolbar-button" type="button" data-command="outdent" aria-label="Outdent">⇤</button>
-                                <button class="pages-toolbar-button" type="button" data-command="indent" aria-label="Indent">⇥</button>
-                                <button class="pages-toolbar-button" type="button" data-editor-link aria-label="Insert link">🔗</button>
-                                <button class="pages-toolbar-button" type="button" data-editor-image aria-label="Insert image">🖼</button>
-                                <button class="pages-toolbar-button" type="button" data-editor-video aria-label="Insert video">🎬</button>
+                                <button class="pages-toolbar-button" type="button" data-command="justifyLeft" aria-label="Align left">L</button>
+                                <button class="pages-toolbar-button" type="button" data-command="justifyCenter" aria-label="Align center">C</button>
+                                <button class="pages-toolbar-button" type="button" data-command="justifyRight" aria-label="Align right">R</button>
+                                <button class="pages-toolbar-button" type="button" data-command="insertUnorderedList" aria-label="Bulleted list">UL</button>
+                                <button class="pages-toolbar-button" type="button" data-command="outdent" aria-label="Outdent">&lt;</button>
+                                <button class="pages-toolbar-button" type="button" data-command="indent" aria-label="Indent">&gt;</button>
+                                <button class="pages-toolbar-button" type="button" data-editor-link aria-label="Insert link">Link</button>
+                                <button class="pages-toolbar-button" type="button" data-editor-image aria-label="Insert image">Img</button>
+                                <button class="pages-toolbar-button" type="button" data-editor-video aria-label="Insert video">Vid</button>
                                 <button class="pages-toolbar-button" type="button" data-editor-code aria-label="Toggle code view">&lt;/&gt;</button>
-                                <button class="pages-toolbar-button" type="button" data-editor-fullscreen aria-label="Fullscreen">⛶</button>
+                                <button class="pages-toolbar-button" type="button" data-editor-fullscreen aria-label="Fullscreen">[]</button>
                             </div>
 
                             <div
@@ -168,6 +174,12 @@
         @if (! $blogPostsTableExists)
             <div class="pages-empty-state">The `blog_posts` table is not available on this server yet. Run the latest migrations before creating or managing pages.</div>
         @else
+            @if (($blogPostMissingEnhancedColumns ?? []) !== [])
+                <div class="pages-empty-state" style="margin-top: 28px; margin-bottom: 0;">
+                    This server is still using the older blog schema. You can manage pages here, but the newer metadata fields will only save separately after the latest migrations are run.
+                </div>
+            @endif
+
             <div class="pages-table-toolbar">
                 <form class="pages-bulk-form" id="bulk-pages-form" action="{{ route('admin.pages.bulk') }}" method="post">
                     @csrf

@@ -105,6 +105,9 @@ class AdminController extends Controller
                 ->latest()
                 ->get()
             : collect();
+        $blogPostMissingEnhancedColumns = $blogPostsTableExists
+            ? $this->blogPostMissingEnhancedColumns()
+            : [];
         $pagesViewMode = 'list';
         $pageEditorPost = null;
         $pagesFormAction = route('admin.pages.store');
@@ -167,6 +170,7 @@ class AdminController extends Controller
             'admin' => $admin,
             'approvedBusinesses' => $approvedBusinesses,
             'blogPosts' => $blogPosts,
+            'blogPostMissingEnhancedColumns' => $blogPostMissingEnhancedColumns,
             'blogPostsTableExists' => $blogPostsTableExists,
             'bookings' => $bookings,
             'businesses' => $businesses,
@@ -234,27 +238,16 @@ class AdminController extends Controller
 
         $validated = $this->validatedBlogPostData($request);
         $status = $validated['status'];
-
-        $blogPost = BlogPost::query()->create([
-            'admin_user_id' => $admin->id,
-            'author_name' => $admin->name,
-            'meta_title' => $validated['meta_title'],
-            'title' => $validated['title'],
-            'heading_two' => $validated['heading_two'],
-            'slug' => $this->uniqueBlogPostSlug($validated['slug'], $validated['title']),
-            'cover_image_url' => $validated['cover_image_url'],
-            'image_alt_text' => $validated['image_alt_text'],
-            'status' => $status,
-            'content_type' => $validated['content_type'],
-            'excerpt' => $validated['meta_description'],
-            'body' => $validated['body'],
-            'published_at' => $status === 'published' ? now() : null,
-        ]);
+        $blogPost = BlogPost::query()->create($this->blogPostPersistenceAttributes(
+            validated: $validated,
+            admin: $admin,
+            publishedAt: $status === 'published' ? now() : null,
+        ));
 
         return redirect()->route('admin.dashboard', [
             'section' => 'pages',
             'pages_edit' => $blogPost->id,
-        ])->with('admin_success', 'Page created successfully.');
+        ])->with('admin_success', $this->blogPostSavedMessage('created'));
     }
 
     public function updateBlogPost(Request $request, string $blogPost): RedirectResponse
@@ -277,27 +270,17 @@ class AdminController extends Controller
         $publishedAt = $status === 'published'
             ? ($blogPostRecord->published_at ?? now())
             : null;
-
-        $blogPostRecord->update([
-            'admin_user_id' => $admin->id,
-            'author_name' => $admin->name,
-            'meta_title' => $validated['meta_title'],
-            'title' => $validated['title'],
-            'heading_two' => $validated['heading_two'],
-            'slug' => $this->uniqueBlogPostSlug($validated['slug'], $validated['title'], $blogPostRecord),
-            'cover_image_url' => $validated['cover_image_url'],
-            'image_alt_text' => $validated['image_alt_text'],
-            'status' => $status,
-            'content_type' => $validated['content_type'],
-            'excerpt' => $validated['meta_description'],
-            'body' => $validated['body'],
-            'published_at' => $publishedAt,
-        ]);
+        $blogPostRecord->update($this->blogPostPersistenceAttributes(
+            validated: $validated,
+            admin: $admin,
+            publishedAt: $publishedAt,
+            existingPost: $blogPostRecord,
+        ));
 
         return redirect()->route('admin.dashboard', [
             'section' => 'pages',
             'pages_edit' => $blogPostRecord->id,
-        ])->with('admin_success', 'Page updated successfully.');
+        ])->with('admin_success', $this->blogPostSavedMessage('updated'));
     }
 
     public function bulkUpdateBlogPosts(Request $request): RedirectResponse
@@ -469,6 +452,77 @@ class AdminController extends Controller
     private function blogPostsTableExists(): bool
     {
         return Schema::hasTable('blog_posts');
+    }
+
+    private function blogPostColumnNames(): array
+    {
+        if (! $this->blogPostsTableExists()) {
+            return [];
+        }
+
+        return Schema::getColumnListing('blog_posts');
+    }
+
+    private function blogPostMissingEnhancedColumns(): array
+    {
+        $availableColumns = $this->blogPostColumnNames();
+        $enhancedColumns = ['meta_title', 'heading_two', 'image_alt_text', 'content_type'];
+
+        return array_values(array_diff($enhancedColumns, $availableColumns));
+    }
+
+    private function blogPostPersistenceAttributes(array $validated, User $admin, ?\Illuminate\Support\Carbon $publishedAt, ?BlogPost $existingPost = null): array
+    {
+        $availableColumns = $this->blogPostColumnNames();
+        $body = $validated['body'];
+
+        if (! in_array('heading_two', $availableColumns, true)) {
+            $body = $this->bodyWithLegacyHeadingTwo($body, $validated['heading_two']);
+        }
+
+        $attributes = [
+            'admin_user_id' => $admin->id,
+            'author_name' => $admin->name,
+            'meta_title' => $validated['meta_title'],
+            'title' => $validated['title'],
+            'heading_two' => $validated['heading_two'],
+            'slug' => $this->uniqueBlogPostSlug($validated['slug'], $validated['title'], $existingPost),
+            'cover_image_url' => $validated['cover_image_url'],
+            'image_alt_text' => $validated['image_alt_text'],
+            'status' => $validated['status'],
+            'content_type' => $validated['content_type'],
+            'excerpt' => $validated['meta_description'],
+            'body' => $body,
+            'published_at' => $publishedAt,
+        ];
+
+        return array_intersect_key($attributes, array_flip($availableColumns));
+    }
+
+    private function bodyWithLegacyHeadingTwo(string $body, ?string $headingTwo): string
+    {
+        $headingTwo = trim((string) $headingTwo);
+
+        if ($headingTwo === '') {
+            return $body;
+        }
+
+        if (Str::contains(Str::lower(strip_tags($body)), Str::lower($headingTwo))) {
+            return $body;
+        }
+
+        return '<h2>'.e($headingTwo).'</h2>'.$body;
+    }
+
+    private function blogPostSavedMessage(string $action): string
+    {
+        $message = 'Page '.($action === 'created' ? 'created' : 'updated').' successfully.';
+
+        if ($this->blogPostMissingEnhancedColumns() === []) {
+            return $message;
+        }
+
+        return $message.' This server is still missing the newer page columns, so advanced metadata fields will save fully after the latest migrations are run.';
     }
 
     private function validatedBlogPostData(Request $request): array

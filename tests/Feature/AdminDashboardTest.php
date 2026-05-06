@@ -7,6 +7,7 @@ use App\Models\BlogPost;
 use App\Models\Business;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -425,6 +426,66 @@ class AdminDashboardTest extends TestCase
             ->assertOk()
             ->assertSeeText('Cell content')
             ->assertSeeText('After the table');
+    }
+
+    public function test_admin_can_create_a_page_even_when_newer_blog_columns_are_missing(): void
+    {
+        $admin = $this->createAdminUser();
+
+        Schema::drop('blog_posts');
+
+        Schema::create('blog_posts', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('admin_user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->string('author_name', 120);
+            $table->string('title', 160);
+            $table->string('slug', 180)->unique();
+            $table->string('cover_image_url', 2048)->nullable();
+            $table->string('status', 20)->default('draft');
+            $table->text('excerpt');
+            $table->longText('body');
+            $table->timestamp('published_at')->nullable();
+            $table->timestamps();
+        });
+
+        $response = $this
+            ->withSession(['admin_user_id' => $admin->id])
+            ->post(route('admin.pages.store'), [
+                'meta_title' => 'Legacy schema post',
+                'meta_description' => 'This server is still on the older blog schema.',
+                'title' => 'Legacy schema post',
+                'heading_two' => 'Legacy heading',
+                'slug' => '',
+                'cover_image_url' => 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1200&q=80',
+                'image_alt_text' => 'Legacy schema post',
+                'status' => 'published',
+                'content_type' => 'post',
+                'body' => '<p>Legacy body copy.</p>',
+            ]);
+
+        $blogPost = BlogPost::query()->firstOrFail();
+
+        $response
+            ->assertRedirect(route('admin.dashboard', ['section' => 'pages', 'pages_edit' => $blogPost->id]))
+            ->assertSessionHas('admin_success');
+
+        $this->assertSame('Legacy schema post', $blogPost->title);
+        $this->assertSame('This server is still on the older blog schema.', $blogPost->excerpt);
+        $this->assertStringContainsString('Legacy heading', strip_tags($blogPost->body));
+        $this->assertStringContainsString('Legacy body copy.', strip_tags($blogPost->body));
+        $this->assertNull($blogPost->meta_title);
+        $this->assertNull($blogPost->heading_two);
+
+        $this->withSession(['admin_user_id' => $admin->id])
+            ->get(route('admin.dashboard', ['section' => 'pages', 'pages_edit' => $blogPost->id]))
+            ->assertOk()
+            ->assertSeeText('older blog schema');
+
+        $this->get(route('blog.show', ['slug' => $blogPost->slug]))
+            ->assertOk()
+            ->assertSeeText('Legacy schema post')
+            ->assertSeeText('Legacy heading')
+            ->assertSeeText('Legacy body copy.');
     }
 
     public function test_admin_can_publish_pages_in_bulk_from_the_pages_manager(): void
