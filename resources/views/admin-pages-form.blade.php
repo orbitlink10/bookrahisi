@@ -205,7 +205,8 @@
 
             .button-primary,
             .button-light,
-            .button-soft {
+            .button-soft,
+            .button-preview {
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
@@ -213,8 +214,10 @@
                 padding: 14px 20px;
                 border-radius: 999px;
                 border: 1px solid transparent;
+                font-family: 'Manrope', sans-serif;
                 font-size: 0.96rem;
                 font-weight: 800;
+                line-height: 1.2;
                 cursor: pointer;
             }
 
@@ -234,6 +237,18 @@
                 background: rgba(255, 255, 255, 0.94);
                 border-color: #21a1c5;
                 color: #1294b8;
+            }
+
+            .button-preview {
+                background: #fff;
+                border-color: #1ca4de;
+                color: #1898cf;
+            }
+
+            .action-button svg {
+                width: 18px;
+                height: 18px;
+                flex: none;
             }
 
             .banner {
@@ -429,7 +444,13 @@
                         <div class="page-toolbar">
                             <a class="button-light" href="{{ route('admin.dashboard', ['section' => 'pages']) }}">Back to pages</a>
                             @if ($previewUrl)
-                                <a class="button-soft" href="{{ $previewUrl }}" target="_blank" rel="noopener noreferrer">Preview live page</a>
+                                <a class="button-preview action-button" href="{{ $previewUrl }}" target="_blank" rel="noopener noreferrer" title="Preview and open page">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12s-4 7.5-10.5 7.5S1.5 12 1.5 12Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+                                        <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7" />
+                                    </svg>
+                                    <span>Preview</span>
+                                </a>
                             @endif
                         </div>
                     </section>

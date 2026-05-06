@@ -27,7 +27,13 @@
         <div class="toolbar">
             <a class="button-light" href="{{ route('admin.dashboard', ['section' => 'pages']) }}">Back to Pages</a>
             @if ($pagesPreviewUrl)
-                <a class="button-preview" href="{{ $pagesPreviewUrl }}" target="_blank" rel="noopener noreferrer">Preview</a>
+                <a class="button-preview pages-action-button" href="{{ $pagesPreviewUrl }}" target="_blank" rel="noopener noreferrer" title="Preview and open page">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12s-4 7.5-10.5 7.5S1.5 12 1.5 12Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+                        <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7" />
+                    </svg>
+                    <span>Preview</span>
+                </a>
             @endif
         </div>
     </section>
@@ -259,7 +265,7 @@
                                 <td>
                                     <div class="pages-row-actions">
                                         @if ($blogPost->status === 'published')
-                                            <a class="button-preview pages-action-button" href="{{ route('blog.show', ['slug' => $blogPost->slug]) }}" target="_blank" rel="noopener noreferrer">
+                                            <a class="button-preview pages-action-button" href="{{ route('blog.show', ['slug' => $blogPost->slug]) }}" target="_blank" rel="noopener noreferrer" title="Preview and open page">
                                                 <svg viewBox="0 0 24 24" aria-hidden="true">
                                                     <path d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12s-4 7.5-10.5 7.5S1.5 12 1.5 12Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
                                                     <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7" />

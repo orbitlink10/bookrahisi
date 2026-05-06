@@ -213,6 +213,8 @@
             .button-primary,
             .button-light,
             .button-soft,
+            .button-preview,
+            .button-warning,
             .button-danger {
                 display: inline-flex;
                 align-items: center;
@@ -221,8 +223,10 @@
                 padding: 14px 20px;
                 border-radius: 999px;
                 border: 1px solid transparent;
+                font-family: 'Manrope', sans-serif;
                 font-size: 0.96rem;
                 font-weight: 800;
+                line-height: 1.2;
                 cursor: pointer;
             }
 
@@ -242,6 +246,20 @@
                 background: rgba(255, 255, 255, 0.94);
                 border-color: #21a1c5;
                 color: #1294b8;
+                padding: 10px 16px;
+            }
+
+            .button-preview {
+                background: #fff;
+                border-color: #1ca4de;
+                color: #1898cf;
+                padding: 10px 16px;
+            }
+
+            .button-warning {
+                background: #fff;
+                border-color: #f5b400;
+                color: #efb100;
                 padding: 10px 16px;
             }
 
@@ -418,8 +436,32 @@
             }
 
             .row-actions {
+                flex-direction: column;
+                align-items: flex-start;
                 justify-content: flex-start;
-                flex-wrap: wrap;
+                gap: 12px;
+            }
+
+            .row-actions form {
+                margin: 0;
+            }
+
+            .action-button {
+                min-width: 0;
+                padding: 9px 16px;
+                gap: 8px;
+                justify-content: flex-start;
+            }
+
+            .action-button svg {
+                width: 18px;
+                height: 18px;
+                flex: none;
+            }
+
+            .action-button.is-disabled {
+                cursor: default;
+                opacity: 0.56;
             }
 
             .table-copy {
@@ -609,14 +651,34 @@
                                                     <td>
                                                         <div class="row-actions">
                                                             @if ($blogPost->status === 'published')
-                                                                <a class="button-soft" href="{{ route('blog.show', ['slug' => $blogPost->slug]) }}" target="_blank" rel="noopener noreferrer">Preview</a>
+                                                                <a class="button-preview action-button" href="{{ route('blog.show', ['slug' => $blogPost->slug]) }}" target="_blank" rel="noopener noreferrer" title="Preview and open page">
+                                                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                                                        <path d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12s-4 7.5-10.5 7.5S1.5 12 1.5 12Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+                                                                        <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7" />
+                                                                    </svg>
+                                                                    <span>Preview</span>
+                                                                </a>
                                                             @else
-                                                                <span class="button-soft" style="cursor: default; opacity: 0.56;">Draft</span>
+                                                                <span class="button-soft action-button is-disabled">Draft</span>
                                                             @endif
-                                                            <a class="button-light" href="{{ route('admin.dashboard', ['section' => 'pages', 'pages_edit' => $blogPost->id]) }}">Update</a>
+                                                            <a class="button-warning action-button" href="{{ route('admin.dashboard', ['section' => 'pages', 'pages_edit' => $blogPost->id]) }}">
+                                                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                                                    <path d="M3 17.25V21h3.75L19.81 7.94l-3.75-3.75L3 17.25Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+                                                                    <path d="M14.06 4.19 17.81 7.94" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+                                                                </svg>
+                                                                <span>Update</span>
+                                                            </a>
                                                             <form action="{{ route('admin.pages.destroy', ['blogPost' => $blogPost]) }}" method="post" onsubmit="return confirm('Delete this page?');">
                                                                 @csrf
-                                                                <button class="button-danger" type="submit">Delete</button>
+                                                                <button class="button-danger action-button" type="submit">
+                                                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                                                        <path d="M4 7h16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+                                                                        <path d="M9 7V4h6v3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+                                                                        <path d="M6 7l1 13h10l1-13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+                                                                        <path d="M10 11v6M14 11v6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+                                                                    </svg>
+                                                                    <span>Delete</span>
+                                                                </button>
                                                             </form>
                                                         </div>
                                                     </td>

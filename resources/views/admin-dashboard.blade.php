@@ -1031,8 +1031,10 @@
                 padding: 10px 18px;
                 border-radius: 999px;
                 border: 1px solid transparent;
-                font-size: 0.92rem;
+                font-family: 'Manrope', sans-serif;
+                font-size: 0.96rem;
                 font-weight: 800;
+                line-height: 1.2;
             }
 
             .button-primary {
