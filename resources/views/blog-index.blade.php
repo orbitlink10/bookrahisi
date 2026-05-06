@@ -265,7 +265,9 @@
                 </article>
             @endif
 
-            @if ($blogPosts->isEmpty())
+            @if (! $blogPostsTableExists)
+                <div class="empty-state">The blog is not available yet because the blog database tables have not been installed on this server.</div>
+            @elseif ($blogPosts->isEmpty())
                 <div class="empty-state">No published blog posts are live yet. New articles will appear here once an admin publishes them from the marketplace console.</div>
             @else
                 <section class="grid">

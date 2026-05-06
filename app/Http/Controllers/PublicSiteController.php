@@ -233,21 +233,30 @@ class PublicSiteController extends Controller
 
     public function blogIndex(): View
     {
-        $blogPosts = BlogPost::query()
-            ->where('status', 'published')
-            ->whereNotNull('published_at')
-            ->orderByDesc('published_at')
-            ->orderByDesc('created_at')
-            ->get();
+        $blogPostsTableExists = Schema::hasTable('blog_posts');
+
+        $blogPosts = $blogPostsTableExists
+            ? BlogPost::query()
+                ->where('status', 'published')
+                ->whereNotNull('published_at')
+                ->orderByDesc('published_at')
+                ->orderByDesc('created_at')
+                ->get()
+            : collect();
 
         return view('blog-index', [
             'blogPosts' => $blogPosts,
+            'blogPostsTableExists' => $blogPostsTableExists,
             'featuredPost' => $blogPosts->first(),
         ]);
     }
 
     public function blogShow(string $slug): View
     {
+        if (! Schema::hasTable('blog_posts')) {
+            abort(404);
+        }
+
         $blogPost = BlogPost::query()
             ->where('slug', $slug)
             ->where('status', 'published')

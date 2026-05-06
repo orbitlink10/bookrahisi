@@ -1069,56 +1069,64 @@
                                 </article>
                             </div>
 
-                            <article class="entity-row" style="margin-bottom: 18px;">
-                                <div class="entity-head">
-                                    <div>
-                                        <h3 class="entity-name">Create new blog post</h3>
-                                        <div class="entity-meta">Compose a new article, choose whether to save it as a draft or publish it immediately, and generate a public page at `/blog/{slug}`.</div>
-                                    </div>
-                                    <span class="status-chip is-success">New</span>
+                            @if (! $blogPostsTableExists)
+                                <div class="empty-state" style="margin-bottom: 18px;">
+                                    Blog setup is incomplete on this server. Run the latest Laravel migrations to create the `blog_posts` table before using the blog editor.
                                 </div>
-
-                                <form class="inline-form" action="{{ route('admin.blog-posts.store') }}" method="post">
-                                    @csrf
-                                    <div class="form-grid">
-                                        <div class="field-group">
-                                            <label class="field-label" for="blog-title">Title</label>
-                                            <input class="field-input" id="blog-title" type="text" name="title" value="{{ old('title') }}" placeholder="How to choose the right salon package for your first visit">
+                            @else
+                                <article class="entity-row" style="margin-bottom: 18px;">
+                                    <div class="entity-head">
+                                        <div>
+                                            <h3 class="entity-name">Create new blog post</h3>
+                                            <div class="entity-meta">Compose a new article, choose whether to save it as a draft or publish it immediately, and generate a public page at `/blog/{slug}`.</div>
                                         </div>
-                                        <div class="field-group">
-                                            <label class="field-label" for="blog-slug">Slug</label>
-                                            <input class="field-input" id="blog-slug" type="text" name="slug" value="{{ old('slug') }}" placeholder="optional-custom-slug">
-                                        </div>
-                                        <div class="field-group">
-                                            <label class="field-label" for="blog-cover-image">Cover image URL</label>
-                                            <input class="field-input" id="blog-cover-image" type="url" name="cover_image_url" value="{{ old('cover_image_url') }}" placeholder="https://images.unsplash.com/...">
-                                        </div>
-                                        <div class="field-group">
-                                            <label class="field-label" for="blog-status">Status</label>
-                                            <select class="field-select" id="blog-status" name="status">
-                                                @foreach (['draft', 'published'] as $status)
-                                                    <option value="{{ $status }}" @selected(old('status', 'draft') === $status)>{{ ucfirst($status) }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="field-group field-group-full">
-                                            <label class="field-label" for="blog-excerpt">Excerpt</label>
-                                            <textarea class="field-textarea" id="blog-excerpt" name="excerpt" placeholder="Write the summary customers should see in blog listings and previews.">{{ old('excerpt') }}</textarea>
-                                            <span class="field-hint">Keep the excerpt short and scannable. It will be used on the public blog listing page.</span>
-                                        </div>
-                                        <div class="field-group field-group-full">
-                                            <label class="field-label" for="blog-body">Body</label>
-                                            <textarea class="field-textarea" id="blog-body" name="body" placeholder="Write the full blog post. Line breaks are preserved on the public page.">{{ old('body') }}</textarea>
-                                        </div>
+                                        <span class="status-chip is-success">New</span>
                                     </div>
 
-                                    <div class="hero-actions" style="margin-top: 18px;">
-                                        <button class="button-dark" type="submit">Save blog post</button>
-                                    </div>
-                                </form>
-                            </article>
+                                    <form class="inline-form" action="{{ route('admin.blog-posts.store') }}" method="post">
+                                        @csrf
+                                        <div class="form-grid">
+                                            <div class="field-group">
+                                                <label class="field-label" for="blog-title">Title</label>
+                                                <input class="field-input" id="blog-title" type="text" name="title" value="{{ old('title') }}" placeholder="How to choose the right salon package for your first visit">
+                                            </div>
+                                            <div class="field-group">
+                                                <label class="field-label" for="blog-slug">Slug</label>
+                                                <input class="field-input" id="blog-slug" type="text" name="slug" value="{{ old('slug') }}" placeholder="optional-custom-slug">
+                                            </div>
+                                            <div class="field-group">
+                                                <label class="field-label" for="blog-cover-image">Cover image URL</label>
+                                                <input class="field-input" id="blog-cover-image" type="url" name="cover_image_url" value="{{ old('cover_image_url') }}" placeholder="https://images.unsplash.com/...">
+                                            </div>
+                                            <div class="field-group">
+                                                <label class="field-label" for="blog-status">Status</label>
+                                                <select class="field-select" id="blog-status" name="status">
+                                                    @foreach (['draft', 'published'] as $status)
+                                                        <option value="{{ $status }}" @selected(old('status', 'draft') === $status)>{{ ucfirst($status) }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="field-group field-group-full">
+                                                <label class="field-label" for="blog-excerpt">Excerpt</label>
+                                                <textarea class="field-textarea" id="blog-excerpt" name="excerpt" placeholder="Write the summary customers should see in blog listings and previews.">{{ old('excerpt') }}</textarea>
+                                                <span class="field-hint">Keep the excerpt short and scannable. It will be used on the public blog listing page.</span>
+                                            </div>
+                                            <div class="field-group field-group-full">
+                                                <label class="field-label" for="blog-body">Body</label>
+                                                <textarea class="field-textarea" id="blog-body" name="body" placeholder="Write the full blog post. Line breaks are preserved on the public page.">{{ old('body') }}</textarea>
+                                            </div>
+                                        </div>
 
-                            @if ($blogPosts->isEmpty())
+                                        <div class="hero-actions" style="margin-top: 18px;">
+                                            <button class="button-dark" type="submit">Save blog post</button>
+                                        </div>
+                                    </form>
+                                </article>
+                            @endif
+
+                            @if (! $blogPostsTableExists)
+                                <div class="empty-state">The public blog will stay unavailable until the `blog_posts` table exists on this server.</div>
+                            @elseif ($blogPosts->isEmpty())
                                 <div class="empty-state">No blog posts have been created yet. The compose form above is ready for your first article.</div>
                             @else
                                 <div class="entity-list">

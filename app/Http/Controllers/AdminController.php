@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -63,6 +64,8 @@ class AdminController extends Controller
             return redirect()->route('admin.sign-in');
         }
 
+        $blogPostsTableExists = $this->blogPostsTableExists();
+
         $businesses = Business::query()
             ->withCount('bookings')
             ->orderByRaw("
@@ -92,10 +95,12 @@ class AdminController extends Controller
             ->take(12)
             ->get();
 
-        $blogPosts = BlogPost::query()
-            ->latest('published_at')
-            ->latest()
-            ->get();
+        $blogPosts = $blogPostsTableExists
+            ? BlogPost::query()
+                ->latest('published_at')
+                ->latest()
+                ->get()
+            : collect();
 
         $totalBusinesses = Business::query()->count();
         $pendingBusinesses = Business::query()->where('approval_status', 'pending')->count();
@@ -116,9 +121,9 @@ class AdminController extends Controller
         $pendingPayments = Booking::query()->where('payment_status', 'pending')->count();
         $refundedPayments = Booking::query()->where('payment_status', 'refunded')->count();
 
-        $totalBlogPosts = BlogPost::query()->count();
-        $publishedBlogPosts = BlogPost::query()->where('status', 'published')->count();
-        $draftBlogPosts = BlogPost::query()->where('status', 'draft')->count();
+        $totalBlogPosts = $blogPostsTableExists ? BlogPost::query()->count() : 0;
+        $publishedBlogPosts = $blogPostsTableExists ? BlogPost::query()->where('status', 'published')->count() : 0;
+        $draftBlogPosts = $blogPostsTableExists ? BlogPost::query()->where('status', 'draft')->count() : 0;
 
         $topBusinesses = Business::query()
             ->withCount('bookings')
@@ -131,6 +136,7 @@ class AdminController extends Controller
             'admin' => $admin,
             'approvedBusinesses' => $approvedBusinesses,
             'blogPosts' => $blogPosts,
+            'blogPostsTableExists' => $blogPostsTableExists,
             'bookings' => $bookings,
             'businesses' => $businesses,
             'cancelledBookings' => $cancelledBookings,
@@ -163,6 +169,11 @@ class AdminController extends Controller
             return redirect()->route('admin.sign-in');
         }
 
+        if (! $this->blogPostsTableExists()) {
+            return redirect()->to($this->dashboardAnchor('blog-posts'))
+                ->withErrors(['blog_posts' => 'The blog post table is missing on this server. Run migrations before creating blog posts.']);
+        }
+
         $validated = $this->validatedBlogPostData($request);
         $status = $validated['status'];
 
@@ -182,7 +193,7 @@ class AdminController extends Controller
             ->with('admin_success', 'Blog post created successfully.');
     }
 
-    public function updateBlogPost(Request $request, BlogPost $blogPost): RedirectResponse
+    public function updateBlogPost(Request $request, string $blogPost): RedirectResponse
     {
         $admin = $this->authenticatedAdmin($request);
 
@@ -190,17 +201,24 @@ class AdminController extends Controller
             return redirect()->route('admin.sign-in');
         }
 
+        if (! $this->blogPostsTableExists()) {
+            return redirect()->to($this->dashboardAnchor('blog-posts'))
+                ->withErrors(['blog_posts' => 'The blog post table is missing on this server. Run migrations before updating blog posts.']);
+        }
+
+        $blogPostRecord = BlogPost::query()->findOrFail($blogPost);
+
         $validated = $this->validatedBlogPostData($request);
         $status = $validated['status'];
         $publishedAt = $status === 'published'
-            ? ($blogPost->published_at ?? now())
+            ? ($blogPostRecord->published_at ?? now())
             : null;
 
-        $blogPost->update([
+        $blogPostRecord->update([
             'admin_user_id' => $admin->id,
             'author_name' => $admin->name,
             'title' => $validated['title'],
-            'slug' => $this->uniqueBlogPostSlug($validated['slug'], $validated['title'], $blogPost),
+            'slug' => $this->uniqueBlogPostSlug($validated['slug'], $validated['title'], $blogPostRecord),
             'cover_image_url' => $validated['cover_image_url'],
             'status' => $status,
             'excerpt' => $validated['excerpt'],
@@ -304,6 +322,11 @@ class AdminController extends Controller
     private function dashboardAnchor(string $section): string
     {
         return route('admin.dashboard').'#'.$section;
+    }
+
+    private function blogPostsTableExists(): bool
+    {
+        return Schema::hasTable('blog_posts');
     }
 
     private function validatedBlogPostData(Request $request): array

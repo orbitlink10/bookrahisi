@@ -7,6 +7,7 @@ use App\Models\BlogPost;
 use App\Models\Business;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class AdminDashboardTest extends TestCase
@@ -72,6 +73,19 @@ class AdminDashboardTest extends TestCase
     public function test_the_admin_dashboard_requires_an_authenticated_admin_session(): void
     {
         $this->get('/admin/dashboard')->assertRedirect('/admin/sign-in');
+    }
+
+    public function test_the_admin_dashboard_still_renders_when_the_blog_posts_table_is_missing(): void
+    {
+        $admin = $this->createAdminUser();
+
+        Schema::drop('blog_posts');
+
+        $this->withSession(['admin_user_id' => $admin->id])
+            ->get('/admin/dashboard')
+            ->assertOk()
+            ->assertSeeText('Admin dashboard')
+            ->assertSeeText('Blog setup is incomplete on this server');
     }
 
     public function test_admin_can_approve_a_business_and_publish_it_to_the_marketplace(): void
@@ -235,6 +249,29 @@ class AdminDashboardTest extends TestCase
             ->assertOk()
             ->assertSeeText($blogPost->title)
             ->assertSeeText('Arrive early');
+    }
+
+    public function test_admin_blog_post_creation_fails_cleanly_when_the_blog_posts_table_is_missing(): void
+    {
+        $admin = $this->createAdminUser();
+
+        Schema::drop('blog_posts');
+
+        $this->withSession(['admin_user_id' => $admin->id])
+            ->post(route('admin.blog-posts.store'), [
+                'title' => 'Server not migrated yet',
+                'slug' => '',
+                'cover_image_url' => '',
+                'status' => 'draft',
+                'excerpt' => 'This should not crash when the table is missing.',
+                'body' => 'The request should redirect back to the dashboard with an actionable error.',
+            ])
+            ->assertRedirect(route('admin.dashboard').'#blog-posts')
+            ->assertSessionHasErrors('blog_posts');
+
+        $this->get(route('blog.index'))
+            ->assertOk()
+            ->assertSeeText('The blog is not available yet');
     }
 
     public function test_draft_blog_posts_are_not_visible_publicly(): void
