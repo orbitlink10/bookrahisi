@@ -93,14 +93,14 @@ class AdminDashboardTest extends TestCase
         $admin = $this->createAdminUser();
 
         $this->withSession(['admin_user_id' => $admin->id])
-            ->get(route('admin.pages.index'))
+            ->get(route('admin.dashboard', ['section' => 'pages']))
             ->assertOk()
             ->assertSeeText('Pages')
             ->assertSeeText('Post List')
             ->assertSeeText('Add Page');
 
         $this->withSession(['admin_user_id' => $admin->id])
-            ->get(route('admin.pages.create'))
+            ->get(route('admin.dashboard', ['section' => 'pages', 'pages_mode' => 'create']))
             ->assertOk()
             ->assertSeeText('Add Page')
             ->assertSeeText('Page editor')
@@ -251,7 +251,7 @@ class AdminDashboardTest extends TestCase
         $blogPost = BlogPost::query()->firstOrFail();
 
         $response
-            ->assertRedirect(route('admin.pages.edit', ['blogPost' => $blogPost]))
+            ->assertRedirect(route('admin.dashboard', ['section' => 'pages', 'pages_edit' => $blogPost->id]))
             ->assertSessionHas('admin_success');
 
         $this->assertSame('How to prepare for your first spa visit', $blogPost->title);
@@ -260,7 +260,7 @@ class AdminDashboardTest extends TestCase
         $this->assertNotNull($blogPost->published_at);
 
         $this->withSession(['admin_user_id' => $admin->id])
-            ->get(route('admin.pages.edit', ['blogPost' => $blogPost]))
+            ->get(route('admin.dashboard', ['section' => 'pages', 'pages_edit' => $blogPost->id]))
             ->assertOk()
             ->assertSeeText('Update Page')
             ->assertSee($blogPost->title, false);
@@ -291,7 +291,7 @@ class AdminDashboardTest extends TestCase
                 'excerpt' => 'This should not crash when the table is missing.',
                 'body' => 'The request should redirect back to the dashboard with an actionable error.',
             ])
-            ->assertRedirect(route('admin.pages.index'))
+            ->assertRedirect(route('admin.dashboard', ['section' => 'pages']))
             ->assertSessionHasErrors('blog_posts');
 
         $this->get(route('blog.index'))
@@ -315,7 +315,7 @@ class AdminDashboardTest extends TestCase
 
         $blogPost = BlogPost::query()->firstOrFail();
 
-        $response->assertRedirect(route('admin.pages.edit', ['blogPost' => $blogPost]));
+        $response->assertRedirect(route('admin.dashboard', ['section' => 'pages', 'pages_edit' => $blogPost->id]));
 
         $this->assertSame('draft', $blogPost->status);
         $this->assertNull($blogPost->published_at);
@@ -349,7 +349,7 @@ class AdminDashboardTest extends TestCase
                 'body' => 'This article is now visible to readers on the public blog.',
             ]);
 
-        $response->assertRedirect(route('admin.pages.edit', ['blogPost' => $blogPost]));
+        $response->assertRedirect(route('admin.dashboard', ['section' => 'pages', 'pages_edit' => $blogPost->id]));
 
         $blogPost->refresh();
 
@@ -375,7 +375,7 @@ class AdminDashboardTest extends TestCase
                 'action' => 'publish',
                 'selected_posts' => [$first->id, $second->id],
             ])
-            ->assertRedirect(route('admin.pages.index'))
+            ->assertRedirect(route('admin.dashboard', ['section' => 'pages']))
             ->assertSessionHas('admin_success');
 
         $first->refresh();
@@ -394,7 +394,7 @@ class AdminDashboardTest extends TestCase
 
         $this->withSession(['admin_user_id' => $admin->id])
             ->post(route('admin.pages.destroy', ['blogPost' => $blogPost]))
-            ->assertRedirect(route('admin.pages.index'))
+            ->assertRedirect(route('admin.dashboard', ['section' => 'pages']))
             ->assertSessionHas('admin_success');
 
         $this->assertDatabaseMissing('blog_posts', [

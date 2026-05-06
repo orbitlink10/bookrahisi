@@ -134,7 +134,8 @@
                 transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
             }
 
-            .sidebar-link:hover {
+            .sidebar-link:hover,
+            .sidebar-link.is-active {
                 border-color: rgba(255, 255, 255, 0.18);
                 background: rgba(255, 255, 255, 0.12);
                 color: #fff;
@@ -738,7 +739,7 @@
                         <span class="sidebar-link-icon">PY</span>
                         <span>Payments</span>
                     </a>
-                    <a class="sidebar-link" href="{{ route('admin.pages.index') }}">
+                    <a class="sidebar-link {{ ($activeAdminSection ?? 'overview') === 'pages' ? 'is-active' : '' }}" href="{{ route('admin.dashboard', ['section' => 'pages']) }}">
                         <span class="sidebar-link-icon">BG</span>
                         <span>Pages</span>
                     </a>
@@ -792,7 +793,7 @@
                             </div>
                             <div class="hero-actions">
                                 <a class="button-dark" href="#businesses">Approve businesses</a>
-                                <a class="button-light" href="{{ route('admin.pages.index') }}">Open pages manager</a>
+                                <a class="button-light" href="{{ route('admin.dashboard', ['section' => 'pages']) }}">Open pages manager</a>
                                 <a class="button-light" href="#payments">Control payments</a>
                                 <a class="button-light" href="#reports">Open reports</a>
                             </div>
@@ -1048,7 +1049,7 @@
                                     <h2 class="panel-title">Pages</h2>
                                     <p class="panel-copy">Use the dedicated pages manager to create, preview, update, publish, and delete blog pages in a cleaner CMS-style workflow.</p>
                                 </div>
-                                <a class="button-light" href="{{ route('admin.pages.index') }}">Open pages manager</a>
+                                <a class="button-light" href="{{ route('admin.dashboard', ['section' => 'pages']) }}">Open pages manager</a>
                             </div>
 
                             <div class="reports-grid">

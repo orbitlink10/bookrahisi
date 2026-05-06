@@ -427,7 +427,7 @@
                         </div>
 
                         <div class="page-toolbar">
-                            <a class="button-light" href="{{ route('admin.pages.index') }}">Back to pages</a>
+                            <a class="button-light" href="{{ route('admin.dashboard', ['section' => 'pages']) }}">Back to pages</a>
                             @if ($previewUrl)
                                 <a class="button-soft" href="{{ $previewUrl }}" target="_blank" rel="noopener noreferrer">Preview live page</a>
                             @endif
@@ -494,7 +494,7 @@
 
                                     <div class="page-toolbar" style="margin-top: 24px;">
                                         <button class="button-primary" type="submit">{{ $formMode === 'create' ? 'Create page' : 'Save changes' }}</button>
-                                        <a class="button-light" href="{{ route('admin.pages.index') }}">Cancel</a>
+                                        <a class="button-light" href="{{ route('admin.dashboard', ['section' => 'pages']) }}">Cancel</a>
                                     </div>
                                 </form>
                             </section>

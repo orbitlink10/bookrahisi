@@ -509,7 +509,7 @@
 
                         <div class="toolbar">
                             <a class="button-light" href="{{ route('admin.dashboard') }}">Back to dashboard</a>
-                            <a class="button-primary" href="{{ route('admin.pages.create') }}">
+                            <a class="button-primary" href="{{ route('admin.dashboard', ['section' => 'pages', 'pages_mode' => 'create']) }}">
                                 <span style="font-size: 1.2rem; line-height: 1;">+</span>
                                 <span>Add Page</span>
                             </a>
@@ -540,7 +540,7 @@
                                 <h2>Post List</h2>
                                 <p class="list-copy">Review each page, preview published entries, and keep editing focused inside a dedicated page editor.</p>
                             </div>
-                            <a class="button-primary" href="{{ route('admin.pages.create') }}">
+                            <a class="button-primary" href="{{ route('admin.dashboard', ['section' => 'pages', 'pages_mode' => 'create']) }}">
                                 <span style="font-size: 1.2rem; line-height: 1;">+</span>
                                 <span>Add Page</span>
                             </a>
@@ -613,7 +613,7 @@
                                                             @else
                                                                 <span class="button-soft" style="cursor: default; opacity: 0.56;">Draft</span>
                                                             @endif
-                                                            <a class="button-light" href="{{ route('admin.pages.edit', ['blogPost' => $blogPost]) }}">Update</a>
+                                                            <a class="button-light" href="{{ route('admin.dashboard', ['section' => 'pages', 'pages_edit' => $blogPost->id]) }}">Update</a>
                                                             <form action="{{ route('admin.pages.destroy', ['blogPost' => $blogPost]) }}" method="post" onsubmit="return confirm('Delete this page?');">
                                                                 @csrf
                                                                 <button class="button-danger" type="submit">Delete</button>

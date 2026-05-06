@@ -64,6 +64,9 @@ class AdminController extends Controller
             return redirect()->route('admin.sign-in');
         }
 
+        $activeAdminSection = $request->query('section') === 'pages'
+            ? 'pages'
+            : 'overview';
         $blogPostsTableExists = $this->blogPostsTableExists();
 
         $businesses = Business::query()
@@ -131,7 +134,56 @@ class AdminController extends Controller
             ->take(5)
             ->get();
 
+        if ($activeAdminSection === 'pages') {
+            $pagesEditId = $request->query('pages_edit');
+            $pagesMode = $request->query('pages_mode');
+
+            if ($pagesMode === 'create') {
+                return view('admin-pages-form', [
+                    'admin' => $admin,
+                    'blogPost' => null,
+                    'blogPostsTableExists' => $blogPostsTableExists,
+                    'draftBlogPosts' => $draftBlogPosts,
+                    'formAction' => route('admin.pages.store'),
+                    'formMode' => 'create',
+                    'pageHeading' => 'Add Page',
+                    'pageSubtitle' => 'Create a new blog page with a title, cover image, summary, and full content body.',
+                    'previewUrl' => null,
+                    'publishedBlogPosts' => $publishedBlogPosts,
+                ]);
+            }
+
+            if ($pagesEditId !== null && $blogPostsTableExists) {
+                $blogPostRecord = BlogPost::query()->findOrFail($pagesEditId);
+
+                return view('admin-pages-form', [
+                    'admin' => $admin,
+                    'blogPost' => $blogPostRecord,
+                    'blogPostsTableExists' => true,
+                    'draftBlogPosts' => $draftBlogPosts,
+                    'formAction' => route('admin.pages.update', ['blogPost' => $blogPostRecord]),
+                    'formMode' => 'edit',
+                    'pageHeading' => 'Update Page',
+                    'pageSubtitle' => 'Refine the page copy, media, slug, and publish state from one focused editor.',
+                    'previewUrl' => $blogPostRecord->status === 'published'
+                        ? route('blog.show', ['slug' => $blogPostRecord->slug])
+                        : null,
+                    'publishedBlogPosts' => $publishedBlogPosts,
+                ]);
+            }
+
+            return view('admin-pages-index', [
+                'admin' => $admin,
+                'blogPosts' => $blogPosts,
+                'blogPostsTableExists' => $blogPostsTableExists,
+                'draftBlogPosts' => $draftBlogPosts,
+                'publishedBlogPosts' => $publishedBlogPosts,
+                'totalBlogPosts' => $totalBlogPosts,
+            ]);
+        }
+
         return view('admin-dashboard', [
+            'activeAdminSection' => $activeAdminSection,
             'activeUsers' => $activeUsers,
             'admin' => $admin,
             'approvedBusinesses' => $approvedBusinesses,
@@ -163,83 +215,22 @@ class AdminController extends Controller
 
     public function pagesIndex(Request $request): View|RedirectResponse
     {
-        $admin = $this->authenticatedAdmin($request);
-
-        if (! $admin) {
-            return redirect()->route('admin.sign-in');
-        }
-
-        $blogPostsTableExists = $this->blogPostsTableExists();
-        $blogPosts = $blogPostsTableExists
-            ? BlogPost::query()
-                ->latest('published_at')
-                ->latest()
-                ->get()
-            : collect();
-
-        return view('admin-pages-index', [
-            'admin' => $admin,
-            'blogPosts' => $blogPosts,
-            'blogPostsTableExists' => $blogPostsTableExists,
-            'draftBlogPosts' => $blogPostsTableExists ? $blogPosts->where('status', 'draft')->count() : 0,
-            'publishedBlogPosts' => $blogPostsTableExists ? $blogPosts->where('status', 'published')->count() : 0,
-            'totalBlogPosts' => $blogPostsTableExists ? $blogPosts->count() : 0,
-        ]);
+        return redirect()->route('admin.dashboard', ['section' => 'pages']);
     }
 
     public function createPage(Request $request): View|RedirectResponse
     {
-        $admin = $this->authenticatedAdmin($request);
-
-        if (! $admin) {
-            return redirect()->route('admin.sign-in');
-        }
-
-        $blogPostCountData = $this->blogPostCountData();
-
-        return view('admin-pages-form', [
-            'admin' => $admin,
-            'blogPost' => null,
-            'blogPostsTableExists' => $blogPostCountData['blogPostsTableExists'],
-            'draftBlogPosts' => $blogPostCountData['draftBlogPosts'],
-            'formAction' => route('admin.pages.store'),
-            'formMode' => 'create',
-            'pageHeading' => 'Add Page',
-            'pageSubtitle' => 'Create a new blog page with a title, cover image, summary, and full content body.',
-            'previewUrl' => null,
-            'publishedBlogPosts' => $blogPostCountData['publishedBlogPosts'],
+        return redirect()->route('admin.dashboard', [
+            'section' => 'pages',
+            'pages_mode' => 'create',
         ]);
     }
 
     public function editPage(Request $request, string $blogPost): View|RedirectResponse
     {
-        $admin = $this->authenticatedAdmin($request);
-
-        if (! $admin) {
-            return redirect()->route('admin.sign-in');
-        }
-
-        if (! $this->blogPostsTableExists()) {
-            return redirect()->route('admin.pages.index')
-                ->withErrors(['blog_posts' => 'The blog post table is missing on this server. Run migrations before editing pages.']);
-        }
-
-        $blogPostRecord = BlogPost::query()->findOrFail($blogPost);
-        $blogPostCountData = $this->blogPostCountData();
-
-        return view('admin-pages-form', [
-            'admin' => $admin,
-            'blogPost' => $blogPostRecord,
-            'blogPostsTableExists' => true,
-            'draftBlogPosts' => $blogPostCountData['draftBlogPosts'],
-            'formAction' => route('admin.pages.update', ['blogPost' => $blogPostRecord]),
-            'formMode' => 'edit',
-            'pageHeading' => 'Update Page',
-            'pageSubtitle' => 'Refine the page copy, media, slug, and publish state from one focused editor.',
-            'previewUrl' => $blogPostRecord->status === 'published'
-                ? route('blog.show', ['slug' => $blogPostRecord->slug])
-                : null,
-            'publishedBlogPosts' => $blogPostCountData['publishedBlogPosts'],
+        return redirect()->route('admin.dashboard', [
+            'section' => 'pages',
+            'pages_edit' => $blogPost,
         ]);
     }
 
@@ -252,7 +243,7 @@ class AdminController extends Controller
         }
 
         if (! $this->blogPostsTableExists()) {
-            return redirect()->route('admin.pages.index')
+            return redirect()->route('admin.dashboard', ['section' => 'pages'])
                 ->withErrors(['blog_posts' => 'The blog post table is missing on this server. Run migrations before creating blog posts.']);
         }
 
@@ -271,8 +262,10 @@ class AdminController extends Controller
             'published_at' => $status === 'published' ? now() : null,
         ]);
 
-        return redirect()->route('admin.pages.edit', ['blogPost' => $blogPost])
-            ->with('admin_success', 'Page created successfully.');
+        return redirect()->route('admin.dashboard', [
+            'section' => 'pages',
+            'pages_edit' => $blogPost->id,
+        ])->with('admin_success', 'Page created successfully.');
     }
 
     public function updateBlogPost(Request $request, string $blogPost): RedirectResponse
@@ -284,7 +277,7 @@ class AdminController extends Controller
         }
 
         if (! $this->blogPostsTableExists()) {
-            return redirect()->route('admin.pages.index')
+            return redirect()->route('admin.dashboard', ['section' => 'pages'])
                 ->withErrors(['blog_posts' => 'The blog post table is missing on this server. Run migrations before updating blog posts.']);
         }
 
@@ -308,8 +301,10 @@ class AdminController extends Controller
             'published_at' => $publishedAt,
         ]);
 
-        return redirect()->route('admin.pages.edit', ['blogPost' => $blogPostRecord])
-            ->with('admin_success', 'Page updated successfully.');
+        return redirect()->route('admin.dashboard', [
+            'section' => 'pages',
+            'pages_edit' => $blogPostRecord->id,
+        ])->with('admin_success', 'Page updated successfully.');
     }
 
     public function bulkUpdateBlogPosts(Request $request): RedirectResponse
@@ -321,7 +316,7 @@ class AdminController extends Controller
         }
 
         if (! $this->blogPostsTableExists()) {
-            return redirect()->route('admin.pages.index')
+            return redirect()->route('admin.dashboard', ['section' => 'pages'])
                 ->withErrors(['blog_posts' => 'The blog post table is missing on this server. Run migrations before managing pages.']);
         }
 
@@ -336,7 +331,7 @@ class AdminController extends Controller
             ->get();
 
         if ($selectedPosts->isEmpty()) {
-            return redirect()->route('admin.pages.index')
+            return redirect()->route('admin.dashboard', ['section' => 'pages'])
                 ->withErrors(['selected_posts' => 'Select at least one page to continue.']);
         }
 
@@ -345,7 +340,7 @@ class AdminController extends Controller
                 ->whereIn('id', $selectedPosts->pluck('id'))
                 ->delete();
 
-            return redirect()->route('admin.pages.index')
+            return redirect()->route('admin.dashboard', ['section' => 'pages'])
                 ->with('admin_success', 'Selected pages deleted successfully.');
         }
 
@@ -358,7 +353,7 @@ class AdminController extends Controller
             ]);
         });
 
-        return redirect()->route('admin.pages.index')
+        return redirect()->route('admin.dashboard', ['section' => 'pages'])
             ->with('admin_success', $validated['action'] === 'publish'
                 ? 'Selected pages published successfully.'
                 : 'Selected pages moved to draft successfully.');
@@ -373,14 +368,14 @@ class AdminController extends Controller
         }
 
         if (! $this->blogPostsTableExists()) {
-            return redirect()->route('admin.pages.index')
+            return redirect()->route('admin.dashboard', ['section' => 'pages'])
                 ->withErrors(['blog_posts' => 'The blog post table is missing on this server. Run migrations before deleting pages.']);
         }
 
         $blogPostRecord = BlogPost::query()->findOrFail($blogPost);
         $blogPostRecord->delete();
 
-        return redirect()->route('admin.pages.index')
+        return redirect()->route('admin.dashboard', ['section' => 'pages'])
             ->with('admin_success', 'Page deleted successfully.');
     }
 
@@ -481,23 +476,6 @@ class AdminController extends Controller
     private function blogPostsTableExists(): bool
     {
         return Schema::hasTable('blog_posts');
-    }
-
-    private function blogPostCountData(): array
-    {
-        if (! $this->blogPostsTableExists()) {
-            return [
-                'blogPostsTableExists' => false,
-                'draftBlogPosts' => 0,
-                'publishedBlogPosts' => 0,
-            ];
-        }
-
-        return [
-            'blogPostsTableExists' => true,
-            'draftBlogPosts' => BlogPost::query()->where('status', 'draft')->count(),
-            'publishedBlogPosts' => BlogPost::query()->where('status', 'published')->count(),
-        ];
     }
 
     private function validatedBlogPostData(Request $request): array

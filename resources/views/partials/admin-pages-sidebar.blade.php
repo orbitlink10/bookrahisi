@@ -9,7 +9,7 @@
             <span class="content-link-icon">DB</span>
             <span>Dashboard</span>
         </a>
-        <a class="content-link {{ $activeSection === 'pages' ? 'is-active' : '' }}" href="{{ route('admin.pages.index') }}">
+        <a class="content-link {{ $activeSection === 'pages' ? 'is-active' : '' }}" href="{{ route('admin.dashboard', ['section' => 'pages']) }}">
             <span class="content-link-icon">PG</span>
             <span>Pages</span>
         </a>
