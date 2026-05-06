@@ -350,7 +350,7 @@
 
             .stats-grid {
                 display: grid;
-                grid-template-columns: repeat(5, minmax(0, 1fr));
+                grid-template-columns: repeat(6, minmax(0, 1fr));
                 gap: 16px;
                 margin-bottom: 22px;
             }
@@ -520,7 +520,8 @@
             }
 
             .field-select,
-            .field-input {
+            .field-input,
+            .field-textarea {
                 width: 100%;
                 min-height: 48px;
                 padding: 0 14px;
@@ -533,9 +534,61 @@
             }
 
             .field-select:focus,
-            .field-input:focus {
+            .field-input:focus,
+            .field-textarea:focus {
                 border-color: var(--accent);
                 box-shadow: 0 0 0 4px rgba(26, 160, 226, 0.08);
+            }
+
+            .field-textarea {
+                min-height: 170px;
+                padding: 14px;
+                resize: vertical;
+            }
+
+            .form-grid,
+            .entity-form-grid {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 14px;
+            }
+
+            .field-group,
+            .entity-form-block {
+                display: grid;
+                gap: 10px;
+            }
+
+            .field-group-full {
+                grid-column: 1 / -1;
+            }
+
+            .field-label {
+                font-size: 0.92rem;
+                font-weight: 800;
+            }
+
+            .field-hint {
+                color: var(--muted);
+                font-size: 0.84rem;
+                line-height: 1.6;
+            }
+
+            .entity-stack {
+                display: grid;
+                gap: 18px;
+            }
+
+            .entity-cover-preview {
+                min-height: 180px;
+                border-radius: 20px;
+                background-position: center;
+                background-size: cover;
+                background-repeat: no-repeat;
+            }
+
+            .entity-body-preview {
+                white-space: pre-line;
             }
 
             .reports-grid {
@@ -637,7 +690,9 @@
 
                 .stats-grid,
                 .reports-grid,
-                .inline-form-row {
+                .inline-form-row,
+                .form-grid,
+                .entity-form-grid {
                     grid-template-columns: 1fr;
                 }
 
@@ -683,6 +738,10 @@
                         <span class="sidebar-link-icon">PY</span>
                         <span>Payments</span>
                     </a>
+                    <a class="sidebar-link" href="#blog-posts">
+                        <span class="sidebar-link-icon">BG</span>
+                        <span>Blog</span>
+                    </a>
                     <a class="sidebar-link" href="#reports">
                         <span class="sidebar-link-icon">RP</span>
                         <span>Reports</span>
@@ -697,12 +756,13 @@
                             <span class="eyebrow">Marketplace control center</span>
                             <h1>Admin dashboard</h1>
                             <p class="subtitle">
-                                Approve businesses, manage platform users, monitor bookings, control payments, and review marketplace performance from one owner-only console.
+                                Approve businesses, manage platform users, publish blog content, monitor bookings, control payments, and review marketplace performance from one owner-only console.
                             </p>
                         </div>
 
                         <div class="toolbar">
                             <a class="button-light" href="{{ route('home') }}">View marketplace</a>
+                            <a class="button-light" href="{{ route('blog.index') }}">Open blog</a>
                             <form action="{{ route('admin.sign-out') }}" method="post">
                                 @csrf
                                 <button class="button-dark" type="submit">Sign out</button>
@@ -732,6 +792,7 @@
                             </div>
                             <div class="hero-actions">
                                 <a class="button-dark" href="#businesses">Approve businesses</a>
+                                <a class="button-light" href="#blog-posts">Write blog posts</a>
                                 <a class="button-light" href="#payments">Control payments</a>
                                 <a class="button-light" href="#reports">Open reports</a>
                             </div>
@@ -769,6 +830,11 @@
                             <div class="stat-label">Paid bookings</div>
                             <div class="stat-value">{{ $paidBookings }}</div>
                             <div class="stat-pill is-danger">Payments controlled</div>
+                        </article>
+                        <article class="stat-card">
+                            <div class="stat-label">Published posts</div>
+                            <div class="stat-value">{{ $publishedBlogPosts }}</div>
+                            <div class="stat-pill is-success">{{ $draftBlogPosts }} drafts ready</div>
                         </article>
                     </section>
 
@@ -976,6 +1042,153 @@
                             @endif
                         </section>
 
+                        <section class="panel" id="blog-posts">
+                            <div class="panel-head">
+                                <div>
+                                    <h2 class="panel-title">Blog posts</h2>
+                                    <p class="panel-copy">Write SEO-friendly blog pages, keep drafts private, and publish stories that customers can read on the public site.</p>
+                                </div>
+                                <a class="button-light" href="{{ route('blog.index') }}" target="_blank" rel="noopener noreferrer">View live blog</a>
+                            </div>
+
+                            <div class="reports-grid" style="margin-bottom: 18px;">
+                                <article class="report-card">
+                                    <div class="report-title">Total posts</div>
+                                    <div class="report-value">{{ $totalBlogPosts }}</div>
+                                    <div class="entity-extra">All blog entries in the CMS</div>
+                                </article>
+                                <article class="report-card">
+                                    <div class="report-title">Published</div>
+                                    <div class="report-value">{{ $publishedBlogPosts }}</div>
+                                    <div class="entity-extra">Visible on the public blog</div>
+                                </article>
+                                <article class="report-card">
+                                    <div class="report-title">Drafts</div>
+                                    <div class="report-value">{{ $draftBlogPosts }}</div>
+                                    <div class="entity-extra">Saved privately for later edits</div>
+                                </article>
+                            </div>
+
+                            <article class="entity-row" style="margin-bottom: 18px;">
+                                <div class="entity-head">
+                                    <div>
+                                        <h3 class="entity-name">Create new blog post</h3>
+                                        <div class="entity-meta">Compose a new article, choose whether to save it as a draft or publish it immediately, and generate a public page at `/blog/{slug}`.</div>
+                                    </div>
+                                    <span class="status-chip is-success">New</span>
+                                </div>
+
+                                <form class="inline-form" action="{{ route('admin.blog-posts.store') }}" method="post">
+                                    @csrf
+                                    <div class="form-grid">
+                                        <div class="field-group">
+                                            <label class="field-label" for="blog-title">Title</label>
+                                            <input class="field-input" id="blog-title" type="text" name="title" value="{{ old('title') }}" placeholder="How to choose the right salon package for your first visit">
+                                        </div>
+                                        <div class="field-group">
+                                            <label class="field-label" for="blog-slug">Slug</label>
+                                            <input class="field-input" id="blog-slug" type="text" name="slug" value="{{ old('slug') }}" placeholder="optional-custom-slug">
+                                        </div>
+                                        <div class="field-group">
+                                            <label class="field-label" for="blog-cover-image">Cover image URL</label>
+                                            <input class="field-input" id="blog-cover-image" type="url" name="cover_image_url" value="{{ old('cover_image_url') }}" placeholder="https://images.unsplash.com/...">
+                                        </div>
+                                        <div class="field-group">
+                                            <label class="field-label" for="blog-status">Status</label>
+                                            <select class="field-select" id="blog-status" name="status">
+                                                @foreach (['draft', 'published'] as $status)
+                                                    <option value="{{ $status }}" @selected(old('status', 'draft') === $status)>{{ ucfirst($status) }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="field-group field-group-full">
+                                            <label class="field-label" for="blog-excerpt">Excerpt</label>
+                                            <textarea class="field-textarea" id="blog-excerpt" name="excerpt" placeholder="Write the summary customers should see in blog listings and previews.">{{ old('excerpt') }}</textarea>
+                                            <span class="field-hint">Keep the excerpt short and scannable. It will be used on the public blog listing page.</span>
+                                        </div>
+                                        <div class="field-group field-group-full">
+                                            <label class="field-label" for="blog-body">Body</label>
+                                            <textarea class="field-textarea" id="blog-body" name="body" placeholder="Write the full blog post. Line breaks are preserved on the public page.">{{ old('body') }}</textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="hero-actions" style="margin-top: 18px;">
+                                        <button class="button-dark" type="submit">Save blog post</button>
+                                    </div>
+                                </form>
+                            </article>
+
+                            @if ($blogPosts->isEmpty())
+                                <div class="empty-state">No blog posts have been created yet. The compose form above is ready for your first article.</div>
+                            @else
+                                <div class="entity-list">
+                                    @foreach ($blogPosts as $blogPost)
+                                        <article class="entity-row">
+                                            <div class="entity-head">
+                                                <div>
+                                                    <h3 class="entity-name">{{ $blogPost->title }}</h3>
+                                                    <div class="entity-meta">
+                                                        /blog/{{ $blogPost->slug }} / {{ $blogPost->author_name }} / Updated {{ $blogPost->updated_at?->format('j M Y, g:i a') ?? 'Recently' }}
+                                                    </div>
+                                                    <div class="entity-extra">
+                                                        {{ $blogPost->published_at ? 'Published '.$blogPost->published_at->format('j M Y, g:i a') : 'Not published yet' }}
+                                                        @if ($blogPost->status === 'published')
+                                                            / <a class="entity-link" href="{{ route('blog.show', ['slug' => $blogPost->slug]) }}" target="_blank" rel="noopener noreferrer">Open public page</a>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                <span class="status-chip {{ $blogPost->status === 'published' ? 'is-success' : 'is-warning' }}">
+                                                    {{ $blogPost->status }}
+                                                </span>
+                                            </div>
+
+                                            @if ($blogPost->cover_image_url)
+                                                <div class="entity-cover-preview" style="margin-top: 16px; background-image: url('{{ $blogPost->cover_image_url }}');"></div>
+                                            @endif
+
+                                            <form class="inline-form" action="{{ route('admin.blog-posts.update', ['blogPost' => $blogPost]) }}" method="post">
+                                                @csrf
+                                                <div class="entity-form-grid">
+                                                    <div class="entity-form-block">
+                                                        <label class="field-label" for="title-{{ $blogPost->id }}">Title</label>
+                                                        <input class="field-input" id="title-{{ $blogPost->id }}" type="text" name="title" value="{{ $blogPost->title }}">
+                                                    </div>
+                                                    <div class="entity-form-block">
+                                                        <label class="field-label" for="slug-{{ $blogPost->id }}">Slug</label>
+                                                        <input class="field-input" id="slug-{{ $blogPost->id }}" type="text" name="slug" value="{{ $blogPost->slug }}">
+                                                    </div>
+                                                    <div class="entity-form-block">
+                                                        <label class="field-label" for="cover-{{ $blogPost->id }}">Cover image URL</label>
+                                                        <input class="field-input" id="cover-{{ $blogPost->id }}" type="url" name="cover_image_url" value="{{ $blogPost->cover_image_url }}">
+                                                    </div>
+                                                    <div class="entity-form-block">
+                                                        <label class="field-label" for="status-{{ $blogPost->id }}">Status</label>
+                                                        <select class="field-select" id="status-{{ $blogPost->id }}" name="status">
+                                                            @foreach (['draft', 'published'] as $status)
+                                                                <option value="{{ $status }}" @selected($blogPost->status === $status)>{{ ucfirst($status) }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="entity-form-block field-group-full">
+                                                        <label class="field-label" for="excerpt-{{ $blogPost->id }}">Excerpt</label>
+                                                        <textarea class="field-textarea" id="excerpt-{{ $blogPost->id }}" name="excerpt">{{ $blogPost->excerpt }}</textarea>
+                                                    </div>
+                                                    <div class="entity-form-block field-group-full">
+                                                        <label class="field-label" for="body-{{ $blogPost->id }}">Body</label>
+                                                        <textarea class="field-textarea" id="body-{{ $blogPost->id }}" name="body">{{ $blogPost->body }}</textarea>
+                                                    </div>
+                                                </div>
+
+                                                <div class="hero-actions" style="margin-top: 18px;">
+                                                    <button class="button-dark" type="submit">Update post</button>
+                                                </div>
+                                            </form>
+                                        </article>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </section>
+
                         <section class="panel" id="reports">
                             <div class="panel-head">
                                 <div>
@@ -1014,6 +1227,11 @@
                                     <div class="report-title">Rejected businesses</div>
                                     <div class="report-value">{{ $rejectedBusinesses }}</div>
                                     <div class="entity-extra">Applications rejected by admin</div>
+                                </article>
+                                <article class="report-card">
+                                    <div class="report-title">Blog coverage</div>
+                                    <div class="report-value">{{ $publishedBlogPosts }}/{{ $totalBlogPosts }}</div>
+                                    <div class="entity-extra">Published vs total blog posts</div>
                                 </article>
                             </div>
 

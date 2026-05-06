@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Booking;
+use App\Models\BlogPost;
 use App\Models\Business;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -44,6 +45,7 @@ class AdminDashboardTest extends TestCase
             ->assertSeeText('Users')
             ->assertSeeText('Bookings')
             ->assertSeeText('Payments')
+            ->assertSeeText('Blog posts')
             ->assertSeeText('Reports');
     }
 
@@ -198,6 +200,107 @@ class AdminDashboardTest extends TestCase
         $this->assertNotNull($booking->paid_at);
     }
 
+    public function test_admin_can_create_a_published_blog_post_from_the_dashboard(): void
+    {
+        $admin = $this->createAdminUser();
+
+        $response = $this
+            ->withSession(['admin_user_id' => $admin->id])
+            ->post(route('admin.blog-posts.store'), [
+                'title' => 'How to prepare for your first spa visit',
+                'slug' => '',
+                'cover_image_url' => 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1200&q=80',
+                'status' => 'published',
+                'excerpt' => 'A short guide for customers who want a smoother first spa booking experience.',
+                'body' => 'Arrive early, confirm your preferred treatment, and communicate any sensitivities before your appointment starts.',
+            ]);
+
+        $response
+            ->assertRedirect(route('admin.dashboard').'#blog-posts')
+            ->assertSessionHas('admin_success');
+
+        $blogPost = BlogPost::query()->firstOrFail();
+
+        $this->assertSame('How to prepare for your first spa visit', $blogPost->title);
+        $this->assertSame('how-to-prepare-for-your-first-spa-visit', $blogPost->slug);
+        $this->assertSame('published', $blogPost->status);
+        $this->assertNotNull($blogPost->published_at);
+
+        $this->get(route('blog.index'))
+            ->assertOk()
+            ->assertSeeText($blogPost->title)
+            ->assertSee(route('blog.show', ['slug' => $blogPost->slug]), false);
+
+        $this->get(route('blog.show', ['slug' => $blogPost->slug]))
+            ->assertOk()
+            ->assertSeeText($blogPost->title)
+            ->assertSeeText('Arrive early');
+    }
+
+    public function test_draft_blog_posts_are_not_visible_publicly(): void
+    {
+        $admin = $this->createAdminUser();
+
+        $this->withSession(['admin_user_id' => $admin->id])
+            ->post(route('admin.blog-posts.store'), [
+                'title' => 'Draft only story',
+                'slug' => '',
+                'cover_image_url' => '',
+                'status' => 'draft',
+                'excerpt' => 'This should stay private until an admin publishes it.',
+                'body' => 'Internal draft content that should not appear on the public blog.',
+            ])
+            ->assertRedirect(route('admin.dashboard').'#blog-posts');
+
+        $blogPost = BlogPost::query()->firstOrFail();
+
+        $this->assertSame('draft', $blogPost->status);
+        $this->assertNull($blogPost->published_at);
+
+        $this->get(route('blog.index'))
+            ->assertOk()
+            ->assertDontSeeText('Draft only story');
+
+        $this->get(route('blog.show', ['slug' => $blogPost->slug]))
+            ->assertNotFound();
+    }
+
+    public function test_admin_can_update_and_publish_an_existing_blog_post(): void
+    {
+        $admin = $this->createAdminUser();
+        $blogPost = $this->createBlogPost([
+            'status' => 'draft',
+            'published_at' => null,
+            'slug' => 'quiet-draft',
+            'title' => 'Quiet draft',
+        ]);
+
+        $response = $this
+            ->withSession(['admin_user_id' => $admin->id])
+            ->post(route('admin.blog-posts.update', ['blogPost' => $blogPost]), [
+                'title' => 'Quiet draft now live',
+                'slug' => 'quiet-draft-now-live',
+                'cover_image_url' => 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1200&q=80',
+                'status' => 'published',
+                'excerpt' => 'The draft has been updated and moved to the live blog.',
+                'body' => 'This article is now visible to readers on the public blog.',
+            ]);
+
+        $response->assertRedirect(route('admin.dashboard').'#blog-posts');
+
+        $blogPost->refresh();
+
+        $this->assertSame('Quiet draft now live', $blogPost->title);
+        $this->assertSame('quiet-draft-now-live', $blogPost->slug);
+        $this->assertSame('published', $blogPost->status);
+        $this->assertNotNull($blogPost->published_at);
+
+        $this->get(route('blog.show', ['slug' => $blogPost->slug]))
+            ->assertOk()
+            ->assertSeeText('Quiet draft now live')
+            ->assertSeeText('This article is now visible');
+    }
+
     private function createAdminUser(array $overrides = []): User
     {
         return User::factory()->create(array_merge([
@@ -246,6 +349,25 @@ class AdminDashboardTest extends TestCase
             'status' => 'pending',
             'payment_status' => 'pending',
             'paid_at' => null,
+        ], $overrides));
+    }
+
+    private function createBlogPost(array $overrides = []): BlogPost
+    {
+        $admin = $this->createAdminUser([
+            'email' => 'blog-admin-'.uniqid().'@bookrahisi.test',
+        ]);
+
+        return BlogPost::query()->create(array_merge([
+            'admin_user_id' => $admin->id,
+            'author_name' => $admin->name,
+            'title' => 'Sample blog post',
+            'slug' => 'sample-blog-post-'.uniqid(),
+            'cover_image_url' => 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=1200&q=80',
+            'status' => 'published',
+            'excerpt' => 'Sample excerpt for a published blog post.',
+            'body' => 'Sample body copy for a published blog post.',
+            'published_at' => now(),
         ], $overrides));
     }
 }

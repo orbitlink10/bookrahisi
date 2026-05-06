@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
+use App\Models\BlogPost;
 use App\Models\Business;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -90,6 +92,11 @@ class AdminController extends Controller
             ->take(12)
             ->get();
 
+        $blogPosts = BlogPost::query()
+            ->latest('published_at')
+            ->latest()
+            ->get();
+
         $totalBusinesses = Business::query()->count();
         $pendingBusinesses = Business::query()->where('approval_status', 'pending')->count();
         $approvedBusinesses = Business::query()->where('approval_status', 'approved')->count();
@@ -109,6 +116,10 @@ class AdminController extends Controller
         $pendingPayments = Booking::query()->where('payment_status', 'pending')->count();
         $refundedPayments = Booking::query()->where('payment_status', 'refunded')->count();
 
+        $totalBlogPosts = BlogPost::query()->count();
+        $publishedBlogPosts = BlogPost::query()->where('status', 'published')->count();
+        $draftBlogPosts = BlogPost::query()->where('status', 'draft')->count();
+
         $topBusinesses = Business::query()
             ->withCount('bookings')
             ->orderByDesc('bookings_count')
@@ -119,25 +130,86 @@ class AdminController extends Controller
             'activeUsers' => $activeUsers,
             'admin' => $admin,
             'approvedBusinesses' => $approvedBusinesses,
+            'blogPosts' => $blogPosts,
             'bookings' => $bookings,
             'businesses' => $businesses,
             'cancelledBookings' => $cancelledBookings,
             'completedBookings' => $completedBookings,
             'confirmedBookings' => $confirmedBookings,
+            'draftBlogPosts' => $draftBlogPosts,
             'paidBookings' => $paidBookings,
             'payments' => $payments,
             'pendingBookings' => $pendingBookings,
             'pendingBusinesses' => $pendingBusinesses,
             'pendingPayments' => $pendingPayments,
+            'publishedBlogPosts' => $publishedBlogPosts,
             'refundedPayments' => $refundedPayments,
             'rejectedBusinesses' => $rejectedBusinesses,
             'suspendedUsers' => $suspendedUsers,
             'topBusinesses' => $topBusinesses,
+            'totalBlogPosts' => $totalBlogPosts,
             'totalBookings' => $totalBookings,
             'totalBusinesses' => $totalBusinesses,
             'totalUsers' => $totalUsers,
             'users' => $users,
         ]);
+    }
+
+    public function storeBlogPost(Request $request): RedirectResponse
+    {
+        $admin = $this->authenticatedAdmin($request);
+
+        if (! $admin) {
+            return redirect()->route('admin.sign-in');
+        }
+
+        $validated = $this->validatedBlogPostData($request);
+        $status = $validated['status'];
+
+        BlogPost::query()->create([
+            'admin_user_id' => $admin->id,
+            'author_name' => $admin->name,
+            'title' => $validated['title'],
+            'slug' => $this->uniqueBlogPostSlug($validated['slug'], $validated['title']),
+            'cover_image_url' => $validated['cover_image_url'],
+            'status' => $status,
+            'excerpt' => $validated['excerpt'],
+            'body' => $validated['body'],
+            'published_at' => $status === 'published' ? now() : null,
+        ]);
+
+        return redirect()->to($this->dashboardAnchor('blog-posts'))
+            ->with('admin_success', 'Blog post created successfully.');
+    }
+
+    public function updateBlogPost(Request $request, BlogPost $blogPost): RedirectResponse
+    {
+        $admin = $this->authenticatedAdmin($request);
+
+        if (! $admin) {
+            return redirect()->route('admin.sign-in');
+        }
+
+        $validated = $this->validatedBlogPostData($request);
+        $status = $validated['status'];
+        $publishedAt = $status === 'published'
+            ? ($blogPost->published_at ?? now())
+            : null;
+
+        $blogPost->update([
+            'admin_user_id' => $admin->id,
+            'author_name' => $admin->name,
+            'title' => $validated['title'],
+            'slug' => $this->uniqueBlogPostSlug($validated['slug'], $validated['title'], $blogPost),
+            'cover_image_url' => $validated['cover_image_url'],
+            'status' => $status,
+            'excerpt' => $validated['excerpt'],
+            'body' => $validated['body'],
+            'published_at' => $publishedAt,
+        ]);
+
+        return redirect()->to($this->dashboardAnchor('blog-posts'))
+            ->with('admin_success', 'Blog post updated successfully.');
     }
 
     public function updateBusinessApproval(Request $request, Business $business): RedirectResponse
@@ -232,6 +304,44 @@ class AdminController extends Controller
     private function dashboardAnchor(string $section): string
     {
         return route('admin.dashboard').'#'.$section;
+    }
+
+    private function validatedBlogPostData(Request $request): array
+    {
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:160'],
+            'slug' => ['nullable', 'string', 'max:180'],
+            'cover_image_url' => ['nullable', 'url', 'max:2048'],
+            'status' => ['required', Rule::in(['draft', 'published'])],
+            'excerpt' => ['required', 'string', 'max:600'],
+            'body' => ['required', 'string', 'max:20000'],
+        ]);
+
+        $validated['title'] = trim($validated['title']);
+        $validated['slug'] = trim((string) ($validated['slug'] ?? ''));
+        $validated['cover_image_url'] = trim((string) ($validated['cover_image_url'] ?? '')) ?: null;
+        $validated['excerpt'] = trim($validated['excerpt']);
+        $validated['body'] = trim($validated['body']);
+
+        return $validated;
+    }
+
+    private function uniqueBlogPostSlug(?string $requestedSlug, string $title, ?BlogPost $ignore = null): string
+    {
+        $baseSlug = Str::slug($requestedSlug ?: $title);
+        $baseSlug = $baseSlug !== '' ? $baseSlug : 'blog-post';
+        $slug = $baseSlug;
+        $counter = 2;
+
+        while (BlogPost::query()
+            ->when($ignore, fn ($query) => $query->where('id', '!=', $ignore->id))
+            ->where('slug', $slug)
+            ->exists()) {
+            $slug = $baseSlug.'-'.$counter;
+            $counter++;
+        }
+
+        return $slug;
     }
 
     private function authenticatedAdmin(Request $request): ?User

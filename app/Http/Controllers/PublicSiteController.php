@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\BookingPlacedMail;
+use App\Models\BlogPost;
 use App\Models\Business;
 use App\Models\Review;
 use App\Models\User;
@@ -227,6 +228,43 @@ class PublicSiteController extends Controller
                     'description' => 'Unlock staff management, payments, reminders, and deeper reporting for busy businesses.',
                 ],
             ],
+        ]);
+    }
+
+    public function blogIndex(): View
+    {
+        $blogPosts = BlogPost::query()
+            ->where('status', 'published')
+            ->whereNotNull('published_at')
+            ->orderByDesc('published_at')
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('blog-index', [
+            'blogPosts' => $blogPosts,
+            'featuredPost' => $blogPosts->first(),
+        ]);
+    }
+
+    public function blogShow(string $slug): View
+    {
+        $blogPost = BlogPost::query()
+            ->where('slug', $slug)
+            ->where('status', 'published')
+            ->whereNotNull('published_at')
+            ->firstOrFail();
+
+        $relatedPosts = BlogPost::query()
+            ->where('status', 'published')
+            ->whereNotNull('published_at')
+            ->where('id', '!=', $blogPost->id)
+            ->orderByDesc('published_at')
+            ->take(3)
+            ->get();
+
+        return view('blog-show', [
+            'blogPost' => $blogPost,
+            'relatedPosts' => $relatedPosts,
         ]);
     }
 

@@ -19,6 +19,8 @@ Route::get('/admin/sign-in', [AdminController::class, 'signIn'])->name('admin.si
 Route::post('/admin/sign-in', [AdminController::class, 'signInSubmit'])->name('admin.sign-in.submit');
 Route::post('/admin/sign-out', [AdminController::class, 'signOut'])->name('admin.sign-out');
 Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+Route::post('/admin/blog-posts', [AdminController::class, 'storeBlogPost'])->name('admin.blog-posts.store');
+Route::post('/admin/blog-posts/{blogPost}', [AdminController::class, 'updateBlogPost'])->name('admin.blog-posts.update');
 Route::post('/admin/businesses/{business}/approval', [AdminController::class, 'updateBusinessApproval'])->name('admin.businesses.approval');
 Route::post('/admin/users/{user}/status', [AdminController::class, 'updateUserStatus'])->name('admin.users.status');
 Route::post('/admin/bookings/{booking}/status', [AdminController::class, 'updateBookingStatus'])->name('admin.bookings.status');
@@ -34,6 +36,8 @@ Route::get('/for-business/tools/settings', [PublicSiteController::class, 'busine
 Route::get('/for-business/tools/bookings', [PublicSiteController::class, 'businessBookings'])->name('for-business.bookings');
 Route::get('/for-business/tools/profile', [PublicSiteController::class, 'businessProfileDetails'])->name('for-business.profile-details');
 Route::post('/for-business/tools/profile', [PublicSiteController::class, 'businessProfileDetailsSubmit'])->name('for-business.profile-details.submit');
+Route::get('/blog', [PublicSiteController::class, 'blogIndex'])->name('blog.index');
+Route::get('/blog/{slug}', [PublicSiteController::class, 'blogShow'])->name('blog.show');
 Route::get('/business/{slug}', [PublicSiteController::class, 'publicBusinessProfile'])->name('business.show');
 Route::get('/business/{slug}/book', [PublicSiteController::class, 'businessBooking'])->name('business.book');
 Route::post('/business/{slug}/book', [PublicSiteController::class, 'businessBookingSubmit'])->name('business.book.submit');

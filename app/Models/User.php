@@ -61,4 +61,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Review::class);
     }
+
+    public function authoredBlogPosts(): HasMany
+    {
+        return $this->hasMany(BlogPost::class, 'admin_user_id');
+    }
 }
