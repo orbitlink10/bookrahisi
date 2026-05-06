@@ -598,6 +598,237 @@
                 gap: 14px;
             }
 
+            .pages-head {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 18px;
+                margin-bottom: 22px;
+            }
+
+            .pages-stats-grid {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 16px;
+                margin-bottom: 22px;
+            }
+
+            .pages-stat-card,
+            .pages-meta-card {
+                padding: 22px;
+                border: 1px solid var(--line);
+                border-radius: 24px;
+                background: rgba(255, 255, 255, 0.94);
+                box-shadow: var(--shadow);
+            }
+
+            .pages-panel,
+            .pages-editor-shell {
+                padding: 0;
+                overflow: hidden;
+            }
+
+            .pages-panel-head {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+                padding: 28px 30px;
+                border-bottom: 1px solid var(--line);
+            }
+
+            .pages-table-toolbar {
+                padding: 24px 30px 0;
+            }
+
+            .pages-bulk-form,
+            .pages-row-actions {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+
+            .pages-table-wrap {
+                padding: 24px 30px 30px;
+                overflow-x: auto;
+            }
+
+            .pages-table {
+                width: 100%;
+                min-width: 940px;
+                border-collapse: collapse;
+            }
+
+            .pages-table thead th {
+                padding: 18px 16px;
+                border-top: 1px solid var(--line);
+                border-bottom: 1px solid var(--line);
+                background: #f7faff;
+                color: #5f7a9d;
+                font-size: 0.9rem;
+                font-weight: 800;
+                letter-spacing: 0.16em;
+                text-transform: uppercase;
+                text-align: left;
+            }
+
+            .pages-table tbody td {
+                padding: 18px 16px;
+                border-bottom: 1px solid rgba(214, 226, 240, 0.78);
+                vertical-align: middle;
+            }
+
+            .pages-field-checkbox {
+                width: 22px;
+                height: 22px;
+                border: 1px solid var(--line);
+                border-radius: 6px;
+            }
+
+            .pages-thumb {
+                width: 170px;
+                height: 110px;
+                border-radius: 18px;
+                background-position: center;
+                background-repeat: no-repeat;
+                background-size: cover;
+                background-color: #eef4fb;
+            }
+
+            .pages-post-number {
+                font-size: 1.45rem;
+                font-weight: 800;
+            }
+
+            .pages-post-title {
+                font-size: 1.2rem;
+                font-weight: 800;
+                line-height: 1.35;
+            }
+
+            .pages-status-pill {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 8px 12px;
+                border-radius: 999px;
+                font-size: 0.8rem;
+                font-weight: 800;
+                text-transform: capitalize;
+            }
+
+            .pages-status-pill.is-published {
+                background: var(--success-soft);
+                color: var(--success-ink);
+            }
+
+            .pages-status-pill.is-draft {
+                background: var(--warning-soft);
+                color: var(--warning-ink);
+            }
+
+            .pages-empty-state {
+                margin: 0 30px 30px;
+                padding: 28px;
+                border: 1px dashed var(--line);
+                border-radius: 22px;
+                background: #fafdff;
+                color: var(--muted);
+                line-height: 1.7;
+            }
+
+            .button-primary,
+            .button-soft,
+            .button-danger,
+            .button-muted {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                padding: 12px 18px;
+                border-radius: 999px;
+                border: 1px solid transparent;
+                font-size: 0.92rem;
+                font-weight: 800;
+            }
+
+            .button-primary {
+                background: #1a75ff;
+                color: #fff;
+                box-shadow: 0 18px 32px rgba(26, 117, 255, 0.18);
+            }
+
+            .button-soft {
+                background: rgba(255, 255, 255, 0.94);
+                border-color: #21a1c5;
+                color: #1294b8;
+            }
+
+            .button-danger {
+                background: #fff;
+                border-color: #f2a4ad;
+                color: #ef4444;
+                cursor: pointer;
+            }
+
+            .button-muted {
+                background: #fff;
+                border-color: var(--line);
+                color: var(--muted);
+                opacity: 0.7;
+            }
+
+            .pages-editor-grid {
+                display: grid;
+                grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+                gap: 20px;
+                padding: 24px 30px 30px;
+            }
+
+            .pages-editor-card {
+                padding: 28px;
+                border: 1px solid var(--line);
+                border-radius: 28px;
+                background: #fff;
+            }
+
+            .pages-meta-stack {
+                display: grid;
+                align-content: start;
+                gap: 18px;
+            }
+
+            .pages-meta-label {
+                color: #8aa0bb;
+                font-size: 0.8rem;
+                font-weight: 800;
+                letter-spacing: 0.16em;
+                text-transform: uppercase;
+            }
+
+            .pages-meta-value {
+                margin-top: 12px;
+                font-family: 'Outfit', sans-serif;
+                font-size: 1.7rem;
+                font-weight: 800;
+                letter-spacing: -0.05em;
+            }
+
+            .pages-cover-preview {
+                min-height: 220px;
+                margin-top: 14px;
+                border-radius: 22px;
+                background-position: center;
+                background-repeat: no-repeat;
+                background-size: cover;
+                background-color: #eef4fb;
+            }
+
+            .pages-field-body {
+                min-height: 340px;
+            }
+
             .report-card {
                 padding: 18px;
                 border: 1px solid var(--line);
@@ -650,6 +881,7 @@
                     grid-template-columns: repeat(3, minmax(0, 1fr));
                 }
 
+                .pages-stats-grid,
                 .reports-grid {
                     grid-template-columns: repeat(2, minmax(0, 1fr));
                 }
@@ -673,6 +905,10 @@
                     justify-items: start;
                     text-align: left;
                 }
+
+                .pages-editor-grid {
+                    grid-template-columns: 1fr;
+                }
             }
 
             @media (max-width: 760px) {
@@ -681,6 +917,8 @@
                 }
 
                 .topbar,
+                .pages-head,
+                .pages-panel-head,
                 .toolbar,
                 .hero-actions,
                 .panel-head,
@@ -690,6 +928,7 @@
                 }
 
                 .stats-grid,
+                .pages-stats-grid,
                 .reports-grid,
                 .inline-form-row,
                 .form-grid,
@@ -697,8 +936,23 @@
                     grid-template-columns: 1fr;
                 }
 
+                .pages-editor-grid,
+                .pages-table-wrap,
+                .pages-table-toolbar {
+                    padding-left: 20px;
+                    padding-right: 20px;
+                }
+
+                .pages-empty-state {
+                    margin-left: 20px;
+                    margin-right: 20px;
+                }
+
                 .button-dark,
                 .button-light,
+                .button-primary,
+                .button-soft,
+                .button-danger,
                 .hero-actions .button-dark,
                 .hero-actions .button-light,
                 .button-inline {
@@ -708,6 +962,9 @@
         </style>
     </head>
     <body>
+        @php
+            $isPagesSection = ($activeAdminSection ?? 'overview') === 'pages';
+        @endphp
         <div class="console-app">
             <aside class="console-sidebar">
                 <div class="sidebar-brand">
@@ -719,31 +976,31 @@
                 </div>
 
                 <nav class="sidebar-nav" aria-label="Admin console navigation">
-                    <a class="sidebar-link" href="#overview">
+                    <a class="sidebar-link {{ $isPagesSection ? '' : 'is-active' }}" href="{{ route('admin.dashboard') }}">
                         <span class="sidebar-link-icon">HM</span>
                         <span>Home</span>
                     </a>
-                    <a class="sidebar-link" href="#businesses">
+                    <a class="sidebar-link" href="{{ route('admin.dashboard') }}#businesses">
                         <span class="sidebar-link-icon">BS</span>
                         <span>Businesses</span>
                     </a>
-                    <a class="sidebar-link" href="#users">
+                    <a class="sidebar-link" href="{{ route('admin.dashboard') }}#users">
                         <span class="sidebar-link-icon">US</span>
                         <span>Users</span>
                     </a>
-                    <a class="sidebar-link" href="#bookings">
+                    <a class="sidebar-link" href="{{ route('admin.dashboard') }}#bookings">
                         <span class="sidebar-link-icon">BK</span>
                         <span>Bookings</span>
                     </a>
-                    <a class="sidebar-link" href="#payments">
+                    <a class="sidebar-link" href="{{ route('admin.dashboard') }}#payments">
                         <span class="sidebar-link-icon">PY</span>
                         <span>Payments</span>
                     </a>
-                    <a class="sidebar-link {{ ($activeAdminSection ?? 'overview') === 'pages' ? 'is-active' : '' }}" href="{{ route('admin.dashboard', ['section' => 'pages']) }}">
+                    <a class="sidebar-link {{ $isPagesSection ? 'is-active' : '' }}" href="{{ route('admin.dashboard', ['section' => 'pages']) }}">
                         <span class="sidebar-link-icon">BG</span>
                         <span>Pages</span>
                     </a>
-                    <a class="sidebar-link" href="#reports">
+                    <a class="sidebar-link" href="{{ route('admin.dashboard') }}#reports">
                         <span class="sidebar-link-icon">RP</span>
                         <span>Reports</span>
                     </a>
@@ -776,374 +1033,386 @@
                     @endif
 
                     @if ($errors->any())
-                        <div class="error-banner">One or more admin actions could not be completed. Review the submitted values and try again.</div>
+                        <div class="error-banner">
+                            @if ($isPagesSection)
+                                @foreach ($errors->all() as $error)
+                                    <div>{{ $error }}</div>
+                                @endforeach
+                            @else
+                                One or more admin actions could not be completed. Review the submitted values and try again.
+                            @endif
+                        </div>
                     @endif
 
-                    <section class="hero-card">
-                        <div>
-                            <span class="eyebrow" style="background: rgba(255, 255, 255, 0.16); color: #fff;">Marketplace snapshot</span>
-                            <h2>Welcome back</h2>
-                            <p class="hero-copy">Track business approvals, user activity, booking volume, and payment state across the full Book Rahisi marketplace from a single console.</p>
-                            <div class="hero-alert">
-                                @if ($pendingBusinesses > 0)
-                                    {{ $pendingBusinesses }} business applications are waiting for approval. Review them in the Businesses section below.
-                                @else
-                                    No businesses are currently waiting for approval. The marketplace queue is clear.
-                                @endif
-                            </div>
-                            <div class="hero-actions">
-                                <a class="button-dark" href="#businesses">Approve businesses</a>
-                                <a class="button-light" href="{{ route('admin.dashboard', ['section' => 'pages']) }}">Open pages manager</a>
-                                <a class="button-light" href="#payments">Control payments</a>
-                                <a class="button-light" href="#reports">Open reports</a>
-                            </div>
-                        </div>
-
-                        <div class="hero-side">
-                            <span class="hero-tag">Admin online</span>
-                            <div class="hero-amount">{{ $totalBookings }}</div>
-                            <div class="hero-caption">Marketplace bookings tracked</div>
-                        </div>
-                    </section>
-
-                    <section class="stats-grid">
-                        <article class="stat-card">
-                            <div class="stat-label">Total businesses</div>
-                            <div class="stat-value">{{ $totalBusinesses }}</div>
-                            <div class="stat-pill">Marketplace listings</div>
-                        </article>
-                        <article class="stat-card">
-                            <div class="stat-label">Pending approvals</div>
-                            <div class="stat-value">{{ $pendingBusinesses }}</div>
-                            <div class="stat-pill is-warning">Needs review</div>
-                        </article>
-                        <article class="stat-card">
-                            <div class="stat-label">Platform users</div>
-                            <div class="stat-value">{{ $totalUsers }}</div>
-                            <div class="stat-pill is-success">Accounts tracked</div>
-                        </article>
-                        <article class="stat-card">
-                            <div class="stat-label">Bookings</div>
-                            <div class="stat-value">{{ $totalBookings }}</div>
-                            <div class="stat-pill">Marketplace flow</div>
-                        </article>
-                        <article class="stat-card">
-                            <div class="stat-label">Paid bookings</div>
-                            <div class="stat-value">{{ $paidBookings }}</div>
-                            <div class="stat-pill is-danger">Payments controlled</div>
-                        </article>
-                        <article class="stat-card">
-                            <div class="stat-label">Published posts</div>
-                            <div class="stat-value">{{ $publishedBlogPosts }}</div>
-                            <div class="stat-pill is-success">{{ $draftBlogPosts }} drafts ready</div>
-                        </article>
-                    </section>
-
-                    <div class="panel-stack">
-                        <section class="panel" id="businesses">
-                            <div class="panel-head">
-                                <div>
-                                    <h2 class="panel-title">Businesses</h2>
-                                    <p class="panel-copy">Approve or reject marketplace businesses, review booking volume, and capture approval notes for each listing.</p>
+                    @if ($isPagesSection)
+                        @include('partials.admin-dashboard-pages')
+                    @else
+                        <section class="hero-card">
+                            <div>
+                                <span class="eyebrow" style="background: rgba(255, 255, 255, 0.16); color: #fff;">Marketplace snapshot</span>
+                                <h2>Welcome back</h2>
+                                <p class="hero-copy">Track business approvals, user activity, booking volume, and payment state across the full Book Rahisi marketplace from a single console.</p>
+                                <div class="hero-alert">
+                                    @if ($pendingBusinesses > 0)
+                                        {{ $pendingBusinesses }} business applications are waiting for approval. Review them in the Businesses section below.
+                                    @else
+                                        No businesses are currently waiting for approval. The marketplace queue is clear.
+                                    @endif
+                                </div>
+                                <div class="hero-actions">
+                                    <a class="button-dark" href="#businesses">Approve businesses</a>
+                                    <a class="button-light" href="{{ route('admin.dashboard', ['section' => 'pages']) }}">Open pages manager</a>
+                                    <a class="button-light" href="#payments">Control payments</a>
+                                    <a class="button-light" href="#reports">Open reports</a>
                                 </div>
                             </div>
 
-                            @if ($businesses->isEmpty())
-                                <div class="empty-state">No businesses have been created yet.</div>
-                            @else
-                                <div class="entity-list">
-                                    @foreach ($businesses as $business)
-                                        <article class="entity-row">
-                                            <div class="entity-head">
-                                                <div>
-                                                    <h3 class="entity-name">{{ $business->business_name }}</h3>
-                                                    <div class="entity-meta">
-                                                        {{ $business->business_category }} / {{ $business->owner_email }} / {{ $business->bookings_count }} bookings
-                                                    </div>
-                                                    @if ($business->approval_notes)
-                                                        <div class="entity-extra">Notes: {{ $business->approval_notes }}</div>
-                                                    @endif
-                                                </div>
-                                                <span class="status-chip {{ $business->approval_status === 'approved' ? 'is-success' : ($business->approval_status === 'rejected' ? 'is-danger' : 'is-warning') }}">
-                                                    {{ $business->approval_status }}
-                                                </span>
-                                            </div>
-
-                                            <form class="inline-form" action="{{ route('admin.businesses.approval', ['business' => $business]) }}" method="post">
-                                                @csrf
-                                                <div class="inline-form-row">
-                                                    <select class="field-select" name="approval_status">
-                                                        @foreach (['pending', 'approved', 'rejected'] as $status)
-                                                            <option value="{{ $status }}" {{ $business->approval_status === $status ? 'selected' : '' }}>
-                                                                {{ ucfirst($status) }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                    <input class="field-input" type="text" name="approval_notes" value="{{ $business->approval_notes }}" placeholder="Add approval or rejection notes">
-                                                    <button class="button-inline" type="submit">Save</button>
-                                                </div>
-                                            </form>
-                                        </article>
-                                    @endforeach
-                                </div>
-                            @endif
+                            <div class="hero-side">
+                                <span class="hero-tag">Admin online</span>
+                                <div class="hero-amount">{{ $totalBookings }}</div>
+                                <div class="hero-caption">Marketplace bookings tracked</div>
+                            </div>
                         </section>
 
-                        <section class="panel" id="users">
-                            <div class="panel-head">
-                                <div>
-                                    <h2 class="panel-title">Users</h2>
-                                    <p class="panel-copy">Manage marketplace users, distinguish admins from standard users, and suspend access when needed.</p>
-                                </div>
-                            </div>
-
-                            @if ($users->isEmpty())
-                                <div class="empty-state">No users exist yet.</div>
-                            @else
-                                <div class="entity-list">
-                                    @foreach ($users as $user)
-                                        <article class="entity-row">
-                                            <div class="entity-head">
-                                                <div>
-                                                    <h3 class="entity-name">{{ $user->name }}</h3>
-                                                    <div class="entity-meta">
-                                                        {{ $user->email }} / {{ $user->is_admin ? 'Admin' : 'Marketplace user' }}
-                                                    </div>
-                                                </div>
-                                                <span class="status-chip {{ $user->account_status === 'active' ? 'is-success' : 'is-danger' }}">
-                                                    {{ $user->account_status }}
-                                                </span>
-                                            </div>
-
-                                            <form class="inline-form" action="{{ route('admin.users.status', ['user' => $user]) }}" method="post">
-                                                @csrf
-                                                <div class="inline-form-row">
-                                                    <select class="field-select" name="account_status">
-                                                        @foreach (['active', 'suspended'] as $status)
-                                                            <option value="{{ $status }}" {{ $user->account_status === $status ? 'selected' : '' }}>
-                                                                {{ ucfirst($status) }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                    <input class="field-input" type="text" value="{{ $user->is_admin ? 'Platform owner access enabled' : 'Standard account' }}" readonly>
-                                                    <button class="button-inline" type="submit">Save</button>
-                                                </div>
-                                            </form>
-                                        </article>
-                                    @endforeach
-                                </div>
-                            @endif
+                        <section class="stats-grid">
+                            <article class="stat-card">
+                                <div class="stat-label">Total businesses</div>
+                                <div class="stat-value">{{ $totalBusinesses }}</div>
+                                <div class="stat-pill">Marketplace listings</div>
+                            </article>
+                            <article class="stat-card">
+                                <div class="stat-label">Pending approvals</div>
+                                <div class="stat-value">{{ $pendingBusinesses }}</div>
+                                <div class="stat-pill is-warning">Needs review</div>
+                            </article>
+                            <article class="stat-card">
+                                <div class="stat-label">Platform users</div>
+                                <div class="stat-value">{{ $totalUsers }}</div>
+                                <div class="stat-pill is-success">Accounts tracked</div>
+                            </article>
+                            <article class="stat-card">
+                                <div class="stat-label">Bookings</div>
+                                <div class="stat-value">{{ $totalBookings }}</div>
+                                <div class="stat-pill">Marketplace flow</div>
+                            </article>
+                            <article class="stat-card">
+                                <div class="stat-label">Paid bookings</div>
+                                <div class="stat-value">{{ $paidBookings }}</div>
+                                <div class="stat-pill is-danger">Payments controlled</div>
+                            </article>
+                            <article class="stat-card">
+                                <div class="stat-label">Published posts</div>
+                                <div class="stat-value">{{ $publishedBlogPosts }}</div>
+                                <div class="stat-pill is-success">{{ $draftBlogPosts }} drafts ready</div>
+                            </article>
                         </section>
 
-                        <section class="panel" id="bookings">
-                            <div class="panel-head">
-                                <div>
-                                    <h2 class="panel-title">Bookings</h2>
-                                    <p class="panel-copy">Monitor live booking activity across the marketplace and move requests through the right operational status.</p>
-                                </div>
-                            </div>
-
-                            @if ($bookings->isEmpty())
-                                <div class="empty-state">No bookings have been captured yet.</div>
-                            @else
-                                <div class="entity-list">
-                                    @foreach ($bookings as $booking)
-                                        <article class="entity-row">
-                                            <div class="entity-head">
-                                                <div>
-                                                    <h3 class="entity-name">{{ $booking->customer_name }}</h3>
-                                                    <div class="entity-meta">
-                                                        {{ $booking->service_name }} / {{ $booking->business?->business_name ?? 'Business unavailable' }} / {{ $booking->appointment_date?->format('D, j M Y') ?? $booking->appointment_date }} at {{ $booking->appointment_time }}
-                                                    </div>
-                                                    <div class="entity-extra">
-                                                        Phone: {{ $booking->customer_phone }}
-                                                        @if ($booking->customer_email)
-                                                            / Email: {{ $booking->customer_email }}
-                                                        @endif
-                                                        @if ($booking->customer_notes)
-                                                            / Notes: {{ $booking->customer_notes }}
-                                                        @endif
-                                                        @if ($booking->customer_image_path)
-                                                            / <a class="entity-link" href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($booking->customer_image_path) }}" target="_blank" rel="noopener noreferrer">Reference image</a>
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                                <span class="status-chip {{ $booking->status === 'completed' ? 'is-success' : ($booking->status === 'cancelled' ? 'is-danger' : 'is-warning') }}">
-                                                    {{ $booking->status }}
-                                                </span>
-                                            </div>
-
-                                            <form class="inline-form" action="{{ route('admin.bookings.status', ['booking' => $booking]) }}" method="post">
-                                                @csrf
-                                                <div class="inline-form-row">
-                                                    <select class="field-select" name="status">
-                                                        @foreach (['pending', 'confirmed', 'completed', 'cancelled'] as $status)
-                                                            <option value="{{ $status }}" {{ $booking->status === $status ? 'selected' : '' }}>
-                                                                {{ ucfirst($status) }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                    <input class="field-input" type="text" value="{{ $booking->business?->owner_email ?? 'No business owner email' }}" readonly>
-                                                    <button class="button-inline" type="submit">Update</button>
-                                                </div>
-                                            </form>
-                                        </article>
-                                    @endforeach
-                                </div>
-                            @endif
-                        </section>
-
-                        <section class="panel" id="payments">
-                            <div class="panel-head">
-                                <div>
-                                    <h2 class="panel-title">Payments</h2>
-                                    <p class="panel-copy">Control marketplace payment state at the booking level and review which requests are pending, paid, refunded, or failed.</p>
-                                </div>
-                            </div>
-
-                            @if ($payments->isEmpty())
-                                <div class="empty-state">No payment records are available because bookings have not been captured yet.</div>
-                            @else
-                                <div class="entity-list">
-                                    @foreach ($payments as $booking)
-                                        <article class="entity-row">
-                                            <div class="entity-head">
-                                                <div>
-                                                    <h3 class="entity-name">{{ $booking->customer_name }}</h3>
-                                                    <div class="entity-meta">
-                                                        {{ $booking->service_name }} / {{ $booking->business?->business_name ?? 'Business unavailable' }} / Booking status: {{ $booking->status }}
-                                                    </div>
-                                                    <div class="entity-extra">
-                                                        Payment recorded:
-                                                        {{ $booking->paid_at ? $booking->paid_at->format('j M Y, g:i a') : 'Not yet marked as paid' }}
-                                                    </div>
-                                                </div>
-                                                <span class="status-chip {{ $booking->payment_status === 'paid' ? 'is-success' : ($booking->payment_status === 'refunded' || $booking->payment_status === 'failed' ? 'is-danger' : 'is-warning') }}">
-                                                    {{ $booking->payment_status }}
-                                                </span>
-                                            </div>
-
-                                            <form class="inline-form" action="{{ route('admin.bookings.payment', ['booking' => $booking]) }}" method="post">
-                                                @csrf
-                                                <div class="inline-form-row">
-                                                    <select class="field-select" name="payment_status">
-                                                        @foreach (['pending', 'paid', 'refunded', 'failed'] as $status)
-                                                            <option value="{{ $status }}" {{ $booking->payment_status === $status ? 'selected' : '' }}>
-                                                                {{ ucfirst($status) }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                    <input class="field-input" type="text" value="{{ $booking->customer_phone }}" readonly>
-                                                    <button class="button-inline" type="submit">Update</button>
-                                                </div>
-                                            </form>
-                                        </article>
-                                    @endforeach
-                                </div>
-                            @endif
-                        </section>
-
-                        <section class="panel" id="blog-posts">
-                            <div class="panel-head">
-                                <div>
-                                    <h2 class="panel-title">Pages</h2>
-                                    <p class="panel-copy">Use the dedicated pages manager to create, preview, update, publish, and delete blog pages in a cleaner CMS-style workflow.</p>
-                                </div>
-                                <a class="button-light" href="{{ route('admin.dashboard', ['section' => 'pages']) }}">Open pages manager</a>
-                            </div>
-
-                            <div class="reports-grid">
-                                <article class="report-card">
-                                    <div class="report-title">Total pages</div>
-                                    <div class="report-value">{{ $totalBlogPosts }}</div>
-                                    <div class="entity-extra">All saved entries in the pages manager</div>
-                                </article>
-                                <article class="report-card">
-                                    <div class="report-title">Published</div>
-                                    <div class="report-value">{{ $publishedBlogPosts }}</div>
-                                    <div class="entity-extra">Live and visible on the public blog</div>
-                                </article>
-                                <article class="report-card">
-                                    <div class="report-title">Drafts</div>
-                                    <div class="report-value">{{ $draftBlogPosts }}</div>
-                                    <div class="entity-extra">Still waiting for edits or approval</div>
-                                </article>
-                            </div>
-
-                            @if (! $blogPostsTableExists)
-                                <div class="empty-state" style="margin-top: 18px;">Blog setup is incomplete on this server. Run the latest Laravel migrations to create the `blog_posts` table before using the pages manager.</div>
-                            @elseif ($blogPosts->isEmpty())
-                                <div class="empty-state" style="margin-top: 18px;">No pages have been created yet. Open the pages manager to add the first blog page.</div>
-                            @else
-                                <div class="report-list">
-                                    @foreach ($blogPosts->take(3) as $blogPost)
-                                        <div class="report-row">
-                                            <span>{{ $blogPost->title }}</span>
-                                            <span>{{ $blogPost->status === 'published' ? 'Published' : 'Draft' }}</span>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @endif
-                        </section>
-
-                        <section class="panel" id="reports">
-                            <div class="panel-head">
-                                <div>
-                                    <h2 class="panel-title">Reports</h2>
-                                    <p class="panel-copy">View marketplace totals, status distribution, and the businesses generating the most booking activity.</p>
-                                </div>
-                            </div>
-
-                            <div class="reports-grid">
-                                <article class="report-card">
-                                    <div class="report-title">Businesses</div>
-                                    <div class="report-value">{{ $approvedBusinesses }}/{{ $totalBusinesses }}</div>
-                                    <div class="entity-extra">Approved vs total listings</div>
-                                </article>
-                                <article class="report-card">
-                                    <div class="report-title">Users</div>
-                                    <div class="report-value">{{ $activeUsers }}/{{ $totalUsers }}</div>
-                                    <div class="entity-extra">Active vs total accounts</div>
-                                </article>
-                                <article class="report-card">
-                                    <div class="report-title">Bookings</div>
-                                    <div class="report-value">{{ $confirmedBookings + $completedBookings }}/{{ $totalBookings }}</div>
-                                    <div class="entity-extra">Confirmed or completed bookings</div>
-                                </article>
-                                <article class="report-card">
-                                    <div class="report-title">Payments</div>
-                                    <div class="report-value">{{ $paidBookings }}/{{ $totalBookings }}</div>
-                                    <div class="entity-extra">Paid bookings across the marketplace</div>
-                                </article>
-                                <article class="report-card">
-                                    <div class="report-title">Suspended users</div>
-                                    <div class="report-value">{{ $suspendedUsers }}</div>
-                                    <div class="entity-extra">Accounts currently disabled</div>
-                                </article>
-                                <article class="report-card">
-                                    <div class="report-title">Rejected businesses</div>
-                                    <div class="report-value">{{ $rejectedBusinesses }}</div>
-                                    <div class="entity-extra">Applications rejected by admin</div>
-                                </article>
-                                <article class="report-card">
-                                    <div class="report-title">Page coverage</div>
-                                    <div class="report-value">{{ $publishedBlogPosts }}/{{ $totalBlogPosts }}</div>
-                                    <div class="entity-extra">Published vs total managed pages</div>
-                                </article>
-                            </div>
-
-                            <div class="report-list">
-                                @forelse ($topBusinesses as $business)
-                                    <div class="report-row">
-                                        <span>{{ $business->business_name }}</span>
-                                        <span>{{ $business->bookings_count }} bookings</span>
+                        <div class="panel-stack">
+                            <section class="panel" id="businesses">
+                                <div class="panel-head">
+                                    <div>
+                                        <h2 class="panel-title">Businesses</h2>
+                                        <p class="panel-copy">Approve or reject marketplace businesses, review booking volume, and capture approval notes for each listing.</p>
                                     </div>
-                                @empty
-                                    <div class="empty-state">No business booking activity is available for reporting yet.</div>
-                                @endforelse
-                            </div>
-                        </section>
-                    </div>
+                                </div>
+
+                                @if ($businesses->isEmpty())
+                                    <div class="empty-state">No businesses have been created yet.</div>
+                                @else
+                                    <div class="entity-list">
+                                        @foreach ($businesses as $business)
+                                            <article class="entity-row">
+                                                <div class="entity-head">
+                                                    <div>
+                                                        <h3 class="entity-name">{{ $business->business_name }}</h3>
+                                                        <div class="entity-meta">
+                                                            {{ $business->business_category }} / {{ $business->owner_email }} / {{ $business->bookings_count }} bookings
+                                                        </div>
+                                                        @if ($business->approval_notes)
+                                                            <div class="entity-extra">Notes: {{ $business->approval_notes }}</div>
+                                                        @endif
+                                                    </div>
+                                                    <span class="status-chip {{ $business->approval_status === 'approved' ? 'is-success' : ($business->approval_status === 'rejected' ? 'is-danger' : 'is-warning') }}">
+                                                        {{ $business->approval_status }}
+                                                    </span>
+                                                </div>
+
+                                                <form class="inline-form" action="{{ route('admin.businesses.approval', ['business' => $business]) }}" method="post">
+                                                    @csrf
+                                                    <div class="inline-form-row">
+                                                        <select class="field-select" name="approval_status">
+                                                            @foreach (['pending', 'approved', 'rejected'] as $status)
+                                                                <option value="{{ $status }}" {{ $business->approval_status === $status ? 'selected' : '' }}>
+                                                                    {{ ucfirst($status) }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                        <input class="field-input" type="text" name="approval_notes" value="{{ $business->approval_notes }}" placeholder="Add approval or rejection notes">
+                                                        <button class="button-inline" type="submit">Save</button>
+                                                    </div>
+                                                </form>
+                                            </article>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </section>
+
+                            <section class="panel" id="users">
+                                <div class="panel-head">
+                                    <div>
+                                        <h2 class="panel-title">Users</h2>
+                                        <p class="panel-copy">Manage marketplace users, distinguish admins from standard users, and suspend access when needed.</p>
+                                    </div>
+                                </div>
+
+                                @if ($users->isEmpty())
+                                    <div class="empty-state">No users exist yet.</div>
+                                @else
+                                    <div class="entity-list">
+                                        @foreach ($users as $user)
+                                            <article class="entity-row">
+                                                <div class="entity-head">
+                                                    <div>
+                                                        <h3 class="entity-name">{{ $user->name }}</h3>
+                                                        <div class="entity-meta">
+                                                            {{ $user->email }} / {{ $user->is_admin ? 'Admin' : 'Marketplace user' }}
+                                                        </div>
+                                                    </div>
+                                                    <span class="status-chip {{ $user->account_status === 'active' ? 'is-success' : 'is-danger' }}">
+                                                        {{ $user->account_status }}
+                                                    </span>
+                                                </div>
+
+                                                <form class="inline-form" action="{{ route('admin.users.status', ['user' => $user]) }}" method="post">
+                                                    @csrf
+                                                    <div class="inline-form-row">
+                                                        <select class="field-select" name="account_status">
+                                                            @foreach (['active', 'suspended'] as $status)
+                                                                <option value="{{ $status }}" {{ $user->account_status === $status ? 'selected' : '' }}>
+                                                                    {{ ucfirst($status) }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                        <input class="field-input" type="text" value="{{ $user->is_admin ? 'Platform owner access enabled' : 'Standard account' }}" readonly>
+                                                        <button class="button-inline" type="submit">Save</button>
+                                                    </div>
+                                                </form>
+                                            </article>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </section>
+
+                            <section class="panel" id="bookings">
+                                <div class="panel-head">
+                                    <div>
+                                        <h2 class="panel-title">Bookings</h2>
+                                        <p class="panel-copy">Monitor live booking activity across the marketplace and move requests through the right operational status.</p>
+                                    </div>
+                                </div>
+
+                                @if ($bookings->isEmpty())
+                                    <div class="empty-state">No bookings have been captured yet.</div>
+                                @else
+                                    <div class="entity-list">
+                                        @foreach ($bookings as $booking)
+                                            <article class="entity-row">
+                                                <div class="entity-head">
+                                                    <div>
+                                                        <h3 class="entity-name">{{ $booking->customer_name }}</h3>
+                                                        <div class="entity-meta">
+                                                            {{ $booking->service_name }} / {{ $booking->business?->business_name ?? 'Business unavailable' }} / {{ $booking->appointment_date?->format('D, j M Y') ?? $booking->appointment_date }} at {{ $booking->appointment_time }}
+                                                        </div>
+                                                        <div class="entity-extra">
+                                                            Phone: {{ $booking->customer_phone }}
+                                                            @if ($booking->customer_email)
+                                                                / Email: {{ $booking->customer_email }}
+                                                            @endif
+                                                            @if ($booking->customer_notes)
+                                                                / Notes: {{ $booking->customer_notes }}
+                                                            @endif
+                                                            @if ($booking->customer_image_path)
+                                                                / <a class="entity-link" href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($booking->customer_image_path) }}" target="_blank" rel="noopener noreferrer">Reference image</a>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                    <span class="status-chip {{ $booking->status === 'completed' ? 'is-success' : ($booking->status === 'cancelled' ? 'is-danger' : 'is-warning') }}">
+                                                        {{ $booking->status }}
+                                                    </span>
+                                                </div>
+
+                                                <form class="inline-form" action="{{ route('admin.bookings.status', ['booking' => $booking]) }}" method="post">
+                                                    @csrf
+                                                    <div class="inline-form-row">
+                                                        <select class="field-select" name="status">
+                                                            @foreach (['pending', 'confirmed', 'completed', 'cancelled'] as $status)
+                                                                <option value="{{ $status }}" {{ $booking->status === $status ? 'selected' : '' }}>
+                                                                    {{ ucfirst($status) }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                        <input class="field-input" type="text" value="{{ $booking->business?->owner_email ?? 'No business owner email' }}" readonly>
+                                                        <button class="button-inline" type="submit">Update</button>
+                                                    </div>
+                                                </form>
+                                            </article>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </section>
+
+                            <section class="panel" id="payments">
+                                <div class="panel-head">
+                                    <div>
+                                        <h2 class="panel-title">Payments</h2>
+                                        <p class="panel-copy">Control marketplace payment state at the booking level and review which requests are pending, paid, refunded, or failed.</p>
+                                    </div>
+                                </div>
+
+                                @if ($payments->isEmpty())
+                                    <div class="empty-state">No payment records are available because bookings have not been captured yet.</div>
+                                @else
+                                    <div class="entity-list">
+                                        @foreach ($payments as $booking)
+                                            <article class="entity-row">
+                                                <div class="entity-head">
+                                                    <div>
+                                                        <h3 class="entity-name">{{ $booking->customer_name }}</h3>
+                                                        <div class="entity-meta">
+                                                            {{ $booking->service_name }} / {{ $booking->business?->business_name ?? 'Business unavailable' }} / Booking status: {{ $booking->status }}
+                                                        </div>
+                                                        <div class="entity-extra">
+                                                            Payment recorded:
+                                                            {{ $booking->paid_at ? $booking->paid_at->format('j M Y, g:i a') : 'Not yet marked as paid' }}
+                                                        </div>
+                                                    </div>
+                                                    <span class="status-chip {{ $booking->payment_status === 'paid' ? 'is-success' : ($booking->payment_status === 'refunded' || $booking->payment_status === 'failed' ? 'is-danger' : 'is-warning') }}">
+                                                        {{ $booking->payment_status }}
+                                                    </span>
+                                                </div>
+
+                                                <form class="inline-form" action="{{ route('admin.bookings.payment', ['booking' => $booking]) }}" method="post">
+                                                    @csrf
+                                                    <div class="inline-form-row">
+                                                        <select class="field-select" name="payment_status">
+                                                            @foreach (['pending', 'paid', 'refunded', 'failed'] as $status)
+                                                                <option value="{{ $status }}" {{ $booking->payment_status === $status ? 'selected' : '' }}>
+                                                                    {{ ucfirst($status) }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                        <input class="field-input" type="text" value="{{ $booking->customer_phone }}" readonly>
+                                                        <button class="button-inline" type="submit">Update</button>
+                                                    </div>
+                                                </form>
+                                            </article>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </section>
+
+                            <section class="panel" id="blog-posts">
+                                <div class="panel-head">
+                                    <div>
+                                        <h2 class="panel-title">Pages</h2>
+                                        <p class="panel-copy">Use the dedicated pages manager to create, preview, update, publish, and delete blog pages in a cleaner CMS-style workflow.</p>
+                                    </div>
+                                    <a class="button-light" href="{{ route('admin.dashboard', ['section' => 'pages']) }}">Open pages manager</a>
+                                </div>
+
+                                <div class="reports-grid">
+                                    <article class="report-card">
+                                        <div class="report-title">Total pages</div>
+                                        <div class="report-value">{{ $totalBlogPosts }}</div>
+                                        <div class="entity-extra">All saved entries in the pages manager</div>
+                                    </article>
+                                    <article class="report-card">
+                                        <div class="report-title">Published</div>
+                                        <div class="report-value">{{ $publishedBlogPosts }}</div>
+                                        <div class="entity-extra">Live and visible on the public blog</div>
+                                    </article>
+                                    <article class="report-card">
+                                        <div class="report-title">Drafts</div>
+                                        <div class="report-value">{{ $draftBlogPosts }}</div>
+                                        <div class="entity-extra">Still waiting for edits or approval</div>
+                                    </article>
+                                </div>
+
+                                @if (! $blogPostsTableExists)
+                                    <div class="empty-state" style="margin-top: 18px;">Blog setup is incomplete on this server. Run the latest Laravel migrations to create the `blog_posts` table before using the pages manager.</div>
+                                @elseif ($blogPosts->isEmpty())
+                                    <div class="empty-state" style="margin-top: 18px;">No pages have been created yet. Open the pages manager to add the first blog page.</div>
+                                @else
+                                    <div class="report-list">
+                                        @foreach ($blogPosts->take(3) as $blogPost)
+                                            <div class="report-row">
+                                                <span>{{ $blogPost->title }}</span>
+                                                <span>{{ $blogPost->status === 'published' ? 'Published' : 'Draft' }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </section>
+
+                            <section class="panel" id="reports">
+                                <div class="panel-head">
+                                    <div>
+                                        <h2 class="panel-title">Reports</h2>
+                                        <p class="panel-copy">View marketplace totals, status distribution, and the businesses generating the most booking activity.</p>
+                                    </div>
+                                </div>
+
+                                <div class="reports-grid">
+                                    <article class="report-card">
+                                        <div class="report-title">Businesses</div>
+                                        <div class="report-value">{{ $approvedBusinesses }}/{{ $totalBusinesses }}</div>
+                                        <div class="entity-extra">Approved vs total listings</div>
+                                    </article>
+                                    <article class="report-card">
+                                        <div class="report-title">Users</div>
+                                        <div class="report-value">{{ $activeUsers }}/{{ $totalUsers }}</div>
+                                        <div class="entity-extra">Active vs total accounts</div>
+                                    </article>
+                                    <article class="report-card">
+                                        <div class="report-title">Bookings</div>
+                                        <div class="report-value">{{ $confirmedBookings + $completedBookings }}/{{ $totalBookings }}</div>
+                                        <div class="entity-extra">Confirmed or completed bookings</div>
+                                    </article>
+                                    <article class="report-card">
+                                        <div class="report-title">Payments</div>
+                                        <div class="report-value">{{ $paidBookings }}/{{ $totalBookings }}</div>
+                                        <div class="entity-extra">Paid bookings across the marketplace</div>
+                                    </article>
+                                    <article class="report-card">
+                                        <div class="report-title">Suspended users</div>
+                                        <div class="report-value">{{ $suspendedUsers }}</div>
+                                        <div class="entity-extra">Accounts currently disabled</div>
+                                    </article>
+                                    <article class="report-card">
+                                        <div class="report-title">Rejected businesses</div>
+                                        <div class="report-value">{{ $rejectedBusinesses }}</div>
+                                        <div class="entity-extra">Applications rejected by admin</div>
+                                    </article>
+                                    <article class="report-card">
+                                        <div class="report-title">Page coverage</div>
+                                        <div class="report-value">{{ $publishedBlogPosts }}/{{ $totalBlogPosts }}</div>
+                                        <div class="entity-extra">Published vs total managed pages</div>
+                                    </article>
+                                </div>
+
+                                <div class="report-list">
+                                    @forelse ($topBusinesses as $business)
+                                        <div class="report-row">
+                                            <span>{{ $business->business_name }}</span>
+                                            <span>{{ $business->bookings_count }} bookings</span>
+                                        </div>
+                                    @empty
+                                        <div class="empty-state">No business booking activity is available for reporting yet.</div>
+                                    @endforelse
+                                </div>
+                            </section>
+                        </div>
+                    @endif
                 </div>
             </main>
         </div>

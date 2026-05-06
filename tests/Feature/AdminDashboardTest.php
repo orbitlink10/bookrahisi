@@ -95,16 +95,20 @@ class AdminDashboardTest extends TestCase
         $this->withSession(['admin_user_id' => $admin->id])
             ->get(route('admin.dashboard', ['section' => 'pages']))
             ->assertOk()
+            ->assertSeeText('Admin dashboard')
             ->assertSeeText('Pages')
             ->assertSeeText('Post List')
-            ->assertSeeText('Add Page');
+            ->assertSeeText('Add Page')
+            ->assertDontSeeText('Content Admin');
 
         $this->withSession(['admin_user_id' => $admin->id])
             ->get(route('admin.dashboard', ['section' => 'pages', 'pages_mode' => 'create']))
             ->assertOk()
+            ->assertSeeText('Admin dashboard')
             ->assertSeeText('Add Page')
             ->assertSeeText('Page editor')
-            ->assertSeeText('Create page');
+            ->assertSeeText('Create page')
+            ->assertDontSeeText('Content Admin');
     }
 
     public function test_admin_can_approve_a_business_and_publish_it_to_the_marketplace(): void

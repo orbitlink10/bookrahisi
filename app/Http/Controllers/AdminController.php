@@ -104,6 +104,12 @@ class AdminController extends Controller
                 ->latest()
                 ->get()
             : collect();
+        $pagesViewMode = 'list';
+        $pageEditorPost = null;
+        $pagesFormAction = route('admin.pages.store');
+        $pagesPageHeading = 'Add Page';
+        $pagesPageSubtitle = 'Create a new blog page with a title, cover image, summary, and full content body.';
+        $pagesPreviewUrl = null;
 
         $totalBusinesses = Business::query()->count();
         $pendingBusinesses = Business::query()->where('approval_status', 'pending')->count();
@@ -139,47 +145,19 @@ class AdminController extends Controller
             $pagesMode = $request->query('pages_mode');
 
             if ($pagesMode === 'create') {
-                return view('admin-pages-form', [
-                    'admin' => $admin,
-                    'blogPost' => null,
-                    'blogPostsTableExists' => $blogPostsTableExists,
-                    'draftBlogPosts' => $draftBlogPosts,
-                    'formAction' => route('admin.pages.store'),
-                    'formMode' => 'create',
-                    'pageHeading' => 'Add Page',
-                    'pageSubtitle' => 'Create a new blog page with a title, cover image, summary, and full content body.',
-                    'previewUrl' => null,
-                    'publishedBlogPosts' => $publishedBlogPosts,
-                ]);
+                $pagesViewMode = 'create';
             }
 
             if ($pagesEditId !== null && $blogPostsTableExists) {
-                $blogPostRecord = BlogPost::query()->findOrFail($pagesEditId);
-
-                return view('admin-pages-form', [
-                    'admin' => $admin,
-                    'blogPost' => $blogPostRecord,
-                    'blogPostsTableExists' => true,
-                    'draftBlogPosts' => $draftBlogPosts,
-                    'formAction' => route('admin.pages.update', ['blogPost' => $blogPostRecord]),
-                    'formMode' => 'edit',
-                    'pageHeading' => 'Update Page',
-                    'pageSubtitle' => 'Refine the page copy, media, slug, and publish state from one focused editor.',
-                    'previewUrl' => $blogPostRecord->status === 'published'
-                        ? route('blog.show', ['slug' => $blogPostRecord->slug])
-                        : null,
-                    'publishedBlogPosts' => $publishedBlogPosts,
-                ]);
+                $pageEditorPost = BlogPost::query()->findOrFail($pagesEditId);
+                $pagesViewMode = 'edit';
+                $pagesFormAction = route('admin.pages.update', ['blogPost' => $pageEditorPost]);
+                $pagesPageHeading = 'Update Page';
+                $pagesPageSubtitle = 'Refine the page copy, media, slug, and publish state from the same dashboard workspace.';
+                $pagesPreviewUrl = $pageEditorPost->status === 'published'
+                    ? route('blog.show', ['slug' => $pageEditorPost->slug])
+                    : null;
             }
-
-            return view('admin-pages-index', [
-                'admin' => $admin,
-                'blogPosts' => $blogPosts,
-                'blogPostsTableExists' => $blogPostsTableExists,
-                'draftBlogPosts' => $draftBlogPosts,
-                'publishedBlogPosts' => $publishedBlogPosts,
-                'totalBlogPosts' => $totalBlogPosts,
-            ]);
         }
 
         return view('admin-dashboard', [
@@ -201,6 +179,12 @@ class AdminController extends Controller
             'pendingBusinesses' => $pendingBusinesses,
             'pendingPayments' => $pendingPayments,
             'publishedBlogPosts' => $publishedBlogPosts,
+            'pageEditorPost' => $pageEditorPost,
+            'pagesFormAction' => $pagesFormAction,
+            'pagesPageHeading' => $pagesPageHeading,
+            'pagesPageSubtitle' => $pagesPageSubtitle,
+            'pagesPreviewUrl' => $pagesPreviewUrl,
+            'pagesViewMode' => $pagesViewMode,
             'refundedPayments' => $refundedPayments,
             'rejectedBusinesses' => $rejectedBusinesses,
             'suspendedUsers' => $suspendedUsers,
