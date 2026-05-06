@@ -1090,13 +1090,7 @@ class PublicSiteController extends Controller
     {
         return collect($images)
             ->filter(fn ($image) => is_string($image) && trim($image) !== '')
-            ->map(function (string $image): string {
-                if (Str::startsWith($image, ['http://', 'https://'])) {
-                    return $image;
-                }
-
-                return Storage::disk('public')->url($image);
-            })
+            ->map(fn (string $image): string => $this->publicGalleryImageUrl($image))
             ->values()
             ->all();
     }
@@ -1118,10 +1112,34 @@ class PublicSiteController extends Controller
         $storedImages = is_array($business->gallery_images) ? $business->gallery_images : [];
 
         if ($storedImages !== []) {
-            return $this->galleryImageUrls($storedImages);
+            $galleryImages = $this->galleryImageUrls($storedImages);
+
+            if ($galleryImages !== []) {
+                return $galleryImages;
+            }
         }
 
         return $this->previewGalleryImages($business->business_category);
+    }
+
+    private function publicGalleryImageUrl(string $image): string
+    {
+        if (Str::startsWith($image, ['http://', 'https://'])) {
+            return $image;
+        }
+
+        $normalizedImage = str_replace('\\', '/', trim($image));
+        $normalizedImage = ltrim($normalizedImage, '/');
+
+        if (Str::startsWith($normalizedImage, 'public/')) {
+            $normalizedImage = substr($normalizedImage, strlen('public/'));
+        }
+
+        if (Str::startsWith($normalizedImage, 'storage/')) {
+            return asset($normalizedImage);
+        }
+
+        return asset('storage/'.$normalizedImage);
     }
 
     private function youtubeEmbedUrl(?string $url): ?string
@@ -1536,7 +1554,7 @@ class PublicSiteController extends Controller
                 return [
                     'category' => $business->business_category,
                     'detail' => 'Open today',
-                    'image' => $this->previewGalleryImages($business->business_category)[0],
+                    'image' => $this->resolvedBusinessGalleryImages($business)[0] ?? $this->previewGalleryImages($business->business_category)[0],
                     'location' => $business->neighborhood.', '.$business->city,
                     'name' => $business->business_name,
                     'rating' => $rating,

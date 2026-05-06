@@ -10,6 +10,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
@@ -47,6 +48,20 @@ class ExampleTest extends TestCase
             ->assertSeeText($approvedBusiness->business_name)
             ->assertSee(route('business.show', ['slug' => $approvedBusiness->slug]), false)
             ->assertDontSeeText('Pending Glow House');
+    }
+
+    public function test_the_homepage_uses_uploaded_business_gallery_images_when_available(): void
+    {
+        $business = $this->createBusiness([
+            'gallery_images' => ['business-gallery/hero-image.jpg'],
+        ]);
+
+        $response = $this->get('/');
+
+        $response
+            ->assertOk()
+            ->assertSee(asset('storage/'.$business->gallery_images[0]), false)
+            ->assertSeeText($business->business_name);
     }
 
     public function test_the_homepage_loads_google_maps_location_picker_when_configured(): void
@@ -380,8 +395,28 @@ class ExampleTest extends TestCase
 
         $publicPage
             ->assertOk()
-            ->assertSee(Storage::disk('public')->url($business->gallery_images[0]), false)
-            ->assertSee(Storage::disk('public')->url($business->gallery_images[1]), false);
+            ->assertSee(asset('storage/'.$business->gallery_images[0]), false)
+            ->assertSee(asset('storage/'.$business->gallery_images[1]), false);
+    }
+
+    public function test_the_gallery_image_url_resolver_uses_request_aware_storage_urls(): void
+    {
+        URL::forceRootUrl('http://localhost/bookrahisi/public');
+
+        try {
+            $controller = app(\App\Http\Controllers\PublicSiteController::class);
+            $method = new \ReflectionMethod($controller, 'publicGalleryImageUrl');
+            $method->setAccessible(true);
+
+            $resolvedUrl = $method->invoke($controller, 'business-gallery/space-1.jpg');
+
+            $this->assertSame(
+                'http://localhost/bookrahisi/public/storage/business-gallery/space-1.jpg',
+                $resolvedUrl
+            );
+        } finally {
+            URL::forceRootUrl(null);
+        }
     }
 
     public function test_the_business_profile_details_form_rejects_an_invalid_youtube_link(): void
