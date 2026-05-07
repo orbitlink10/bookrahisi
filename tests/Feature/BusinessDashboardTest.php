@@ -15,6 +15,11 @@ class BusinessDashboardTest extends TestCase
         $this->get('/for-business/tools/settings')->assertRedirect('/for-business/sign-in');
     }
 
+    public function test_the_business_pos_page_requires_an_owner_session(): void
+    {
+        $this->get('/for-business/tools/pos')->assertRedirect('/for-business/sign-in');
+    }
+
     public function test_an_authenticated_business_owner_can_view_the_settings_console(): void
     {
         $business = $this->createBusiness();
@@ -34,6 +39,18 @@ class BusinessDashboardTest extends TestCase
             ->assertSeeText('Other');
     }
 
+    public function test_an_authenticated_business_owner_can_view_the_pos_workspace(): void
+    {
+        $business = $this->createBusiness();
+
+        $this->withSession(['business_signup_email' => $business->owner_email])
+            ->get('/for-business/tools/pos')
+            ->assertOk()
+            ->assertSeeText('POS')
+            ->assertSeeText('Manage your listed business from one place')
+            ->assertSeeText('Business management overview');
+    }
+
     public function test_the_business_dashboard_links_to_the_settings_console(): void
     {
         $business = $this->createBusiness();
@@ -41,7 +58,8 @@ class BusinessDashboardTest extends TestCase
         $this->withSession(['business_signup_email' => $business->owner_email])
             ->get('/for-business/tools')
             ->assertOk()
-            ->assertSeeText('Settings');
+            ->assertSeeText('Settings')
+            ->assertSeeText('POS');
     }
 
     private function createBusiness(array $overrides = []): Business

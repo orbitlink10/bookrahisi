@@ -106,6 +106,24 @@ class ExampleTest extends TestCase
             ->assertSeeText('Continue with Apple');
     }
 
+    public function test_the_business_sign_in_page_redirects_existing_owner_sessions_to_the_dashboard(): void
+    {
+        $business = $this->createBusiness();
+
+        $this->withSession(['business_signup_email' => $business->owner_email])
+            ->get('/for-business/sign-in')
+            ->assertRedirect('/for-business/tools')
+            ->assertSessionHas('business_account_setup', $this->accountSetupSession())
+            ->assertSessionHas('business_profile_details', $this->profileDetailsSession());
+    }
+
+    public function test_the_business_sign_in_page_redirects_active_onboarding_sessions_to_the_dashboard(): void
+    {
+        $this->withSession($this->ownerOnboardingSession())
+            ->get('/for-business/sign-in')
+            ->assertRedirect('/for-business/tools');
+    }
+
     public function test_the_get_started_business_sign_up_form_redirects_new_owners_to_the_business_dashboard(): void
     {
         $response = $this->post('/for-business/sign-in', [

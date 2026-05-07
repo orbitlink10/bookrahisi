@@ -277,8 +277,20 @@ class PublicSiteController extends Controller
         ]);
     }
 
-    public function businessSignIn(Request $request): View
+    public function businessSignIn(Request $request): View|RedirectResponse
     {
+        $email = $request->session()->get('business_signup_email');
+
+        if ($email) {
+            $this->hydrateOwnerSessionFromDatabase($request);
+
+            $accountSetup = $request->session()->get('business_account_setup');
+
+            if ($this->findOwnedBusinessByEmail($email) || (is_array($accountSetup) && $accountSetup !== [])) {
+                return redirect()->route('for-business.tools');
+            }
+        }
+
         return view('for-business-sign-in', [
             'accountSetup' => $request->session()->get('business_account_setup', []),
             'businessCategories' => $this->businessCategories(),
@@ -509,6 +521,52 @@ class PublicSiteController extends Controller
             'profileDetails' => $profileDetails,
             'recentBookings' => $recentBookings,
             'sideImage' => 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1400&q=80',
+            'todayBookingCount' => $todayBookingCount,
+        ]);
+    }
+
+    public function businessPos(Request $request): View|RedirectResponse
+    {
+        $email = $request->session()->get('business_signup_email');
+
+        if (! $email) {
+            return redirect()->route('for-business.sign-in');
+        }
+
+        $this->hydrateOwnerSessionFromDatabase($request);
+
+        $accountSetup = $request->session()->get('business_account_setup');
+        $profileDetails = $request->session()->get('business_profile_details', []);
+
+        if (! is_array($accountSetup) || $accountSetup === []) {
+            return redirect()->route('for-business.account-setup');
+        }
+
+        $business = $this->findOwnedBusinessByEmail($email);
+        $businessSlug = Str::slug($accountSetup['business_name']);
+        $profileReady = is_array($profileDetails) && $profileDetails !== [];
+        $bookingCount = $business?->bookings()->count() ?? 0;
+        $pendingBookingCount = $business?->bookings()->where('status', 'pending')->count() ?? 0;
+        $paidBookingCount = $business?->bookings()->where('payment_status', 'paid')->count() ?? 0;
+        $pendingPaymentCount = $business?->bookings()->where('payment_status', 'pending')->count() ?? 0;
+        $todayBookingCount = $business?->bookings()->whereDate('appointment_date', today())->count() ?? 0;
+        $listingStatus = $business ? ucfirst((string) $business->approval_status) : 'Draft';
+        $recentPaidBookings = $business
+            ? $business->bookings()->where('payment_status', 'paid')->latest('paid_at')->take(4)->get()
+            : collect();
+
+        return view('for-business-pos', [
+            'accountSetup' => $accountSetup,
+            'bookingCount' => $bookingCount,
+            'businessSlug' => $businessSlug,
+            'email' => $email,
+            'listingStatus' => $listingStatus,
+            'pendingBookingCount' => $pendingBookingCount,
+            'paidBookingCount' => $paidBookingCount,
+            'pendingPaymentCount' => $pendingPaymentCount,
+            'profileReady' => $profileReady,
+            'profileDetails' => $profileDetails,
+            'recentPaidBookings' => $recentPaidBookings,
             'todayBookingCount' => $todayBookingCount,
         ]);
     }
