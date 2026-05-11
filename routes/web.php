@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\BusinessPosController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\PublicSiteController;
 use Illuminate\Support\Facades\Route;
@@ -40,7 +41,16 @@ Route::get('/for-business/account-setup', [PublicSiteController::class, 'busines
 Route::post('/for-business/account-setup', [PublicSiteController::class, 'businessAccountSetupSubmit'])->name('for-business.account-setup.submit');
 Route::get('/for-business/business-setup', [PublicSiteController::class, 'businessProfileSetup'])->name('for-business.business-setup');
 Route::get('/for-business/tools', [PublicSiteController::class, 'businessTools'])->name('for-business.tools');
-Route::get('/for-business/tools/pos', [PublicSiteController::class, 'businessPos'])->name('for-business.pos');
+Route::get('/for-business/tools/pos', [BusinessPosController::class, 'index'])->name('for-business.pos');
+Route::post('/for-business/tools/pos/customers', [BusinessPosController::class, 'storeCustomer'])->name('for-business.pos.customers.store');
+Route::post('/for-business/tools/pos/staff', [BusinessPosController::class, 'storeStaff'])->name('for-business.pos.staff.store');
+Route::post('/for-business/tools/pos/services', [BusinessPosController::class, 'storeService'])->name('for-business.pos.services.store');
+Route::post('/for-business/tools/pos/products', [BusinessPosController::class, 'storeProduct'])->name('for-business.pos.products.store');
+Route::post('/for-business/tools/pos/resources', [BusinessPosController::class, 'storeRoomChair'])->name('for-business.pos.resources.store');
+Route::post('/for-business/tools/pos/appointments', [BusinessPosController::class, 'storeAppointment'])->name('for-business.pos.appointments.store');
+Route::post('/for-business/tools/pos/sales', [BusinessPosController::class, 'storeSale'])->name('for-business.pos.sales.store');
+Route::post('/for-business/tools/pos/expenses', [BusinessPosController::class, 'storeExpense'])->name('for-business.pos.expenses.store');
+Route::get('/for-business/tools/pos/receipts/{sale}', [BusinessPosController::class, 'receipt'])->name('for-business.pos.receipt');
 Route::get('/for-business/tools/settings', [PublicSiteController::class, 'businessSettings'])->name('for-business.settings');
 Route::get('/for-business/tools/bookings', [PublicSiteController::class, 'businessBookings'])->name('for-business.bookings');
 Route::get('/for-business/tools/profile', [PublicSiteController::class, 'businessProfileDetails'])->name('for-business.profile-details');

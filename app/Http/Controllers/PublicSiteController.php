@@ -349,6 +349,7 @@ class PublicSiteController extends Controller
                     'name' => $ownerName,
                     'phone_number' => $validated['phone'],
                     'account_status' => 'active',
+                    'business_role' => 'Admin',
                 ]);
             } else {
                 User::query()->create([
@@ -358,6 +359,7 @@ class PublicSiteController extends Controller
                     'password' => $validated['password'],
                     'is_admin' => false,
                     'account_status' => 'active',
+                    'business_role' => 'Admin',
                 ]);
             }
 
