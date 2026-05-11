@@ -14,17 +14,17 @@ use App\Models\Branch;
 use App\Models\Business;
 use App\Models\Membership;
 use App\Models\RoomChair;
-use App\Models\Sale;
-use App\Models\User;
 use App\Services\Pos\AppointmentService;
 use App\Services\Pos\PosReferenceGenerator;
 use App\Services\Pos\PosReportService;
 use App\Services\Pos\SaleProcessor;
+use App\Support\BusinessConsolePermissions;
 use App\Support\BusinessConsoleSchema;
 use App\Support\PosOptions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class BusinessPosController extends Controller
@@ -129,6 +129,17 @@ class BusinessPosController extends Controller
 
         $branch = $this->resolveBranchFromRequest($business, $request->integer('branch_id'));
         $staffId = $request->integer('preferred_staff_id') ?: null;
+        $preferredStaff = null;
+
+        if ($staffId) {
+            $preferredStaff = $business->staffMembers()->whereKey($staffId)->first();
+
+            if (! $preferredStaff) {
+                throw ValidationException::withMessages([
+                    'preferred_staff_id' => 'Select a preferred staff member from this business.',
+                ]);
+            }
+        }
 
         $customer = $business->customers()->create([
             'branch_id' => $branch?->id,
@@ -144,7 +155,7 @@ class BusinessPosController extends Controller
             'gender' => $request->input('gender'),
             'date_of_birth' => $request->input('date_of_birth'),
             'customer_type' => $request->string('customer_type')->toString(),
-            'preferred_staff_id' => $staffId,
+            'preferred_staff_id' => $preferredStaff?->id,
             'visit_notes' => $request->input('visit_notes'),
             'allergies' => $request->input('allergies'),
             'skin_type' => $request->input('skin_type'),
@@ -235,8 +246,18 @@ class BusinessPosController extends Controller
         $requiredProducts = [];
 
         if ($request->filled('required_product_id') && $request->filled('required_product_quantity')) {
+            $requiredProduct = $business->products()
+                ->whereKey($request->integer('required_product_id'))
+                ->first();
+
+            if (! $requiredProduct) {
+                throw ValidationException::withMessages([
+                    'required_product_id' => 'Select a required product from this business inventory.',
+                ]);
+            }
+
             $requiredProducts[] = [
-                'product_id' => $request->integer('required_product_id'),
+                'product_id' => $requiredProduct->id,
                 'quantity' => (float) $request->input('required_product_quantity'),
             ];
         }
@@ -420,7 +441,7 @@ class BusinessPosController extends Controller
             ->with('pos_success', 'Expense recorded for reporting.');
     }
 
-    public function receipt(Request $request, Sale $sale): View|RedirectResponse
+    public function receipt(Request $request, string $sale): View|RedirectResponse
     {
         if ($redirect = $this->posModuleUnavailableRedirect()) {
             return $redirect;
@@ -432,11 +453,13 @@ class BusinessPosController extends Controller
             return $business;
         }
 
-        abort_unless((int) $sale->business_id === (int) $business->id, 403);
+        $saleModel = $business->sales()
+            ->whereKey($sale)
+            ->firstOrFail();
 
         return view('for-business-pos-receipt', [
             'business' => $business,
-            'sale' => $sale->load([
+            'sale' => $saleModel->load([
                 'appointment',
                 'customer.membership',
                 'items.service',
@@ -547,13 +570,7 @@ class BusinessPosController extends Controller
 
     private function currentBusinessRole(string $email): string
     {
-        if (! BusinessConsoleSchema::hasBusinessRoleColumn()) {
-            return 'Admin';
-        }
-
-        return User::query()
-            ->where('email', $email)
-            ->value('business_role') ?: 'Admin';
+        return BusinessConsolePermissions::roleForEmail($email);
     }
 
     private function posModuleUnavailableRedirect(): ?RedirectResponse

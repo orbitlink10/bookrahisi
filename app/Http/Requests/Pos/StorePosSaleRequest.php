@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Pos;
 
+use App\Models\MpesaTransaction;
 use App\Services\Pos\KenyaPhoneNumber;
 use App\Support\PosOptions;
 use Illuminate\Foundation\Http\FormRequest;
@@ -81,6 +82,8 @@ class StorePosSaleRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {
+            $mpesaCodes = [];
+
             if (
                 count($this->input('service_items', [])) === 0
                 && count($this->input('product_items', [])) === 0
@@ -96,6 +99,14 @@ class StorePosSaleRequest extends FormRequest
 
                 if (blank($payment['mpesa_code'] ?? null)) {
                     $validator->errors()->add("payments.$index.mpesa_code", 'M-Pesa code is required for M-Pesa payments.');
+                } else {
+                    $code = (string) $payment['mpesa_code'];
+
+                    if (in_array($code, $mpesaCodes, true)) {
+                        $validator->errors()->add("payments.$index.mpesa_code", 'Each M-Pesa code can only be used once per sale.');
+                    } else {
+                        $mpesaCodes[] = $code;
+                    }
                 }
 
                 if (blank($payment['phone_number'] ?? null) || ! preg_match(PosOptions::kenyanPhonePattern(), (string) $payment['phone_number'])) {
@@ -104,6 +115,27 @@ class StorePosSaleRequest extends FormRequest
 
                 if (blank($payment['till_or_paybill'] ?? null)) {
                     $validator->errors()->add("payments.$index.till_or_paybill", 'Till or Paybill is required for M-Pesa payments.');
+                }
+            }
+
+            if ($mpesaCodes === []) {
+                return;
+            }
+
+            $existingCodes = MpesaTransaction::query()
+                ->whereIn('mpesa_code', $mpesaCodes)
+                ->pluck('mpesa_code')
+                ->all();
+
+            foreach ($this->input('payments', []) as $index => $payment) {
+                if (($payment['payment_method'] ?? null) !== 'M-Pesa') {
+                    continue;
+                }
+
+                $code = (string) ($payment['mpesa_code'] ?? '');
+
+                if ($code !== '' && in_array($code, $existingCodes, true)) {
+                    $validator->errors()->add("payments.$index.mpesa_code", 'That M-Pesa code has already been recorded.');
                 }
             }
         });

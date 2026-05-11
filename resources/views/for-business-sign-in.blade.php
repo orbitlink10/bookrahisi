@@ -570,11 +570,11 @@
                             <div class="field-group">
                                 <label class="field-label" for="existing-password">Password</label>
                                 <input
-                                    class="field-input"
+                                    class="field-input {{ $errors->has('password') && old('intent') === 'continue' ? 'field-input-error' : '' }}"
                                     id="existing-password"
                                     type="password"
                                     name="password"
-                                    placeholder="Enter your password or leave blank for legacy access"
+                                    placeholder="Enter your owner password"
                                 >
                             </div>
                             <button class="continue-button" type="submit">Continue</button>
@@ -582,6 +582,10 @@
 
                         @if ($errors->has('email') && old('intent') === 'continue')
                             <div class="field-error" style="margin-top: 12px;">{{ $errors->first('email') }}</div>
+                        @endif
+
+                        @if ($errors->has('password') && old('intent') === 'continue')
+                            <div class="field-error" style="margin-top: 12px;">{{ $errors->first('password') }}</div>
                         @endif
                     </section>
 

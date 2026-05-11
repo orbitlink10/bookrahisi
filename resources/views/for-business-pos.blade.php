@@ -966,6 +966,10 @@
                         <div class="flash flash-success">{{ session('pos_success') }}</div>
                     @endif
 
+                    @if (session('pos_error'))
+                        <div class="flash flash-error">{{ session('pos_error') }}</div>
+                    @endif
+
                     @if ($errors->any())
                         <div class="flash flash-error">
                             <strong>There are validation errors in the POS form.</strong>

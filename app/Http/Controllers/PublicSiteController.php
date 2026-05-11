@@ -382,25 +382,34 @@ class PublicSiteController extends Controller
             'password' => ['nullable', 'string'],
         ]);
 
-        $request->session()->put('business_signup_email', $validated['email']);
-
         $business = $this->findOwnedBusinessByEmail($validated['email']);
         $ownerUser = $this->findUserByEmail($validated['email']);
 
         if ($business) {
-            if (($validated['password'] ?? '') !== '') {
-                if (! $ownerUser || ! Hash::check($validated['password'], $ownerUser->password)) {
-                    return redirect()
-                        ->route('for-business.sign-in')
-                        ->withErrors(['email' => 'The owner credentials are invalid.'])
-                        ->withInput($request->except('password'));
-                }
+            if (blank($validated['password'] ?? null)) {
+                $this->clearOwnerSession($request);
+
+                return redirect()
+                    ->route('for-business.sign-in')
+                    ->withErrors(['password' => 'Enter the password for this owner account.'])
+                    ->withInput($request->except('password'));
+            }
+
+            if (! $ownerUser || ! Hash::check($validated['password'], $ownerUser->password)) {
+                $this->clearOwnerSession($request);
+
+                return redirect()
+                    ->route('for-business.sign-in')
+                    ->withErrors(['email' => 'The owner credentials are invalid.'])
+                    ->withInput($request->except('password'));
             }
 
             $this->syncOwnerSessionFromBusiness($request, $business);
 
             return redirect()->route('for-business.tools');
         }
+
+        $request->session()->put('business_signup_email', $validated['email']);
 
         return redirect()->route('for-business.account-setup');
     }
@@ -1053,6 +1062,15 @@ class PublicSiteController extends Controller
         $request->session()->put('business_signup_email', $business->owner_email);
         $request->session()->put('business_account_setup', $this->accountSetupFromBusiness($business));
         $request->session()->put('business_profile_details', $this->profileDetailsFromBusiness($business));
+    }
+
+    private function clearOwnerSession(Request $request): void
+    {
+        $request->session()->forget([
+            'business_signup_email',
+            'business_account_setup',
+            'business_profile_details',
+        ]);
     }
 
     private function findOwnedBusinessByEmail(?string $email): ?Business

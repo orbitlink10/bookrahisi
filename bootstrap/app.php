@@ -11,7 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'pos.available' => \App\Http\Middleware\EnsurePosModuleAvailable::class,
+            'pos.capability' => \App\Http\Middleware\EnsureBusinessPosCapability::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

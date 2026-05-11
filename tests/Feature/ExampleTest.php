@@ -190,19 +190,53 @@ class ExampleTest extends TestCase
             ->assertSessionHas('business_signup_email', 'owner@bookrahisi.test');
     }
 
-    public function test_the_business_sign_in_form_redirects_existing_owners_to_business_tools(): void
+    public function test_the_business_sign_in_form_requires_a_password_for_existing_owners(): void
     {
         $business = $this->createBusiness();
 
-        $response = $this->post('/for-business/sign-in', [
+        User::query()->create([
+            'name' => 'Amina Njeri',
+            'email' => $business->owner_email,
+            'phone_number' => $business->phone,
+            'password' => 'ownerpass123',
+            'is_admin' => false,
+            'account_status' => 'active',
+        ]);
+
+        $response = $this->from('/for-business/sign-in')->post('/for-business/sign-in', [
+            'intent' => 'continue',
             'email' => $business->owner_email,
         ]);
 
         $response
-            ->assertRedirect('/for-business/tools')
-            ->assertSessionHas('business_signup_email', $business->owner_email)
-            ->assertSessionHas('business_account_setup', $this->accountSetupSession())
-            ->assertSessionHas('business_profile_details', $this->profileDetailsSession());
+            ->assertRedirect('/for-business/sign-in')
+            ->assertSessionHasErrors('password')
+            ->assertSessionMissing('business_signup_email');
+    }
+
+    public function test_the_business_sign_in_form_does_not_start_an_owner_session_for_invalid_passwords(): void
+    {
+        $business = $this->createBusiness();
+
+        User::query()->create([
+            'name' => 'Amina Njeri',
+            'email' => $business->owner_email,
+            'phone_number' => $business->phone,
+            'password' => 'ownerpass123',
+            'is_admin' => false,
+            'account_status' => 'active',
+        ]);
+
+        $response = $this->from('/for-business/sign-in')->post('/for-business/sign-in', [
+            'intent' => 'continue',
+            'email' => $business->owner_email,
+            'password' => 'wrong-pass-123',
+        ]);
+
+        $response
+            ->assertRedirect('/for-business/sign-in')
+            ->assertSessionHasErrors('email')
+            ->assertSessionMissing('business_signup_email');
     }
 
     public function test_the_business_sign_in_form_rejects_an_invalid_email(): void

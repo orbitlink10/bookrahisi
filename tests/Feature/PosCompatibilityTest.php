@@ -54,6 +54,18 @@ class PosCompatibilityTest extends TestCase
             ->assertSessionHas('dashboard_warning');
     }
 
+    public function test_pos_receipt_route_redirects_to_tools_when_pos_tables_are_not_migrated(): void
+    {
+        $business = $this->createBusiness();
+
+        Schema::dropIfExists('expenses');
+
+        $this->withSession(['business_signup_email' => $business->owner_email])
+            ->get(route('for-business.pos.receipt', ['sale' => 999]))
+            ->assertRedirect(route('for-business.tools'))
+            ->assertSessionHas('dashboard_warning');
+    }
+
     private function createBusiness(array $overrides = []): Business
     {
         User::query()->create([

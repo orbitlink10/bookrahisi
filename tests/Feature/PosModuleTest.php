@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\RoomChair;
 use App\Models\Service;
 use App\Models\Staff;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -225,6 +226,161 @@ class PosModuleTest extends TestCase
         ]);
     }
 
+    public function test_receptionist_can_view_pos_but_cannot_manage_staff_records(): void
+    {
+        $business = $this->createBusiness();
+        $this->createBusinessUser($business, 'Receptionist');
+
+        $this->withSession(['business_signup_email' => $business->owner_email])
+            ->get(route('for-business.pos'))
+            ->assertOk();
+
+        $this->withSession(['business_signup_email' => $business->owner_email])
+            ->post(route('for-business.pos.staff.store'), [])
+            ->assertRedirect(route('for-business.pos', ['tab' => 'staff']))
+            ->assertSessionHas('pos_error');
+
+        $this->assertDatabaseCount('staff', 0);
+    }
+
+    public function test_customer_preferred_staff_must_belong_to_the_current_business(): void
+    {
+        $business = $this->createBusiness();
+        $branch = $this->createBranch($business);
+        $this->createBusinessUser($business);
+
+        $otherBusiness = $this->createBusiness([
+            'owner_email' => 'other-owner@bookrahisi.test',
+            'business_name' => 'Other Glow House',
+            'slug' => 'other-glow-house',
+            'phone' => '+254733445566',
+        ]);
+        $otherBranch = $this->createBranch($otherBusiness, [
+            'branch_code' => 'BR-20260511-0002',
+            'email' => $otherBusiness->owner_email,
+            'phone' => $otherBusiness->phone,
+        ]);
+        $foreignStaff = $this->createStaff($otherBusiness, $otherBranch, [
+            'staff_code' => 'STF-20260511-0002',
+            'email' => 'foreign-staff@bookrahisi.test',
+        ]);
+
+        $this->withSession(['business_signup_email' => $business->owner_email])
+            ->post(route('for-business.pos.customers.store'), [
+                'branch_id' => $branch->id,
+                'full_name' => 'Jane Spa Client',
+                'phone_number' => '0712345678',
+                'email' => 'jane.client@bookrahisi.test',
+                'gender' => 'Female',
+                'customer_type' => 'VIP',
+                'preferred_staff_id' => $foreignStaff->id,
+            ])
+            ->assertSessionHasErrors('preferred_staff_id');
+
+        $this->assertDatabaseCount('customers', 0);
+        $this->assertDatabaseCount('memberships', 0);
+    }
+
+    public function test_service_required_product_must_belong_to_the_current_business(): void
+    {
+        $business = $this->createBusiness();
+        $branch = $this->createBranch($business);
+        $this->createBusinessUser($business);
+
+        $otherBusiness = $this->createBusiness([
+            'owner_email' => 'inventory-owner@bookrahisi.test',
+            'business_name' => 'Inventory House',
+            'slug' => 'inventory-house',
+            'phone' => '+254744556677',
+        ]);
+        $otherBranch = $this->createBranch($otherBusiness, [
+            'branch_code' => 'BR-20260511-0003',
+            'email' => $otherBusiness->owner_email,
+            'phone' => $otherBusiness->phone,
+        ]);
+        $foreignProduct = $this->createProduct($otherBusiness, $otherBranch, [
+            'product_code' => 'PRD-20260511-0003',
+            'barcode' => 'SKU003',
+        ]);
+
+        $this->withSession(['business_signup_email' => $business->owner_email])
+            ->post(route('for-business.pos.services.store'), [
+                'branch_id' => $branch->id,
+                'name' => 'Sensitive Facial',
+                'category' => 'Facial',
+                'price' => 2500,
+                'duration_minutes' => 60,
+                'commission_type' => 'Percentage',
+                'commission_rate' => 12,
+                'vat_applicable' => '1',
+                'vat_rate' => 16,
+                'gender_type' => 'Unisex',
+                'required_product_id' => $foreignProduct->id,
+                'required_product_quantity' => 1,
+                'description' => 'Deep cleaning facial.',
+                'is_active' => '1',
+            ])
+            ->assertSessionHasErrors('required_product_id');
+
+        $this->assertDatabaseCount('services', 0);
+    }
+
+    public function test_recording_a_sale_rejects_duplicate_mpesa_codes_before_hitting_the_database(): void
+    {
+        $business = $this->createBusiness();
+        $branch = $this->createBranch($business);
+        $staff = $this->createStaff($business, $branch);
+        $customer = $this->createCustomer($business, $branch, $staff);
+        $service = $this->createService($business, $branch);
+
+        $payload = [
+            'branch_id' => $branch->id,
+            'customer_id' => $customer->id,
+            'staff_id' => $staff->id,
+            'transaction_date' => now()->format('Y-m-d H:i:s'),
+            'sales_channel' => 'Walk-in',
+            'discount_amount' => 0,
+            'service_items' => [
+                [
+                    'service_id' => $service->id,
+                    'staff_id' => $staff->id,
+                    'quantity' => 1,
+                    'discount_amount' => 0,
+                    'deduct_products' => false,
+                ],
+            ],
+            'product_items' => [],
+            'package_items' => [],
+            'payments' => [
+                [
+                    'payment_method' => 'M-Pesa',
+                    'amount' => 1740,
+                    'status' => 'Paid',
+                    'reference' => 'POS-DEMO',
+                    'paid_at' => now()->format('Y-m-d H:i:s'),
+                    'notes' => 'First payment',
+                    'mpesa_code' => 'MPESA-DUPE-001',
+                    'phone_number' => '0712345678',
+                    'till_or_paybill' => 'Till 123456',
+                ],
+            ],
+        ];
+
+        $this->withSession(['business_signup_email' => $business->owner_email])
+            ->post(route('for-business.pos.sales.store'), $payload)
+            ->assertRedirect(route('for-business.pos', ['tab' => 'checkout']));
+
+        $duplicatePayload = $payload;
+        $duplicatePayload['payments'][0]['notes'] = 'Duplicate payment attempt';
+
+        $this->withSession(['business_signup_email' => $business->owner_email])
+            ->post(route('for-business.pos.sales.store'), $duplicatePayload)
+            ->assertSessionHasErrors('payments.0.mpesa_code');
+
+        $this->assertDatabaseCount('sales', 1);
+        $this->assertDatabaseCount('mpesa_transactions', 1);
+    }
+
     private function createBusiness(array $overrides = []): Business
     {
         return Business::query()->create(array_merge([
@@ -247,9 +403,9 @@ class PosModuleTest extends TestCase
         ], $overrides));
     }
 
-    private function createBranch(Business $business): Branch
+    private function createBranch(Business $business, array $overrides = []): Branch
     {
-        return Branch::query()->create([
+        return Branch::query()->create(array_merge([
             'business_id' => $business->id,
             'branch_code' => 'BR-20260511-0001',
             'name' => 'Main Branch',
@@ -259,7 +415,7 @@ class PosModuleTest extends TestCase
             'city' => $business->city,
             'is_primary' => true,
             'is_active' => true,
-        ]);
+        ], $overrides));
     }
 
     private function createStaff(Business $business, Branch $branch, array $overrides = []): Staff
@@ -352,6 +508,19 @@ class PosModuleTest extends TestCase
             'name' => 'Chair 1',
             'resource_type' => 'Chair',
             'status' => 'Active',
+        ]);
+    }
+
+    private function createBusinessUser(Business $business, string $role = 'Admin'): User
+    {
+        return User::query()->create([
+            'name' => $business->owner_first_name.' '.$business->owner_last_name,
+            'email' => $business->owner_email,
+            'phone_number' => $business->phone,
+            'password' => 'ownerpass123',
+            'is_admin' => false,
+            'account_status' => 'active',
+            'business_role' => $role,
         ]);
     }
 }
