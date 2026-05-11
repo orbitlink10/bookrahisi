@@ -16,6 +16,9 @@ Route::get('/customer/dashboard', [CustomerController::class, 'dashboard'])->nam
 Route::get('/customer/bookings', [CustomerController::class, 'bookings'])->name('customer.bookings');
 Route::post('/customer/bookings/{booking}/cancel', [CustomerController::class, 'cancelBooking'])->name('customer.bookings.cancel');
 Route::post('/customer/bookings/{booking}/review', [CustomerController::class, 'submitReview'])->name('customer.bookings.review');
+Route::get('/media/public/{path}', [PublicSiteController::class, 'publicMedia'])
+    ->where('path', '.*')
+    ->name('media.public');
 Route::get('/admin/sign-in', [AdminController::class, 'signIn'])->name('admin.sign-in');
 Route::post('/admin/sign-in', [AdminController::class, 'signInSubmit'])->name('admin.sign-in.submit');
 Route::post('/admin/sign-out', [AdminController::class, 'signOut'])->name('admin.sign-out');

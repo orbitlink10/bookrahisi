@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PublicSiteController extends Controller
 {
@@ -1040,6 +1041,17 @@ class PublicSiteController extends Controller
         ]);
     }
 
+    public function publicMedia(string $path): StreamedResponse
+    {
+        $normalizedPath = $this->normalizedPublicStoragePath($path);
+
+        abort_unless($normalizedPath !== '' && Storage::disk('public')->exists($normalizedPath), 404);
+
+        return Storage::disk('public')->response($normalizedPath, null, [
+            'Cache-Control' => 'public, max-age=31536000',
+        ]);
+    }
+
     private function hydrateOwnerSessionFromDatabase(Request $request): void
     {
         $email = $request->session()->get('business_signup_email');
@@ -1216,7 +1228,14 @@ class PublicSiteController extends Controller
     {
         return collect($images)
             ->filter(fn ($image) => is_string($image) && trim($image) !== '')
-            ->map(fn (string $image): string => $this->publicGalleryImageUrl($image))
+            ->map(function (string $image): ?string {
+                if (! $this->publicGalleryImageExists($image)) {
+                    return null;
+                }
+
+                return $this->publicGalleryImageUrl($image);
+            })
+            ->filter(fn ($image) => is_string($image) && $image !== '')
             ->values()
             ->all();
     }
@@ -1254,18 +1273,40 @@ class PublicSiteController extends Controller
             return $image;
         }
 
-        $normalizedImage = str_replace('\\', '/', trim($image));
-        $normalizedImage = ltrim($normalizedImage, '/');
+        $normalizedImage = $this->normalizedPublicStoragePath($image);
 
-        if (Str::startsWith($normalizedImage, 'public/')) {
-            $normalizedImage = substr($normalizedImage, strlen('public/'));
+        return route('media.public', ['path' => $normalizedImage]);
+    }
+
+    private function publicGalleryImageExists(string $image): bool
+    {
+        if (Str::startsWith($image, ['http://', 'https://'])) {
+            return true;
         }
 
-        if (Str::startsWith($normalizedImage, 'storage/')) {
-            return asset($normalizedImage);
+        $normalizedImage = $this->normalizedPublicStoragePath($image);
+
+        return $normalizedImage !== '' && Storage::disk('public')->exists($normalizedImage);
+    }
+
+    private function normalizedPublicStoragePath(string $path): string
+    {
+        $normalizedPath = str_replace('\\', '/', trim($path));
+        $normalizedPath = ltrim($normalizedPath, '/');
+
+        if (Str::startsWith($normalizedPath, 'public/')) {
+            $normalizedPath = substr($normalizedPath, strlen('public/'));
         }
 
-        return asset('storage/'.$normalizedImage);
+        if (Str::startsWith($normalizedPath, 'storage/')) {
+            $normalizedPath = substr($normalizedPath, strlen('storage/'));
+        }
+
+        if ($normalizedPath === '' || Str::contains($normalizedPath, ['../', '/..'])) {
+            return '';
+        }
+
+        return trim($normalizedPath, '/');
     }
 
     private function youtubeEmbedUrl(?string $url): ?string

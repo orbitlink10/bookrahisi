@@ -52,6 +52,9 @@ class ExampleTest extends TestCase
 
     public function test_the_homepage_uses_uploaded_business_gallery_images_when_available(): void
     {
+        Storage::fake('public');
+        Storage::disk('public')->put('business-gallery/hero-image.jpg', 'fake-image');
+
         $business = $this->createBusiness([
             'gallery_images' => ['business-gallery/hero-image.jpg'],
         ]);
@@ -60,7 +63,7 @@ class ExampleTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertSee(asset('storage/'.$business->gallery_images[0]), false)
+            ->assertSee(route('media.public', ['path' => $business->gallery_images[0]]), false)
             ->assertSeeText($business->business_name);
     }
 
@@ -447,8 +450,8 @@ class ExampleTest extends TestCase
 
         $publicPage
             ->assertOk()
-            ->assertSee(asset('storage/'.$business->gallery_images[0]), false)
-            ->assertSee(asset('storage/'.$business->gallery_images[1]), false);
+            ->assertSee(route('media.public', ['path' => $business->gallery_images[0]]), false)
+            ->assertSee(route('media.public', ['path' => $business->gallery_images[1]]), false);
     }
 
     public function test_the_gallery_image_url_resolver_uses_request_aware_storage_urls(): void
@@ -463,12 +466,25 @@ class ExampleTest extends TestCase
             $resolvedUrl = $method->invoke($controller, 'business-gallery/space-1.jpg');
 
             $this->assertSame(
-                'http://localhost/bookrahisi/public/storage/business-gallery/space-1.jpg',
+                'http://localhost/bookrahisi/public/media/public/business-gallery/space-1.jpg',
                 $resolvedUrl
             );
         } finally {
             URL::forceRootUrl(null);
         }
+    }
+
+    public function test_uploaded_gallery_images_are_served_through_the_public_media_route(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('business-gallery/space-1.jpg', 'gallery-image-content');
+
+        $response = $this->get(route('media.public', ['path' => 'business-gallery/space-1.jpg']));
+
+        $response
+            ->assertOk()
+            ->assertHeader('cache-control', 'max-age=31536000, public')
+            ->assertStreamedContent('gallery-image-content');
     }
 
     public function test_the_business_profile_details_form_rejects_an_invalid_youtube_link(): void
