@@ -228,6 +228,17 @@
                 font-weight: 700;
             }
 
+            .warning-banner {
+                margin-bottom: 18px;
+                padding: 16px 18px;
+                border: 1px solid rgba(179, 108, 0, 0.16);
+                border-radius: 20px;
+                background: var(--warning-soft);
+                color: var(--warning-ink);
+                font-size: 0.96rem;
+                font-weight: 700;
+            }
+
             .hero-card {
                 display: grid;
                 grid-template-columns: minmax(0, 1.2fr) auto;
@@ -573,6 +584,10 @@
 
                     @if (session('dashboard_success'))
                         <div class="success-banner">{{ session('dashboard_success') }}</div>
+                    @endif
+
+                    @if (session('dashboard_warning'))
+                        <div class="warning-banner">{{ session('dashboard_warning') }}</div>
                     @endif
 
                     <section class="hero-card">

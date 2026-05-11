@@ -7,6 +7,7 @@ use App\Models\BlogPost;
 use App\Models\Business;
 use App\Models\Review;
 use App\Models\User;
+use App\Support\BusinessConsoleSchema;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -336,6 +337,15 @@ class PublicSiteController extends Controller
             }
 
             $ownerName = $validated['first_name'].' '.$validated['last_name'];
+            $ownerPayload = [
+                'name' => $ownerName,
+                'phone_number' => $validated['phone'],
+                'account_status' => 'active',
+            ];
+
+            if (BusinessConsoleSchema::hasBusinessRoleColumn()) {
+                $ownerPayload['business_role'] = 'Admin';
+            }
 
             if ($existingUser) {
                 if (! Hash::check($validated['password'], $existingUser->password)) {
@@ -345,21 +355,12 @@ class PublicSiteController extends Controller
                         ->withInput($request->except('password', 'password_confirmation'));
                 }
 
-                $existingUser->update([
-                    'name' => $ownerName,
-                    'phone_number' => $validated['phone'],
-                    'account_status' => 'active',
-                    'business_role' => 'Admin',
-                ]);
+                $existingUser->update($ownerPayload);
             } else {
-                User::query()->create([
-                    'name' => $ownerName,
+                User::query()->create($ownerPayload + [
                     'email' => $validated['email'],
-                    'phone_number' => $validated['phone'],
                     'password' => $validated['password'],
                     'is_admin' => false,
-                    'account_status' => 'active',
-                    'business_role' => 'Admin',
                 ]);
             }
 

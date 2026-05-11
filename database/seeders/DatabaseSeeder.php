@@ -20,6 +20,7 @@ use App\Models\SaleItem;
 use App\Models\Service;
 use App\Models\Staff;
 use App\Models\User;
+use App\Support\BusinessConsoleSchema;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Schema;
@@ -32,14 +33,14 @@ class DatabaseSeeder extends Seeder
     {
         User::query()->updateOrCreate(
             ['email' => 'admin@bookrahisi.test'],
-            [
+            array_filter([
                 'name' => 'Book Rahisi Owner',
                 'phone_number' => '+254700000010',
                 'password' => 'password',
                 'is_admin' => true,
                 'account_status' => 'active',
-                'business_role' => 'Admin',
-            ]
+                'business_role' => BusinessConsoleSchema::hasBusinessRoleColumn() ? 'Admin' : null,
+            ], static fn ($value) => $value !== null)
         );
 
         $customerUser = User::query()->updateOrCreate(
@@ -59,14 +60,14 @@ class DatabaseSeeder extends Seeder
 
         User::query()->updateOrCreate(
             ['email' => 'owner@bookrahisi.test'],
-            [
+            array_filter([
                 'name' => 'Amina Njeri',
                 'phone_number' => '+254711223344',
                 'password' => 'password',
                 'is_admin' => false,
                 'account_status' => 'active',
-                'business_role' => 'Admin',
-            ]
+                'business_role' => BusinessConsoleSchema::hasBusinessRoleColumn() ? 'Admin' : null,
+            ], static fn ($value) => $value !== null)
         );
 
         $business = Business::query()->updateOrCreate(

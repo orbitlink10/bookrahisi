@@ -20,6 +20,7 @@ use App\Services\Pos\AppointmentService;
 use App\Services\Pos\PosReferenceGenerator;
 use App\Services\Pos\PosReportService;
 use App\Services\Pos\SaleProcessor;
+use App\Support\BusinessConsoleSchema;
 use App\Support\PosOptions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -38,6 +39,10 @@ class BusinessPosController extends Controller
 
     public function index(Request $request): View|RedirectResponse
     {
+        if ($redirect = $this->posModuleUnavailableRedirect()) {
+            return $redirect;
+        }
+
         $context = $this->ownerContext($request);
 
         if ($context instanceof RedirectResponse) {
@@ -112,6 +117,10 @@ class BusinessPosController extends Controller
 
     public function storeCustomer(StorePosCustomerRequest $request): RedirectResponse
     {
+        if ($redirect = $this->posModuleUnavailableRedirect()) {
+            return $redirect;
+        }
+
         $business = $this->businessOrRedirect($request);
 
         if ($business instanceof RedirectResponse) {
@@ -172,6 +181,10 @@ class BusinessPosController extends Controller
 
     public function storeStaff(StorePosStaffRequest $request): RedirectResponse
     {
+        if ($redirect = $this->posModuleUnavailableRedirect()) {
+            return $redirect;
+        }
+
         $business = $this->businessOrRedirect($request);
 
         if ($business instanceof RedirectResponse) {
@@ -208,6 +221,10 @@ class BusinessPosController extends Controller
 
     public function storeService(StorePosServiceRequest $request): RedirectResponse
     {
+        if ($redirect = $this->posModuleUnavailableRedirect()) {
+            return $redirect;
+        }
+
         $business = $this->businessOrRedirect($request);
 
         if ($business instanceof RedirectResponse) {
@@ -253,6 +270,10 @@ class BusinessPosController extends Controller
 
     public function storeProduct(StorePosProductRequest $request): RedirectResponse
     {
+        if ($redirect = $this->posModuleUnavailableRedirect()) {
+            return $redirect;
+        }
+
         $business = $this->businessOrRedirect($request);
 
         if ($business instanceof RedirectResponse) {
@@ -293,6 +314,10 @@ class BusinessPosController extends Controller
 
     public function storeRoomChair(StorePosRoomChairRequest $request): RedirectResponse
     {
+        if ($redirect = $this->posModuleUnavailableRedirect()) {
+            return $redirect;
+        }
+
         $business = $this->businessOrRedirect($request);
 
         if ($business instanceof RedirectResponse) {
@@ -323,6 +348,10 @@ class BusinessPosController extends Controller
 
     public function storeAppointment(StorePosAppointmentRequest $request): RedirectResponse
     {
+        if ($redirect = $this->posModuleUnavailableRedirect()) {
+            return $redirect;
+        }
+
         $business = $this->businessOrRedirect($request);
 
         if ($business instanceof RedirectResponse) {
@@ -338,6 +367,10 @@ class BusinessPosController extends Controller
 
     public function storeSale(StorePosSaleRequest $request): RedirectResponse
     {
+        if ($redirect = $this->posModuleUnavailableRedirect()) {
+            return $redirect;
+        }
+
         $business = $this->businessOrRedirect($request);
 
         if ($business instanceof RedirectResponse) {
@@ -354,6 +387,10 @@ class BusinessPosController extends Controller
 
     public function storeExpense(StorePosExpenseRequest $request): RedirectResponse
     {
+        if ($redirect = $this->posModuleUnavailableRedirect()) {
+            return $redirect;
+        }
+
         $business = $this->businessOrRedirect($request);
 
         if ($business instanceof RedirectResponse) {
@@ -385,6 +422,10 @@ class BusinessPosController extends Controller
 
     public function receipt(Request $request, Sale $sale): View|RedirectResponse
     {
+        if ($redirect = $this->posModuleUnavailableRedirect()) {
+            return $redirect;
+        }
+
         $business = $this->businessOrRedirect($request);
 
         if ($business instanceof RedirectResponse) {
@@ -506,9 +547,24 @@ class BusinessPosController extends Controller
 
     private function currentBusinessRole(string $email): string
     {
+        if (! BusinessConsoleSchema::hasBusinessRoleColumn()) {
+            return 'Admin';
+        }
+
         return User::query()
             ->where('email', $email)
             ->value('business_role') ?: 'Admin';
+    }
+
+    private function posModuleUnavailableRedirect(): ?RedirectResponse
+    {
+        if (BusinessConsoleSchema::hasPosModuleTables()) {
+            return null;
+        }
+
+        return redirect()
+            ->route('for-business.tools')
+            ->with('dashboard_warning', 'The POS module database migration has not been applied on this environment yet. Run `php artisan migrate` to enable POS features.');
     }
 
     private function hydrateOwnerSessionFromDatabase(Request $request): void
