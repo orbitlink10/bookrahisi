@@ -77,6 +77,7 @@ Route::get('/for-business/tools/pos/receipts/{sale}', [BusinessPosController::cl
 Route::get('/for-business/tools/settings', [PublicSiteController::class, 'businessSettings'])->name('for-business.settings');
 Route::get('/for-business/tools/bookings', [PublicSiteController::class, 'businessBookings'])->name('for-business.bookings');
 Route::get('/for-business/tools/profile', [PublicSiteController::class, 'businessProfileDetails'])->name('for-business.profile-details');
+Route::get('/for-business/tools/profile/address-autocomplete', [PublicSiteController::class, 'businessProfileAddressAutocomplete'])->name('for-business.profile-details.address-autocomplete');
 Route::post('/for-business/tools/profile', [PublicSiteController::class, 'businessProfileDetailsSubmit'])->name('for-business.profile-details.submit');
 Route::get('/blog', [PublicSiteController::class, 'blogIndex'])->name('blog.index');
 Route::get('/blog/{slug}', [PublicSiteController::class, 'blogShow'])->name('blog.show');

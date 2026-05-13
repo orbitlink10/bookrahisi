@@ -679,7 +679,6 @@
     <body>
         @php
             $profileReady = is_array($profileDetails) && $profileDetails !== [];
-            $googleMapsApiKey = config('services.google.maps_api_key');
         @endphp
 
         <div class="console-app">
@@ -789,10 +788,7 @@
                                         </div>
                                         <div class="location-picker-dropdown" id="address-suggestions" hidden></div>
                                         <span class="field-hint" id="location-picker-status">
-                                            Start typing and select an address from Google Maps suggestions to fill the street address, city, and neighborhood faster.
-                                            @if (! $googleMapsApiKey)
-                                                Google Maps suggestions are currently unavailable until `GOOGLE_MAPS_API_KEY` is configured, so manual entry still works.
-                                            @endif
+                                            Start typing and select an address from OpenStreetMap suggestions to fill the street address, city, and neighborhood faster.
                                         </span>
                                         @error('address_line')
                                             <span class="field-error">{{ $message }}</span>
@@ -978,319 +974,246 @@
                 </div>
             </main>
         </div>
-        @if ($googleMapsApiKey)
-            <script>
-                window.initBusinessProfileAddressPicker = function () {
-                    const addressInput = document.getElementById('address-line');
-                    const cityInput = document.getElementById('city');
-                    const neighborhoodInput = document.getElementById('neighborhood');
-                    const statusNode = document.getElementById('location-picker-status');
-                    const clearButton = document.getElementById('address-line-clear');
-                    const dropdown = document.getElementById('address-suggestions');
+        <script>
+            (function () {
+                const addressInput = document.getElementById('address-line');
+                const cityInput = document.getElementById('city');
+                const neighborhoodInput = document.getElementById('neighborhood');
+                const statusNode = document.getElementById('location-picker-status');
+                const clearButton = document.getElementById('address-line-clear');
+                const dropdown = document.getElementById('address-suggestions');
+                const endpoint = @json($addressAutocompleteEndpoint);
 
-                    if (! addressInput || ! dropdown || ! window.google || ! window.google.maps || ! window.google.maps.places) {
+                if (! addressInput || ! dropdown || ! endpoint) {
+                    return;
+                }
+
+                let activeIndex = -1;
+                let debounceTimer = null;
+                let activeRequest = null;
+                let suggestions = [];
+
+                const updateClearButton = function () {
+                    if (! clearButton) {
                         return;
                     }
 
-                    const autocompleteService = new window.google.maps.places.AutocompleteService();
-                    const placesService = new window.google.maps.places.PlacesService(document.createElement('div'));
-                    let activeIndex = -1;
-                    let debounceTimer = null;
-                    let predictions = [];
+                    clearButton.hidden = addressInput.value.trim() === '';
+                };
 
-                    const updateClearButton = function () {
-                        if (! clearButton) {
-                            return;
-                        }
+                const hideDropdown = function () {
+                    dropdown.hidden = true;
+                    dropdown.innerHTML = '';
+                    addressInput.setAttribute('aria-expanded', 'false');
+                    activeIndex = -1;
+                };
 
-                        clearButton.hidden = addressInput.value.trim() === '';
-                    };
+                const locationOptionIcon = function () {
+                    return `
+                        <span class="location-picker-option-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 21s6-5.33 6-11a6 6 0 1 0-12 0c0 5.67 6 11 6 11Z"></path>
+                                <circle cx="12" cy="10" r="2.5"></circle>
+                            </svg>
+                        </span>
+                    `;
+                };
 
-                    const hideDropdown = function () {
-                        dropdown.hidden = true;
-                        dropdown.innerHTML = '';
-                        addressInput.setAttribute('aria-expanded', 'false');
-                        activeIndex = -1;
-                    };
+                const escapeHtml = function (value) {
+                    return String(value)
+                        .replaceAll('&', '&amp;')
+                        .replaceAll('<', '&lt;')
+                        .replaceAll('>', '&gt;')
+                        .replaceAll('"', '&quot;')
+                        .replaceAll("'", '&#039;');
+                };
 
-                    const componentMap = function (addressComponents) {
-                        return (addressComponents || []).reduce(function (carry, component) {
-                            (component.types || []).forEach(function (type) {
-                                if (! carry[type]) {
-                                    carry[type] = component.long_name;
-                                }
-                            });
+                const renderEmptyState = function (message) {
+                    dropdown.innerHTML = '<div class="location-picker-empty">' + message + '</div>';
+                    dropdown.hidden = false;
+                    addressInput.setAttribute('aria-expanded', 'true');
+                    activeIndex = -1;
+                };
 
-                            return carry;
-                        }, {});
-                    };
+                const fillSuggestion = function (suggestion) {
+                    addressInput.value = suggestion.address_line || addressInput.value;
 
-                    const composeAddressLine = function (components, place) {
-                        const mainStreet = [components.street_number, components.route].filter(Boolean).join(' ').trim();
-                        const secondaryLine = components.subpremise || components.premise || components.establishment || place.name || '';
-                        const parts = [];
+                    if (cityInput && suggestion.city) {
+                        cityInput.value = suggestion.city;
+                    }
 
-                        if (mainStreet !== '') {
-                            parts.push(mainStreet);
-                        }
+                    if (neighborhoodInput && suggestion.neighborhood) {
+                        neighborhoodInput.value = suggestion.neighborhood;
+                    }
 
-                        if (secondaryLine !== '' && ! parts.includes(secondaryLine)) {
-                            parts.push(secondaryLine);
-                        }
+                    updateClearButton();
+                    hideDropdown();
 
-                        if (parts.length > 0) {
-                            return parts.join(', ');
-                        }
+                    if (statusNode) {
+                        statusNode.textContent = 'Picked from OpenStreetMap data. You can still adjust the street address, city, or neighborhood manually before saving.';
+                    }
+                };
 
-                        if (typeof place.formatted_address === 'string' && place.formatted_address.trim() !== '') {
-                            return place.formatted_address
-                                .split(',')
-                                .slice(0, 2)
-                                .map(function (part) {
-                                    return part.trim();
-                                })
-                                .filter(Boolean)
-                                .join(', ');
-                        }
+                const renderSuggestions = function () {
+                    if (suggestions.length === 0) {
+                        renderEmptyState('No OpenStreetMap addresses matched that search yet.');
+                        return;
+                    }
 
-                        return addressInput.value;
-                    };
-
-                    const locationOptionIcon = function () {
+                    dropdown.innerHTML = suggestions.map(function (suggestion, index) {
                         return `
-                            <span class="location-picker-option-icon" aria-hidden="true">
-                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 21s6-5.33 6-11a6 6 0 1 0-12 0c0 5.67 6 11 6 11Z"></path>
-                                    <circle cx="12" cy="10" r="2.5"></circle>
-                                </svg>
-                            </span>
+                            <button class="location-picker-option${index === activeIndex ? ' is-active' : ''}" type="button" data-index="${index}">
+                                ${locationOptionIcon()}
+                                <span class="location-picker-option-copy">
+                                    <span class="location-picker-option-primary">${escapeHtml(suggestion.address_line || suggestion.label || '')}</span>
+                                    <span class="location-picker-option-secondary">${escapeHtml(suggestion.secondary_label || suggestion.label || '')}</span>
+                                </span>
+                            </button>
                         `;
-                    };
+                    }).join('');
 
-                    const escapeHtml = function (value) {
-                        return String(value)
-                            .replaceAll('&', '&amp;')
-                            .replaceAll('<', '&lt;')
-                            .replaceAll('>', '&gt;')
-                            .replaceAll('"', '&quot;')
-                            .replaceAll("'", '&#039;');
-                    };
+                    dropdown.hidden = false;
+                    addressInput.setAttribute('aria-expanded', 'true');
 
-                    const renderEmptyState = function (message) {
-                        dropdown.innerHTML = '<div class="location-picker-empty">' + message + '</div>';
-                        dropdown.hidden = false;
-                        addressInput.setAttribute('aria-expanded', 'true');
-                        activeIndex = -1;
-                    };
+                    Array.from(dropdown.querySelectorAll('.location-picker-option')).forEach(function (button) {
+                        button.addEventListener('mousedown', function (event) {
+                            event.preventDefault();
+                        });
 
-                    const fillPlace = function (place) {
-                        if (! place || ! Array.isArray(place.address_components) || place.address_components.length === 0) {
-                            if (statusNode) {
-                                statusNode.textContent = 'Select one of the Google Maps suggestions to apply the address details.';
+                        button.addEventListener('click', function () {
+                            const index = Number(button.getAttribute('data-index'));
+
+                            if (! Number.isNaN(index) && suggestions[index]) {
+                                fillSuggestion(suggestions[index]);
                             }
+                        });
+                    });
+                };
 
+                const fetchSuggestions = async function (query) {
+                    if (query.length < 3) {
+                        suggestions = [];
+                        hideDropdown();
+
+                        if (statusNode) {
+                            statusNode.textContent = 'Keep typing to search for a street, building, or area from OpenStreetMap.';
+                        }
+
+                        return;
+                    }
+
+                    if (activeRequest) {
+                        activeRequest.abort();
+                    }
+
+                    activeRequest = new AbortController();
+
+                    try {
+                        const response = await fetch(endpoint + '?q=' + encodeURIComponent(query), {
+                            headers: {
+                                'Accept': 'application/json',
+                            },
+                            signal: activeRequest.signal,
+                        });
+
+                        if (! response.ok) {
+                            throw new Error('Address lookup failed.');
+                        }
+
+                        const payload = await response.json();
+                        suggestions = Array.isArray(payload.suggestions) ? payload.suggestions : [];
+
+                        if (statusNode && typeof payload.message === 'string' && payload.message !== '') {
+                            statusNode.textContent = payload.message;
+                        }
+
+                        activeIndex = suggestions.length > 0 ? 0 : -1;
+                        renderSuggestions();
+                    } catch (error) {
+                        if (error.name === 'AbortError') {
                             return;
                         }
 
-                        const components = componentMap(place.address_components);
+                        suggestions = [];
+                        renderEmptyState('OpenStreetMap suggestions are temporarily unavailable. You can still enter the address manually.');
 
-                        addressInput.value = composeAddressLine(components, place);
-
-                        if (cityInput) {
-                            cityInput.value = components.locality
-                                || components.administrative_area_level_2
-                                || components.administrative_area_level_1
-                                || cityInput.value;
+                        if (statusNode) {
+                            statusNode.textContent = 'OpenStreetMap suggestions are temporarily unavailable. You can still enter the address manually.';
                         }
+                    }
+                };
 
-                        if (neighborhoodInput) {
-                            neighborhoodInput.value = components.sublocality_level_1
-                                || components.sublocality
-                                || components.neighborhood
-                                || components.premise
-                                || components.establishment
-                                || neighborhoodInput.value;
-                        }
+                if (statusNode) {
+                    statusNode.textContent = 'Start typing and select an address from OpenStreetMap suggestions to fill the street address, city, and neighborhood faster.';
+                }
 
+                addressInput.addEventListener('input', function () {
+                    updateClearButton();
+                    window.clearTimeout(debounceTimer);
+                    debounceTimer = window.setTimeout(function () {
+                        fetchSuggestions(addressInput.value.trim());
+                    }, 180);
+                });
+
+                addressInput.addEventListener('focus', function () {
+                    if (addressInput.value.trim().length >= 3) {
+                        fetchSuggestions(addressInput.value.trim());
+                    }
+                });
+
+                addressInput.addEventListener('keydown', function (event) {
+                    if (dropdown.hidden || suggestions.length === 0) {
+                        return;
+                    }
+
+                    if (event.key === 'ArrowDown') {
+                        event.preventDefault();
+                        activeIndex = (activeIndex + 1) % suggestions.length;
+                        renderSuggestions();
+                        return;
+                    }
+
+                    if (event.key === 'ArrowUp') {
+                        event.preventDefault();
+                        activeIndex = (activeIndex - 1 + suggestions.length) % suggestions.length;
+                        renderSuggestions();
+                        return;
+                    }
+
+                    if (event.key === 'Enter' && activeIndex >= 0 && suggestions[activeIndex]) {
+                        event.preventDefault();
+                        fillSuggestion(suggestions[activeIndex]);
+                        return;
+                    }
+
+                    if (event.key === 'Escape') {
+                        hideDropdown();
+                    }
+                });
+
+                document.addEventListener('click', function (event) {
+                    if (! dropdown.contains(event.target) && event.target !== addressInput && event.target !== clearButton) {
+                        hideDropdown();
+                    }
+                });
+
+                if (clearButton) {
+                    clearButton.addEventListener('click', function () {
+                        addressInput.value = '';
+                        suggestions = [];
                         updateClearButton();
                         hideDropdown();
 
                         if (statusNode) {
-                            statusNode.textContent = 'Picked from Google Maps. You can still adjust the street address, city, or neighborhood manually before saving.';
-                        }
-                    };
-
-                    const selectPrediction = function (prediction) {
-                        placesService.getDetails({
-                            placeId: prediction.place_id,
-                            fields: ['address_components', 'formatted_address', 'name'],
-                        }, function (place, status) {
-                            if (status !== window.google.maps.places.PlacesServiceStatus.OK || ! place) {
-                                if (statusNode) {
-                                    statusNode.textContent = 'Google Maps found a suggestion, but the address details could not be loaded. You can keep typing or fill the fields manually.';
-                                }
-
-                                return;
-                            }
-
-                            fillPlace(place);
-                        });
-                    };
-
-                    const renderPredictions = function () {
-                        if (predictions.length === 0) {
-                            renderEmptyState('No Google Maps locations matched that search yet.');
-                            return;
+                            statusNode.textContent = 'Start typing and select an address from OpenStreetMap suggestions to fill the street address, city, and neighborhood faster.';
                         }
 
-                        dropdown.innerHTML = predictions.map(function (prediction, index) {
-                            const mainText = prediction.structured_formatting && prediction.structured_formatting.main_text
-                                ? prediction.structured_formatting.main_text
-                                : prediction.description;
-                            const secondaryText = prediction.structured_formatting && prediction.structured_formatting.secondary_text
-                                ? prediction.structured_formatting.secondary_text
-                                : prediction.description;
-
-                            return `
-                                <button class="location-picker-option${index === activeIndex ? ' is-active' : ''}" type="button" data-index="${index}">
-                                    ${locationOptionIcon()}
-                                    <span class="location-picker-option-copy">
-                                        <span class="location-picker-option-primary">${escapeHtml(mainText)}</span>
-                                        <span class="location-picker-option-secondary">${escapeHtml(secondaryText)}</span>
-                                    </span>
-                                </button>
-                            `;
-                        }).join('');
-
-                        dropdown.hidden = false;
-                        addressInput.setAttribute('aria-expanded', 'true');
-
-                        Array.from(dropdown.querySelectorAll('.location-picker-option')).forEach(function (button) {
-                            button.addEventListener('mousedown', function (event) {
-                                event.preventDefault();
-                            });
-
-                            button.addEventListener('click', function () {
-                                const index = Number(button.getAttribute('data-index'));
-
-                                if (! Number.isNaN(index) && predictions[index]) {
-                                    selectPrediction(predictions[index]);
-                                }
-                            });
-                        });
-                    };
-
-                    const fetchPredictions = function (query) {
-                        if (query.length < 3) {
-                            predictions = [];
-                            hideDropdown();
-
-                            if (statusNode) {
-                                statusNode.textContent = 'Keep typing to search for a street, building, or area from Google Maps.';
-                            }
-
-                            return;
-                        }
-
-                        autocompleteService.getPlacePredictions({
-                            input: query,
-                            componentRestrictions: { country: 'ke' },
-                        }, function (results, status) {
-                            if (status === window.google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
-                                predictions = [];
-                                renderEmptyState('No Google Maps locations matched that search yet.');
-                                return;
-                            }
-
-                            if (status !== window.google.maps.places.PlacesServiceStatus.OK || ! results) {
-                                predictions = [];
-                                renderEmptyState('Keep typing to search for a street, building, or area from Google Maps.');
-                                return;
-                            }
-
-                            predictions = results.slice(0, 5);
-                            activeIndex = 0;
-                            renderPredictions();
-                        });
-                    };
-
-                    if (statusNode) {
-                        statusNode.textContent = 'Start typing and select an address from Google Maps suggestions to fill the street address, city, and neighborhood faster.';
-                    }
-
-                    addressInput.addEventListener('input', function () {
-                        updateClearButton();
-                        window.clearTimeout(debounceTimer);
-                        debounceTimer = window.setTimeout(function () {
-                            fetchPredictions(addressInput.value.trim());
-                        }, 160);
+                        addressInput.focus();
                     });
+                }
 
-                    addressInput.addEventListener('focus', function () {
-                        if (addressInput.value.trim().length >= 3) {
-                            fetchPredictions(addressInput.value.trim());
-                        }
-                    });
-
-                    addressInput.addEventListener('keydown', function (event) {
-                        if (dropdown.hidden || predictions.length === 0) {
-                            return;
-                        }
-
-                        if (event.key === 'ArrowDown') {
-                            event.preventDefault();
-                            activeIndex = (activeIndex + 1) % predictions.length;
-                            renderPredictions();
-                            return;
-                        }
-
-                        if (event.key === 'ArrowUp') {
-                            event.preventDefault();
-                            activeIndex = (activeIndex - 1 + predictions.length) % predictions.length;
-                            renderPredictions();
-                            return;
-                        }
-
-                        if (event.key === 'Enter' && activeIndex >= 0 && predictions[activeIndex]) {
-                            event.preventDefault();
-                            selectPrediction(predictions[activeIndex]);
-                            return;
-                        }
-
-                        if (event.key === 'Escape') {
-                            hideDropdown();
-                        }
-                    });
-
-                    document.addEventListener('click', function (event) {
-                        if (! dropdown.contains(event.target) && event.target !== addressInput && event.target !== clearButton) {
-                            hideDropdown();
-                        }
-                    });
-
-                    if (clearButton) {
-                        clearButton.addEventListener('click', function () {
-                            addressInput.value = '';
-                            predictions = [];
-                            updateClearButton();
-                            hideDropdown();
-
-                            if (statusNode) {
-                                statusNode.textContent = 'Start typing and select an address from Google Maps suggestions to fill the street address, city, and neighborhood faster.';
-                            }
-
-                            addressInput.focus();
-                        });
-                    }
-
-                    updateClearButton();
-                };
-            </script>
-            <script
-                async
-                defer
-                src="https://maps.googleapis.com/maps/api/js?key={{ rawurlencode($googleMapsApiKey) }}&libraries=places&callback=initBusinessProfileAddressPicker"
-            ></script>
-        @endif
+                updateClearButton();
+            })();
+        </script>
     </body>
 </html>

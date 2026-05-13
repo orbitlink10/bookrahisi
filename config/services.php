@@ -39,4 +39,9 @@ return [
         'maps_api_key' => env('GOOGLE_MAPS_API_KEY'),
     ],
 
+    'photon' => [
+        'base_url' => env('PHOTON_BASE_URL', 'https://photon.komoot.io/api'),
+        'country_code' => env('PHOTON_COUNTRY_CODE', 'KE'),
+    ],
+
 ];

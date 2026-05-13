@@ -8,9 +8,11 @@ use App\Models\Business;
 use App\Models\Review;
 use App\Models\User;
 use App\Support\BusinessConsoleSchema;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
@@ -753,12 +755,87 @@ class PublicSiteController extends Controller
 
         return view('for-business-profile-details', [
             'accountSetup' => $accountSetup,
+            'addressAutocompleteEndpoint' => route('for-business.profile-details.address-autocomplete'),
             'businessSlug' => Str::slug($accountSetup['business_name']),
             'email' => $email,
             'galleryPreviewImages' => $this->galleryImageUrls($request->session()->get('business_profile_details.gallery_images', [])),
             'profileDetails' => $request->session()->get('business_profile_details', []),
             'previewImageUrl' => $this->galleryImageUrls($request->session()->get('business_profile_details.gallery_images', []))[0] ?? 'https://images.unsplash.com/photo-1493256338651-d82f7acb2b38?auto=format&fit=crop&w=1400&q=80',
             'sideImage' => 'https://images.unsplash.com/photo-1493256338651-d82f7acb2b38?auto=format&fit=crop&w=1400&q=80',
+        ]);
+    }
+
+    public function businessProfileAddressAutocomplete(Request $request): JsonResponse
+    {
+        $email = $request->session()->get('business_signup_email');
+
+        if (! $email) {
+            return response()->json([
+                'suggestions' => [],
+                'message' => 'Sign in again to continue using business tools.',
+            ], 401);
+        }
+
+        $validated = $request->validate([
+            'q' => ['required', 'string', 'min:3', 'max:160'],
+        ]);
+
+        $countryCode = strtoupper((string) config('services.photon.country_code', 'KE'));
+        $baseUrl = (string) config('services.photon.base_url', 'https://photon.komoot.io/api');
+        $layerParams = ['house', 'street', 'district', 'city', 'locality'];
+        $queryString = http_build_query([
+            'q' => trim($validated['q']),
+            'limit' => 5,
+            'lang' => 'en',
+            'countrycode' => $countryCode,
+        ]);
+        $layerQueryString = implode('&', array_map(
+            static fn (string $layer): string => 'layer='.rawurlencode($layer),
+            $layerParams,
+        ));
+        $requestUrl = $baseUrl.'?'.$queryString.'&'.$layerQueryString;
+
+        try {
+            $response = Http::acceptJson()
+                ->withHeaders([
+                    'User-Agent' => config('app.name', 'Book Rahisi').'/1.0',
+                ])
+                ->timeout(6)
+                ->get($requestUrl);
+        } catch (\Throwable) {
+            return response()->json([
+                'suggestions' => [],
+                'message' => 'OpenStreetMap suggestions are temporarily unavailable. You can still enter the address manually.',
+            ], 200);
+        }
+
+        if (! $response->successful()) {
+            return response()->json([
+                'suggestions' => [],
+                'message' => 'OpenStreetMap suggestions are temporarily unavailable. You can still enter the address manually.',
+            ], 200);
+        }
+
+        $features = $response->json('features');
+
+        if (! is_array($features)) {
+            return response()->json([
+                'suggestions' => [],
+                'message' => 'No address suggestions matched that search yet.',
+            ]);
+        }
+
+        $suggestions = collect($features)
+            ->map(fn (mixed $feature): ?array => $this->mapPhotonSuggestion($feature))
+            ->filter()
+            ->values()
+            ->all();
+
+        return response()->json([
+            'suggestions' => $suggestions,
+            'message' => $suggestions === []
+                ? 'No OpenStreetMap addresses matched that search yet.'
+                : 'Select an OpenStreetMap suggestion to fill the street address, city, and neighborhood faster.',
         ]);
     }
 
@@ -1083,6 +1160,58 @@ class PublicSiteController extends Controller
             'business_account_setup',
             'business_profile_details',
         ]);
+    }
+
+    private function mapPhotonSuggestion(mixed $feature): ?array
+    {
+        if (! is_array($feature)) {
+            return null;
+        }
+
+        $properties = is_array($feature['properties'] ?? null) ? $feature['properties'] : [];
+
+        if ($properties === []) {
+            return null;
+        }
+
+        $name = trim((string) ($properties['name'] ?? ''));
+        $street = trim((string) ($properties['street'] ?? ''));
+        $houseNumber = trim((string) ($properties['housenumber'] ?? ''));
+        $city = trim((string) ($properties['city'] ?? $properties['county'] ?? $properties['state'] ?? ''));
+        $neighborhood = trim((string) ($properties['district'] ?? $properties['suburb'] ?? $properties['locality'] ?? $name));
+
+        $streetLine = trim(implode(' ', array_filter([$houseNumber, $street])));
+        $addressParts = array_values(array_filter([
+            $streetLine !== '' ? $streetLine : null,
+            ($name !== '' && $name !== $street && $name !== $streetLine) ? $name : null,
+        ]));
+
+        $addressLine = trim(implode(', ', $addressParts));
+
+        if ($addressLine === '') {
+            $addressLine = $street !== '' ? $street : $name;
+        }
+
+        if ($addressLine === '') {
+            return null;
+        }
+
+        $labelParts = array_values(array_filter([
+            $addressLine,
+            $neighborhood,
+            $city,
+            trim((string) ($properties['country'] ?? '')),
+        ]));
+
+        return [
+            'address_line' => $addressLine,
+            'city' => $city,
+            'neighborhood' => $neighborhood !== '' ? $neighborhood : $city,
+            'label' => implode(', ', $labelParts),
+            'secondary_label' => implode(', ', array_values(array_filter([$neighborhood, $city]))),
+            'latitude' => data_get($feature, 'geometry.coordinates.1'),
+            'longitude' => data_get($feature, 'geometry.coordinates.0'),
+        ];
     }
 
     private function findOwnedBusinessByEmail(?string $email): ?Business
