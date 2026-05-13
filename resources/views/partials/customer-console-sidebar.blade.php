@@ -9,18 +9,21 @@
         [
             'code' => 'HM',
             'label' => 'Dashboard',
+            'meta' => 'Overview and discovery',
             'href' => route('customer.dashboard'),
             'active' => request()->routeIs('customer.dashboard'),
         ],
         [
             'code' => 'BK',
             'label' => 'My Bookings',
+            'meta' => 'Upcoming and past visits',
             'href' => route('customer.bookings'),
             'active' => request()->routeIs('customer.bookings'),
         ],
         [
             'code' => 'BR',
             'label' => 'Browse',
+            'meta' => 'Find approved businesses',
             'href' => route('customer.dashboard').'#browse',
             'active' => false,
         ],
@@ -36,12 +39,24 @@
         </div>
     </div>
 
+    <div class="sidebar-section-label">Customer workspace</div>
+
     <nav class="sidebar-nav" aria-label="Customer console navigation">
         @foreach ($sidebarItems as $item)
             <a class="sidebar-link {{ $item['active'] ? 'is-active' : '' }}" href="{{ $item['href'] }}">
                 <span class="sidebar-link-icon">{{ $item['code'] }}</span>
-                <span>{{ $item['label'] }}</span>
+                <span class="sidebar-link-copy">
+                    <span class="sidebar-link-label">{{ $item['label'] }}</span>
+                    <span class="sidebar-link-meta">{{ $item['meta'] }}</span>
+                </span>
             </a>
         @endforeach
     </nav>
+
+    <div class="sidebar-support">
+        <div class="sidebar-support-label">Signed-in account</div>
+        <div class="sidebar-support-title">{{ $customer->email }}</div>
+        <div class="sidebar-support-copy">{{ $customer->phone_number }}</div>
+        <a class="sidebar-support-link" href="{{ route('home') }}">Open marketplace</a>
+    </div>
 </aside>

@@ -414,6 +414,7 @@
                     padding: 22px;
                 }
             }
+            @include('partials.admin-content-overrides')
         </style>
     </head>
     <body>

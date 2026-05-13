@@ -4,18 +4,24 @@
         <div class="sidebar-brand-subtitle">Content Admin</div>
     </div>
 
+    <div class="content-group-label">Control center</div>
+
     <nav class="content-nav" aria-label="Content management navigation">
         <a class="content-link {{ $activeSection === 'dashboard' ? 'is-active' : '' }}" href="{{ route('admin.dashboard') }}">
             <span class="content-link-icon">DB</span>
-            <span>Dashboard</span>
+            <span class="content-link-copy">
+                <span class="content-link-label">Dashboard</span>
+                <span class="content-link-meta">Marketplace overview</span>
+            </span>
         </a>
         <a class="content-link {{ $activeSection === 'pages' ? 'is-active' : '' }}" href="{{ route('admin.dashboard', ['section' => 'pages']) }}">
             <span class="content-link-icon">PG</span>
-            <span>Pages</span>
+            <span class="content-link-copy">
+                <span class="content-link-label">Pages</span>
+                <span class="content-link-meta">Editorial workflow</span>
+            </span>
         </a>
     </nav>
-
-    <div class="content-group-label">Content Management</div>
 
     <div class="content-summary-card">
         <div class="content-summary-label">Published</div>

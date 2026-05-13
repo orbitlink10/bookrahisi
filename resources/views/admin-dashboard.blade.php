@@ -1222,6 +1222,7 @@
                     width: 100%;
                 }
             }
+            @include('partials.auth-console-overrides')
         </style>
     </head>
     <body>
@@ -1238,36 +1239,66 @@
                     </div>
                 </div>
 
+                <div class="sidebar-section-label">Platform control</div>
+
                 <nav class="sidebar-nav" aria-label="Admin console navigation">
                     <a class="sidebar-link {{ $isPagesSection ? '' : 'is-active' }}" href="{{ route('admin.dashboard') }}">
                         <span class="sidebar-link-icon">HM</span>
-                        <span>Home</span>
+                        <span class="sidebar-link-copy">
+                            <span class="sidebar-link-label">Home</span>
+                            <span class="sidebar-link-meta">Marketplace overview</span>
+                        </span>
                     </a>
                     <a class="sidebar-link" href="{{ route('admin.dashboard') }}#businesses">
                         <span class="sidebar-link-icon">BS</span>
-                        <span>Businesses</span>
+                        <span class="sidebar-link-copy">
+                            <span class="sidebar-link-label">Businesses</span>
+                            <span class="sidebar-link-meta">Review and approvals</span>
+                        </span>
                     </a>
                     <a class="sidebar-link" href="{{ route('admin.dashboard') }}#users">
                         <span class="sidebar-link-icon">US</span>
-                        <span>Users</span>
+                        <span class="sidebar-link-copy">
+                            <span class="sidebar-link-label">Users</span>
+                            <span class="sidebar-link-meta">Account access control</span>
+                        </span>
                     </a>
                     <a class="sidebar-link" href="{{ route('admin.dashboard') }}#bookings">
                         <span class="sidebar-link-icon">BK</span>
-                        <span>Bookings</span>
+                        <span class="sidebar-link-copy">
+                            <span class="sidebar-link-label">Bookings</span>
+                            <span class="sidebar-link-meta">Live appointment activity</span>
+                        </span>
                     </a>
                     <a class="sidebar-link" href="{{ route('admin.dashboard') }}#payments">
                         <span class="sidebar-link-icon">PY</span>
-                        <span>Payments</span>
+                        <span class="sidebar-link-copy">
+                            <span class="sidebar-link-label">Payments</span>
+                            <span class="sidebar-link-meta">Collection and status</span>
+                        </span>
                     </a>
                     <a class="sidebar-link {{ $isPagesSection ? 'is-active' : '' }}" href="{{ route('admin.dashboard', ['section' => 'pages']) }}">
                         <span class="sidebar-link-icon">BG</span>
-                        <span>Pages</span>
+                        <span class="sidebar-link-copy">
+                            <span class="sidebar-link-label">Pages</span>
+                            <span class="sidebar-link-meta">Content and publishing</span>
+                        </span>
                     </a>
                     <a class="sidebar-link" href="{{ route('admin.dashboard') }}#reports">
                         <span class="sidebar-link-icon">RP</span>
-                        <span>Reports</span>
+                        <span class="sidebar-link-copy">
+                            <span class="sidebar-link-label">Reports</span>
+                            <span class="sidebar-link-meta">Marketplace performance</span>
+                        </span>
                     </a>
                 </nav>
+
+                <div class="sidebar-support">
+                    <div class="sidebar-support-label">Admin workspace</div>
+                    <div class="sidebar-support-title">{{ $approvedBusinesses }}/{{ $totalBusinesses }} live listings</div>
+                    <div class="sidebar-support-copy">{{ $totalUsers }} users and {{ $totalBookings }} bookings currently tracked across the marketplace.</div>
+                    <a class="sidebar-support-link" href="{{ route('home') }}">Open marketplace</a>
+                </div>
             </aside>
 
             <main class="workspace">

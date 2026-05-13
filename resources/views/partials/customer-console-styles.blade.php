@@ -631,3 +631,5 @@ h1 {
         width: 100%;
     }
 }
+
+@include('partials.auth-console-overrides')

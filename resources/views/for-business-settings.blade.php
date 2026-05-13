@@ -577,6 +577,7 @@
                     text-align: left;
                 }
             }
+            @include('partials.auth-console-overrides')
         </style>
     </head>
     <body>

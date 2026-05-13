@@ -522,6 +522,7 @@
                     margin-right: 20px;
                 }
             }
+            @include('partials.admin-content-overrides')
         </style>
     </head>
     <body>

@@ -500,6 +500,7 @@
                     width: 100%;
                 }
             }
+            @include('partials.auth-console-overrides')
         </style>
     </head>
     <body>
