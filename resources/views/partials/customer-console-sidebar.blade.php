@@ -28,6 +28,27 @@
             'active' => false,
         ],
     ];
+
+    $mobilePrimaryItems = $sidebarItems;
+    $mobileDrawerItems = [
+        [
+            'code' => 'MK',
+            'label' => 'Marketplace',
+            'meta' => 'Browse public businesses',
+            'href' => route('home'),
+            'active' => false,
+        ],
+    ];
+
+    $mobileDrawerForms = [
+        [
+            'action' => route('customer.sign-out'),
+            'label' => 'Sign out',
+            'meta' => 'Exit this customer account',
+            'code' => 'SO',
+            'tone' => 'danger',
+        ],
+    ];
 @endphp
 
 <aside class="console-sidebar">
@@ -59,4 +80,12 @@
         <div class="sidebar-support-copy">{{ $customer->phone_number }}</div>
         <a class="sidebar-support-link" href="{{ route('home') }}">Open marketplace</a>
     </div>
+
+    @include('partials.mobile-console-nav', [
+        'primaryItems' => $mobilePrimaryItems,
+        'drawerTitle' => $customer->name,
+        'drawerCopy' => $customer->email.' / '.$customer->phone_number,
+        'drawerItems' => $mobileDrawerItems,
+        'drawerForms' => $mobileDrawerForms,
+    ])
 </aside>

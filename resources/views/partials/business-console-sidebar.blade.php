@@ -51,6 +51,20 @@
             'active' => false,
         ],
     ];
+
+    $mobilePrimaryItems = array_slice($sidebarItems, 0, 3);
+    $mobileDrawerItems = array_merge(
+        array_slice($sidebarItems, 3),
+        [
+            [
+                'code' => 'MK',
+                'label' => 'Marketplace',
+                'meta' => 'Open the public website',
+                'href' => route('home'),
+                'active' => false,
+            ],
+        ],
+    );
 @endphp
 
 <aside class="console-sidebar">
@@ -88,4 +102,11 @@
             {{ ($profileReady ?? false) ? 'Preview public page' : 'Finish profile' }}
         </a>
     </div>
+
+    @include('partials.mobile-console-nav', [
+        'primaryItems' => $mobilePrimaryItems,
+        'drawerTitle' => $accountSetup['business_name'],
+        'drawerCopy' => $accountSetup['business_category'].' workspace',
+        'drawerItems' => $mobileDrawerItems,
+    ])
 </aside>

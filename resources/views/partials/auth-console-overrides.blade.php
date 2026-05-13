@@ -18,6 +18,10 @@
     --danger-soft: #fff0ee;
     --danger-ink: #c24134;
     --shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+    --mobile-accent: var(--accent);
+    --mobile-accent-soft: var(--accent-soft);
+    --mobile-danger-soft: var(--danger-soft);
+    --mobile-danger-ink: var(--danger-ink);
 }
 
 html {
@@ -597,11 +601,17 @@ h1 {
 
 @media (max-width: 760px) {
     .workspace {
-        padding: 16px 14px 28px;
+        padding: 16px 14px calc(120px + env(safe-area-inset-bottom));
     }
 
     .console-sidebar {
         padding: 16px 14px 18px;
+    }
+
+    .console-sidebar .sidebar-section-label,
+    .console-sidebar .sidebar-nav,
+    .console-sidebar .sidebar-support {
+        display: none;
     }
 
     .sidebar-brand,
@@ -623,3 +633,5 @@ h1 {
         padding: 24px;
     }
 }
+
+@include('partials.mobile-console-nav-styles')

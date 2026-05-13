@@ -13,6 +13,10 @@
     --success: #167443;
     --success-soft: #ebf8ef;
     --shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+    --mobile-accent: var(--primary);
+    --mobile-accent-soft: var(--primary-soft);
+    --mobile-danger-soft: var(--danger-soft);
+    --mobile-danger-ink: var(--danger);
 }
 
 body {
@@ -239,11 +243,17 @@ h1 {
 
 @media (max-width: 760px) {
     .workspace {
-        padding: 16px 14px 28px;
+        padding: 16px 14px calc(120px + env(safe-area-inset-bottom));
     }
 
     .content-sidebar {
         padding: 16px 14px 18px;
+    }
+
+    .content-sidebar .content-group-label,
+    .content-sidebar .content-nav,
+    .content-sidebar .content-summary-card {
+        display: none;
     }
 
     .sidebar-brand-card,
@@ -256,3 +266,5 @@ h1 {
         border-radius: 24px;
     }
 }
+
+@include('partials.mobile-console-nav-styles')

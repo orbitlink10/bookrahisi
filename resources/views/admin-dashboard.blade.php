@@ -1229,6 +1229,83 @@
         @php
             $isPagesSection = ($activeAdminSection ?? 'overview') === 'pages';
         @endphp
+        @php
+            $adminMobilePrimaryItems = [
+                [
+                    'code' => 'HM',
+                    'label' => 'Home',
+                    'href' => route('admin.dashboard'),
+                    'active' => ! $isPagesSection,
+                ],
+                [
+                    'code' => 'BK',
+                    'label' => 'Bookings',
+                    'href' => route('admin.dashboard').'#bookings',
+                    'active' => false,
+                ],
+                [
+                    'code' => 'PG',
+                    'label' => 'Pages',
+                    'href' => route('admin.dashboard', ['section' => 'pages']),
+                    'active' => $isPagesSection,
+                ],
+            ];
+
+            $adminMobileDrawerItems = [
+                [
+                    'code' => 'BS',
+                    'label' => 'Businesses',
+                    'meta' => 'Review and approvals',
+                    'href' => route('admin.dashboard').'#businesses',
+                    'active' => false,
+                ],
+                [
+                    'code' => 'US',
+                    'label' => 'Users',
+                    'meta' => 'Access control',
+                    'href' => route('admin.dashboard').'#users',
+                    'active' => false,
+                ],
+                [
+                    'code' => 'PY',
+                    'label' => 'Payments',
+                    'meta' => 'Payment status management',
+                    'href' => route('admin.dashboard').'#payments',
+                    'active' => false,
+                ],
+                [
+                    'code' => 'RP',
+                    'label' => 'Reports',
+                    'meta' => 'Marketplace performance',
+                    'href' => route('admin.dashboard').'#reports',
+                    'active' => false,
+                ],
+                [
+                    'code' => 'MK',
+                    'label' => 'Marketplace',
+                    'meta' => 'Open public website',
+                    'href' => route('home'),
+                    'active' => false,
+                ],
+                [
+                    'code' => 'BL',
+                    'label' => 'Blog',
+                    'meta' => 'Published content',
+                    'href' => route('blog.index'),
+                    'active' => false,
+                ],
+            ];
+
+            $adminMobileDrawerForms = [
+                [
+                    'action' => route('admin.sign-out'),
+                    'label' => 'Sign out',
+                    'meta' => 'Exit admin access',
+                    'code' => 'SO',
+                    'tone' => 'danger',
+                ],
+            ];
+        @endphp
         <div class="console-app">
             <aside class="console-sidebar">
                 <div class="sidebar-brand">
@@ -1299,6 +1376,14 @@
                     <div class="sidebar-support-copy">{{ $totalUsers }} users and {{ $totalBookings }} bookings currently tracked across the marketplace.</div>
                     <a class="sidebar-support-link" href="{{ route('home') }}">Open marketplace</a>
                 </div>
+
+                @include('partials.mobile-console-nav', [
+                    'primaryItems' => $adminMobilePrimaryItems,
+                    'drawerTitle' => 'Admin workspace',
+                    'drawerCopy' => $approvedBusinesses.'/'.$totalBusinesses.' live listings, '.$totalUsers.' users, '.$totalBookings.' bookings.',
+                    'drawerItems' => $adminMobileDrawerItems,
+                    'drawerForms' => $adminMobileDrawerForms,
+                ])
             </aside>
 
             <main class="workspace">
