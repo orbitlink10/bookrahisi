@@ -525,18 +525,123 @@ class PublicSiteController extends Controller
         $recentBookings = $business
             ? $business->bookings()->latest()->take(4)->get()
             : collect();
+        $posDashboardReady = $business && BusinessConsoleSchema::hasPosModuleTables();
+        $todaySalesTotal = 0;
+        $weekSalesTotal = 0;
+        $customerCount = $bookingCount;
+        $lowStockItemCount = 0;
+        $employeeCount = count($this->previewTeamMembers($accountSetup['business_category']));
+        $teamFallback = collect($this->previewTeamMembers($accountSetup['business_category']))
+            ->take(4)
+            ->values()
+            ->map(fn (array $member, int $index): array => [
+                'id' => null,
+                'name' => $member['name'],
+                'role' => $member['role'],
+                'avatar' => substr($member['name'], 0, 1),
+                'tone' => ['rose', 'green', 'blue', 'amber'][$index % 4],
+            ]);
+        $dashboardStaff = $teamFallback;
+        $dashboardAppointments = collect();
+
+        if ($posDashboardReady) {
+            $todaySalesTotal = (float) $business->sales()->whereDate('transaction_date', today())->sum('total_amount');
+            $weekSalesTotal = (float) $business->sales()
+                ->whereBetween('transaction_date', [now()->startOfWeek(), now()->endOfWeek()])
+                ->sum('total_amount');
+            $customerCount = $business->customers()->count();
+            $lowStockItemCount = $business->products()->whereColumn('current_stock', '<=', 'reorder_level')->count();
+            $employeeCount = $business->staffMembers()->count();
+
+            $staffMembers = $business->staffMembers()
+                ->orderBy('full_name')
+                ->take(4)
+                ->get();
+
+            if ($staffMembers->isNotEmpty()) {
+                $dashboardStaff = $staffMembers
+                    ->values()
+                    ->map(fn ($staff, int $index): array => [
+                        'id' => $staff->id,
+                        'name' => $staff->full_name,
+                        'role' => $staff->role,
+                        'avatar' => substr($staff->full_name, 0, 1),
+                        'tone' => ['rose', 'green', 'blue', 'amber'][$index % 4],
+                    ]);
+            }
+
+            $staffIndexById = $dashboardStaff
+                ->pluck('id')
+                ->filter()
+                ->values()
+                ->flip();
+
+            $dashboardAppointments = $business->appointments()
+                ->with(['customer', 'service', 'staff'])
+                ->whereDate('booking_date', today())
+                ->orderBy('start_time')
+                ->take(12)
+                ->get()
+                ->values()
+                ->map(function ($appointment, int $index) use ($dashboardStaff, $staffIndexById): array {
+                    $start = $appointment->start_time
+                        ? \Illuminate\Support\Carbon::parse($appointment->start_time)
+                        : today()->setTime(9 + ($index % 7), 0);
+                    $duration = max((int) ($appointment->duration_minutes ?: 60), 45);
+                    $staffPosition = $appointment->staff_id && $staffIndexById->has($appointment->staff_id)
+                        ? (int) $staffIndexById->get($appointment->staff_id)
+                        : $index % max($dashboardStaff->count(), 1);
+
+                    return [
+                        'customer' => $appointment->customer?->full_name ?? 'Walk-in customer',
+                        'service' => $appointment->service?->name ?? 'Appointment',
+                        'time' => $start->format('h:i A').' - '.$start->copy()->addMinutes($duration)->format('h:i A'),
+                        'staff_index' => $staffPosition,
+                        'top' => max((($start->hour + ($start->minute / 60)) - 9) * 74, 0),
+                        'height' => max(($duration / 60) * 74, 58),
+                        'tone' => ['purple', 'mint', 'sky', 'rose', 'sand'][$index % 5],
+                    ];
+                });
+        }
+
+        if ($dashboardAppointments->isEmpty()) {
+            $dashboardAppointments = $recentBookings
+                ->values()
+                ->map(function ($booking, int $index) use ($dashboardStaff): array {
+                    $start = $booking->appointment_time
+                        ? \Illuminate\Support\Carbon::parse($booking->appointment_time)
+                        : today()->setTime(9 + ($index % 7), 0);
+
+                    return [
+                        'customer' => $booking->customer_name,
+                        'service' => $booking->service_name,
+                        'time' => $start->format('h:i A').' - '.$start->copy()->addHour()->format('h:i A'),
+                        'staff_index' => $index % max($dashboardStaff->count(), 1),
+                        'top' => max((($start->hour + ($start->minute / 60)) - 9) * 74, 0),
+                        'height' => 74,
+                        'tone' => ['purple', 'mint', 'sky', 'rose', 'sand'][$index % 5],
+                    ];
+                });
+        }
 
         return view('for-business-tools', [
             'accountSetup' => $accountSetup,
             'bookingCount' => $bookingCount,
             'businessSlug' => $businessSlug,
+            'customerCount' => $customerCount,
+            'dashboardAppointments' => $dashboardAppointments,
+            'dashboardStaff' => $dashboardStaff,
             'email' => $email,
+            'employeeCount' => $employeeCount,
+            'lowStockItemCount' => $lowStockItemCount,
             'pendingBookingCount' => $pendingBookingCount,
             'profileReady' => $profileReady,
             'profileDetails' => $profileDetails,
             'recentBookings' => $recentBookings,
             'sideImage' => 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1400&q=80',
+            'todaySalesTotal' => $todaySalesTotal,
             'todayBookingCount' => $todayBookingCount,
+            'weekSalesTotal' => $weekSalesTotal,
         ]);
     }
 

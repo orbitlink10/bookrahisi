@@ -3,32 +3,30 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Book Rahisi For Professionals | Business Dashboard</title>
+        <title>Book Rahisi Salon POS | Dashboard</title>
         <meta
             name="description"
-            content="Manage your business dashboard, profile, and customer bookings on Book Rahisi."
+            content="Manage appointments, POS sales, stock, customers, and team activity from the Book Rahisi salon dashboard."
         >
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=outfit:400,500,600,700,800|manrope:400,500,600,700,800" rel="stylesheet" />
         <style>
             :root {
-                --navy: #17345d;
-                --navy-deep: #112744;
-                --navy-soft: rgba(255, 255, 255, 0.08);
-                --line: #d6e2f0;
-                --page: #eef5fb;
+                --ink: #17151f;
+                --muted: #74717e;
+                --line: #e8e5ee;
+                --page: #fbf9fe;
                 --panel: #ffffff;
-                --ink: #17304d;
-                --muted: #607792;
-                --accent: #1aa0e2;
-                --accent-deep: #14898b;
-                --success-soft: #eaf8ef;
-                --success-ink: #147d46;
-                --warning-soft: #fff4dc;
-                --warning-ink: #b36c00;
-                --danger-soft: #fff0ee;
-                --danger-ink: #c24b3a;
-                --shadow: 0 24px 44px rgba(28, 66, 104, 0.12);
+                --purple: #7c3fd3;
+                --purple-dark: #6630bd;
+                --pink: #e74c8a;
+                --green: #25a864;
+                --blue: #367bd9;
+                --amber: #f0a21a;
+                --shadow: 0 18px 44px rgba(40, 34, 56, 0.08);
+                --soft-shadow: 0 10px 26px rgba(40, 34, 56, 0.06);
+                --mobile-accent: var(--purple);
+                --mobile-accent-soft: #f1e9ff;
             }
 
             * {
@@ -38,7 +36,9 @@
             body {
                 margin: 0;
                 min-height: 100vh;
-                background: linear-gradient(180deg, #f6fbff 0%, var(--page) 100%);
+                background:
+                    radial-gradient(circle at 72% 0%, rgba(124, 63, 211, 0.06), transparent 28%),
+                    linear-gradient(180deg, #ffffff 0%, var(--page) 100%);
                 color: var(--ink);
                 font-family: 'Manrope', sans-serif;
             }
@@ -48,9 +48,15 @@
                 text-decoration: none;
             }
 
+            button,
+            input,
+            select {
+                font: inherit;
+            }
+
             .console-app {
                 display: grid;
-                grid-template-columns: 320px minmax(0, 1fr);
+                grid-template-columns: 290px minmax(0, 1fr);
                 min-height: 100vh;
             }
 
@@ -61,48 +67,54 @@
                 align-content: start;
                 gap: 28px;
                 min-height: 100vh;
-                padding: 24px 20px;
-                background: linear-gradient(180deg, var(--navy) 0%, var(--navy-deep) 100%);
-                color: #fff;
+                padding: 26px 20px;
+                border-right: 1px solid var(--line);
+                background: rgba(255, 255, 255, 0.86);
+                color: var(--ink);
+                backdrop-filter: blur(18px);
             }
 
             .sidebar-brand {
                 display: flex;
                 align-items: center;
-                gap: 14px;
+                justify-content: center;
+                gap: 10px;
+                text-align: left;
             }
 
             .brand-avatar {
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
-                width: 58px;
-                height: 58px;
-                border-radius: 18px;
-                background: linear-gradient(180deg, #d9ecff 0%, #a8d1ff 100%);
-                color: var(--navy);
+                width: 44px;
+                height: 44px;
+                border-radius: 12px;
+                background: linear-gradient(135deg, var(--purple) 0%, var(--pink) 100%);
+                color: #fff;
                 font-family: 'Outfit', sans-serif;
-                font-size: 1.35rem;
+                font-size: 1rem;
                 font-weight: 800;
-                letter-spacing: -0.05em;
-            }
-
-            .brand-copy {
-                display: grid;
-                gap: 4px;
             }
 
             .brand-title {
                 font-family: 'Outfit', sans-serif;
-                font-size: 2rem;
+                font-size: 1.6rem;
                 font-weight: 800;
-                letter-spacing: -0.06em;
+                letter-spacing: 0;
+                line-height: 1;
             }
 
             .brand-subtitle {
-                color: rgba(255, 255, 255, 0.74);
-                font-size: 0.96rem;
-                font-weight: 700;
+                margin-top: 4px;
+                color: var(--pink);
+                font-size: 0.95rem;
+                font-weight: 800;
+            }
+
+            .sidebar-section-label,
+            .sidebar-link-meta,
+            .sidebar-support {
+                display: none;
             }
 
             .sidebar-nav {
@@ -113,386 +125,575 @@
             .sidebar-link {
                 display: flex;
                 align-items: center;
-                gap: 16px;
-                padding: 14px 16px;
-                border: 1px solid transparent;
-                border-radius: 18px;
-                color: rgba(255, 255, 255, 0.82);
-                font-size: 0.98rem;
+                gap: 14px;
+                min-height: 52px;
+                padding: 12px 16px;
+                border-radius: 8px;
+                color: #575465;
+                font-size: 1rem;
                 font-weight: 800;
-                transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+                transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
             }
 
             .sidebar-link:hover,
             .sidebar-link.is-active {
-                border-color: rgba(255, 255, 255, 0.18);
-                background: rgba(255, 255, 255, 0.12);
+                background: linear-gradient(135deg, var(--purple) 0%, var(--purple-dark) 100%);
                 color: #fff;
+                box-shadow: 0 14px 28px rgba(124, 63, 211, 0.24);
             }
 
             .sidebar-link-icon {
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
-                width: 38px;
-                height: 38px;
-                border-radius: 12px;
-                border: 1px solid rgba(255, 255, 255, 0.16);
-                background: var(--navy-soft);
-                font-size: 0.86rem;
-                font-weight: 800;
+                width: 24px;
+                height: 24px;
+                border: 0;
+                border-radius: 0;
+                background: transparent;
+                font-size: 0.78rem;
+                font-weight: 900;
+                letter-spacing: 0;
             }
 
             .workspace {
-                padding: 26px 28px 36px;
+                min-width: 0;
+                padding: 24px 24px 30px;
             }
 
-            .workspace-shell {
-                width: min(100%, 1420px);
+            .dashboard-shell {
+                width: min(100%, 1590px);
                 margin: 0 auto;
             }
 
-            .topbar {
+            .dashboard-topbar,
+            .dashboard-heading,
+            .utility-actions,
+            .profile-chip,
+            .date-pill,
+            .panel-head,
+            .calendar-controls,
+            .staff-head,
+            .metric-card,
+            .metric-icon,
+            .quick-tile,
+            .chart-head {
                 display: flex;
                 align-items: center;
+            }
+
+            .dashboard-topbar {
                 justify-content: space-between;
                 gap: 18px;
                 margin-bottom: 22px;
             }
 
-            .eyebrow {
-                display: inline-flex;
+            .menu-button,
+            .icon-button,
+            .panel-button,
+            .quick-tile {
+                border: 1px solid var(--line);
+                background: #fff;
+                color: var(--ink);
+                cursor: pointer;
+            }
+
+            .menu-button,
+            .icon-button {
+                justify-content: center;
+                width: 46px;
+                height: 46px;
+                border-radius: 14px;
+                box-shadow: var(--soft-shadow);
+            }
+
+            .search-box {
+                flex: 0 1 380px;
+                display: flex;
                 align-items: center;
                 gap: 10px;
-                padding: 10px 16px;
-                border-radius: 999px;
-                background: #def2ff;
-                color: var(--accent);
-                font-size: 0.88rem;
+                min-height: 46px;
+                padding: 0 14px;
+                border: 1px solid var(--line);
+                border-radius: 14px;
+                background: rgba(255, 255, 255, 0.92);
+                box-shadow: var(--soft-shadow);
+            }
+
+            .search-box input {
+                width: 100%;
+                border: 0;
+                outline: 0;
+                background: transparent;
+                color: var(--ink);
+                font-size: 0.9rem;
+                font-weight: 700;
+            }
+
+            .shortcut {
+                padding: 5px 10px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                color: var(--muted);
+                font-size: 0.78rem;
                 font-weight: 800;
+                white-space: nowrap;
+            }
+
+            .utility-actions {
+                gap: 14px;
+            }
+
+            .bell-dot {
+                position: relative;
+            }
+
+            .bell-dot::after {
+                position: absolute;
+                top: -5px;
+                right: -3px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 20px;
+                height: 20px;
+                border-radius: 999px;
+                background: #ff405d;
+                color: #fff;
+                content: "{{ $pendingBookingCount }}";
+                font-size: 0.68rem;
+                font-weight: 900;
+            }
+
+            .profile-chip {
+                gap: 12px;
+            }
+
+            .profile-photo {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 54px;
+                height: 54px;
+                border-radius: 999px;
+                background: linear-gradient(135deg, #f7c68f 0%, #a855f7 100%);
+                color: #fff;
+                font-family: 'Outfit', sans-serif;
+                font-size: 1.15rem;
+                font-weight: 800;
+                box-shadow: var(--soft-shadow);
+            }
+
+            .profile-name {
+                font-weight: 900;
+            }
+
+            .profile-role,
+            .heading-copy,
+            .metric-copy,
+            .metric-foot,
+            .staff-role,
+            .chart-axis,
+            .quick-label {
+                color: var(--muted);
+            }
+
+            .profile-role {
+                margin-top: 3px;
+                font-size: 0.82rem;
+                font-weight: 700;
+            }
+
+            .dashboard-heading {
+                justify-content: space-between;
+                gap: 18px;
+                margin-bottom: 18px;
             }
 
             h1 {
                 margin: 0;
                 font-family: 'Outfit', sans-serif;
-                font-size: clamp(2.3rem, 4vw, 3.9rem);
-                letter-spacing: -0.06em;
+                font-size: clamp(1.8rem, 2.4vw, 2.35rem);
                 line-height: 1;
+                letter-spacing: 0;
             }
 
-            .subtitle {
-                margin: 14px 0 0;
-                max-width: 860px;
-                color: var(--muted);
+            .heading-copy {
+                margin: 8px 0 0;
                 font-size: 1rem;
-                line-height: 1.75;
+                font-weight: 700;
             }
 
-            .toolbar {
-                display: flex;
-                flex-wrap: wrap;
+            .date-pill,
+            .panel-button {
                 gap: 10px;
-            }
-
-            .button-dark,
-            .button-light {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                padding: 14px 20px;
-                border-radius: 16px;
-                font-size: 0.96rem;
-                font-weight: 800;
-            }
-
-            .button-dark {
-                background: var(--navy);
-                color: #fff;
-                box-shadow: 0 14px 30px rgba(23, 52, 93, 0.16);
-            }
-
-            .button-light {
+                min-height: 46px;
+                padding: 0 16px;
                 border: 1px solid var(--line);
-                background: rgba(255, 255, 255, 0.9);
-                color: var(--ink);
+                border-radius: 10px;
+                background: #fff;
+                font-size: 0.9rem;
+                font-weight: 900;
+                box-shadow: var(--soft-shadow);
+                white-space: nowrap;
+            }
+
+            .success-banner,
+            .warning-banner {
+                margin-bottom: 18px;
+                padding: 14px 16px;
+                border-radius: 12px;
+                font-size: 0.95rem;
+                font-weight: 800;
             }
 
             .success-banner {
-                margin-bottom: 18px;
-                padding: 16px 18px;
-                border: 1px solid rgba(20, 125, 70, 0.14);
-                border-radius: 20px;
-                background: var(--success-soft);
-                color: var(--success-ink);
-                font-size: 0.96rem;
-                font-weight: 700;
+                border: 1px solid rgba(37, 168, 100, 0.18);
+                background: #edfbf3;
+                color: #147d46;
             }
 
             .warning-banner {
-                margin-bottom: 18px;
-                padding: 16px 18px;
-                border: 1px solid rgba(179, 108, 0, 0.16);
-                border-radius: 20px;
-                background: var(--warning-soft);
-                color: var(--warning-ink);
-                font-size: 0.96rem;
-                font-weight: 700;
+                border: 1px solid rgba(240, 162, 26, 0.18);
+                background: #fff7e7;
+                color: #9b650d;
             }
 
-            .hero-card {
-                display: grid;
-                grid-template-columns: minmax(0, 1.2fr) auto;
-                gap: 24px;
-                align-items: center;
-                margin-bottom: 22px;
-                padding: 28px 30px;
-                border-radius: 26px;
-                background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
-                color: #fff;
-                box-shadow: var(--shadow);
-            }
-
-            .hero-card h2 {
-                margin: 14px 0 0;
-                font-family: 'Outfit', sans-serif;
-                font-size: clamp(2.5rem, 4vw, 3.6rem);
-                letter-spacing: -0.06em;
-                line-height: 0.96;
-                max-width: 10ch;
-            }
-
-            .hero-copy {
-                margin: 14px 0 0;
-                max-width: 780px;
-                color: rgba(255, 255, 255, 0.94);
-                font-size: 1rem;
-                line-height: 1.7;
-            }
-
-            .hero-actions {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 12px;
-                margin-top: 20px;
-            }
-
-            .hero-actions .button-dark,
-            .hero-actions .button-light {
-                background: rgba(255, 255, 255, 0.95);
-                color: var(--ink);
-                box-shadow: none;
-            }
-
-            .hero-side {
-                display: grid;
-                justify-items: end;
-                gap: 14px;
-                min-width: 240px;
-                text-align: right;
-            }
-
-            .hero-tag {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                padding: 12px 16px;
-                border-radius: 16px;
-                background: rgba(255, 255, 255, 0.9);
-                color: var(--accent);
-                font-size: 0.92rem;
-                font-weight: 800;
-            }
-
-            .hero-metric {
-                font-family: 'Outfit', sans-serif;
-                font-size: clamp(2.6rem, 5vw, 4.2rem);
-                font-weight: 800;
-                letter-spacing: -0.06em;
-                line-height: 0.92;
-            }
-
-            .hero-side-copy {
-                max-width: 280px;
-                color: rgba(255, 255, 255, 0.92);
-                font-size: 0.98rem;
-                line-height: 1.7;
-            }
-
-            .stats-grid {
+            .metrics-grid {
                 display: grid;
                 grid-template-columns: repeat(5, minmax(0, 1fr));
                 gap: 16px;
-                margin-bottom: 22px;
+                margin-bottom: 18px;
             }
 
-            .stat-card,
+            .metric-card,
             .panel {
                 border: 1px solid var(--line);
-                border-radius: 24px;
+                border-radius: 8px;
                 background: rgba(255, 255, 255, 0.94);
                 box-shadow: var(--shadow);
             }
 
-            .stat-card {
-                padding: 20px 20px 18px;
+            .metric-card {
+                gap: 12px;
+                min-height: 128px;
+                padding: 16px;
             }
 
-            .stat-label {
-                color: var(--muted);
-                font-size: 0.84rem;
-                font-weight: 700;
-            }
-
-            .stat-value {
-                margin-top: 14px;
-                font-family: 'Outfit', sans-serif;
-                font-size: 2rem;
-                font-weight: 800;
-                letter-spacing: -0.05em;
-                line-height: 1;
-            }
-
-            .stat-pill {
-                display: inline-flex;
-                align-items: center;
+            .metric-icon {
                 justify-content: center;
-                margin-top: 14px;
-                padding: 10px 14px;
-                border-radius: 16px;
-                background: #e8f4ff;
-                color: #0f69ad;
-                font-size: 0.9rem;
+                flex: 0 0 50px;
+                width: 50px;
+                height: 50px;
+                border-radius: 12px;
+                font-weight: 900;
+            }
+
+            .metric-icon.is-purple { background: #f1e9ff; color: var(--purple); }
+            .metric-icon.is-green { background: #eaf9f0; color: var(--green); }
+            .metric-icon.is-amber { background: #fff5df; color: var(--amber); }
+            .metric-icon.is-pink { background: #ffeaf3; color: var(--pink); }
+            .metric-icon.is-blue { background: #eaf2ff; color: var(--blue); }
+
+            .metric-copy {
+                font-size: 0.84rem;
                 font-weight: 800;
             }
 
-            .stat-pill.is-success {
-                background: var(--success-soft);
-                color: var(--success-ink);
+            .metric-value {
+                margin-top: 6px;
+                font-family: 'Outfit', sans-serif;
+                font-size: clamp(1.2rem, 1.15vw, 1.55rem);
+                font-weight: 800;
+                line-height: 1;
+                white-space: nowrap;
             }
 
-            .stat-pill.is-warning {
-                background: var(--warning-soft);
-                color: var(--warning-ink);
+            .metric-foot {
+                display: inline-block;
+                margin-top: 9px;
+                font-size: 0.76rem;
+                font-weight: 900;
             }
 
-            .stat-pill.is-danger {
-                background: rgba(255, 255, 255, 0.74);
-                color: var(--navy);
+            .metric-foot.is-good {
+                color: var(--green);
+            }
+
+            .metric-foot.is-alert {
+                color: var(--pink);
             }
 
             .dashboard-grid {
                 display: grid;
-                grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.82fr);
-                gap: 24px;
+                grid-template-columns: minmax(0, 1.45fr) minmax(360px, 0.9fr);
+                gap: 18px;
                 align-items: start;
             }
 
-            .summary-stack {
+            .side-stack {
                 display: grid;
-                gap: 24px;
+                gap: 18px;
             }
 
             .panel {
-                padding: 24px;
+                padding: 18px;
+                overflow: hidden;
             }
 
-            .panel-head {
-                display: flex;
-                align-items: center;
+            .panel-head,
+            .chart-head {
                 justify-content: space-between;
-                gap: 16px;
-                margin-bottom: 18px;
+                gap: 14px;
+                margin-bottom: 16px;
             }
 
             .panel-title {
                 margin: 0;
                 font-family: 'Outfit', sans-serif;
-                font-size: 1.7rem;
-                letter-spacing: -0.05em;
+                font-size: 1.25rem;
+                font-weight: 800;
+                letter-spacing: 0;
             }
 
-            .panel-copy {
-                margin: 10px 0 0;
-                color: var(--muted);
-                line-height: 1.7;
+            .calendar-controls {
+                gap: 10px;
+                flex-wrap: wrap;
             }
 
-            .booking-list,
-            .summary-list {
+            .panel-button {
+                min-height: 38px;
+                padding: 0 14px;
+                border-radius: 8px;
+                box-shadow: none;
+            }
+
+            .calendar-wrap {
+                overflow-x: auto;
+            }
+
+            .calendar {
                 display: grid;
+                grid-template-columns: 88px repeat({{ max($dashboardStaff->count(), 1) }}, minmax(160px, 1fr));
+                min-width: 820px;
+                border-top: 1px solid var(--line);
+            }
+
+            .calendar-corner,
+            .staff-head {
+                min-height: 66px;
+                padding: 12px 14px;
+                border-bottom: 1px solid var(--line);
+            }
+
+            .staff-head {
+                gap: 10px;
+                justify-content: center;
+                text-align: left;
+            }
+
+            .staff-avatar,
+            .mini-avatar {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 999px;
+                color: #fff;
+                font-family: 'Outfit', sans-serif;
+                font-weight: 800;
+            }
+
+            .staff-avatar {
+                width: 34px;
+                height: 34px;
+                font-size: 0.86rem;
+            }
+
+            .mini-avatar {
+                width: 28px;
+                height: 28px;
+                font-size: 0.75rem;
+            }
+
+            .tone-rose { background: linear-gradient(135deg, #ff8a99, #9b5de5); }
+            .tone-green { background: linear-gradient(135deg, #42d392, #1aa06d); }
+            .tone-blue { background: linear-gradient(135deg, #60a5fa, #2563eb); }
+            .tone-amber { background: linear-gradient(135deg, #fbbf24, #f97316); }
+
+            .staff-name {
+                font-size: 0.86rem;
+                font-weight: 900;
+                line-height: 1.15;
+            }
+
+            .staff-role {
+                margin-top: 3px;
+                font-size: 0.72rem;
+                font-weight: 700;
+            }
+
+            .time-column {
+                display: grid;
+                grid-template-rows: repeat(9, 74px);
+                border-right: 1px solid var(--line);
+            }
+
+            .time-cell {
+                padding-top: 12px;
+                color: #5f5a69;
+                font-size: 0.78rem;
+                font-weight: 800;
+                border-bottom: 1px solid var(--line);
+            }
+
+            .staff-column {
+                position: relative;
+                min-height: 666px;
+                border-right: 1px solid var(--line);
+                background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 73px, var(--line) 74px);
+            }
+
+            .staff-column:last-child {
+                border-right: 0;
+            }
+
+            .appointment-block {
+                position: absolute;
+                right: 10px;
+                left: 10px;
+                min-height: 58px;
+                padding: 10px 12px;
+                border: 1px solid rgba(124, 63, 211, 0.08);
+                border-radius: 8px;
+                font-size: 0.78rem;
+                line-height: 1.35;
+                box-shadow: 0 10px 18px rgba(38, 32, 51, 0.07);
+            }
+
+            .appointment-block.is-purple { background: #f0e7fb; }
+            .appointment-block.is-mint { background: #e7f7ee; }
+            .appointment-block.is-sky { background: #e7f2fe; }
+            .appointment-block.is-rose { background: #fde8f1; }
+            .appointment-block.is-sand { background: #fff5df; }
+
+            .appointment-name {
+                font-weight: 900;
+            }
+
+            .appointment-service,
+            .appointment-time {
+                margin-top: 2px;
+                font-weight: 800;
+                color: #3f3a48;
+            }
+
+            .calendar-footer {
+                padding-top: 12px;
+                text-align: center;
+            }
+
+            .text-link {
+                color: var(--purple);
+                font-weight: 900;
+            }
+
+            .sales-total {
+                margin: 0 0 6px;
+                font-family: 'Outfit', sans-serif;
+                font-size: 1.55rem;
+                font-weight: 800;
+            }
+
+            .chart {
+                position: relative;
+                height: 226px;
+                margin-top: 18px;
+                padding: 0 0 24px 44px;
+                background-image: repeating-linear-gradient(to top, transparent 0, transparent 43px, var(--line) 44px);
+            }
+
+            .chart svg {
+                width: 100%;
+                height: 100%;
+                overflow: visible;
+            }
+
+            .chart-axis {
+                position: absolute;
+                left: 0;
+                font-size: 0.78rem;
+                font-weight: 800;
+            }
+
+            .axis-100 { top: 0; }
+            .axis-80 { top: 42px; }
+            .axis-60 { top: 86px; }
+            .axis-40 { top: 130px; }
+            .axis-20 { top: 174px; }
+            .axis-0 { bottom: 24px; }
+
+            .chart-days {
+                display: grid;
+                grid-template-columns: repeat(7, 1fr);
+                gap: 4px;
+                margin: 4px 0 0 44px;
+                color: var(--muted);
+                font-size: 0.78rem;
+                font-weight: 900;
+                text-align: center;
+            }
+
+            .quick-grid {
+                display: grid;
+                grid-template-columns: repeat(5, minmax(0, 1fr));
                 gap: 14px;
             }
 
-            .booking-row,
-            .summary-row {
-                padding: 18px;
-                border: 1px solid var(--line);
-                border-radius: 20px;
-                background: #fff;
+            .quick-tile {
+                display: grid;
+                justify-items: center;
+                gap: 10px;
+                min-height: 98px;
+                padding: 10px 8px;
+                border-radius: 8px;
             }
 
-            .booking-top {
-                display: flex;
-                align-items: flex-start;
-                justify-content: space-between;
-                gap: 16px;
+            .quick-icon {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 56px;
+                height: 56px;
+                border-radius: 12px;
+                font-weight: 900;
             }
 
-            .booking-name {
-                margin: 0;
-                font-family: 'Outfit', sans-serif;
-                font-size: 1.28rem;
-                letter-spacing: -0.04em;
-            }
-
-            .booking-meta,
-            .booking-note,
-            .summary-value {
-                margin-top: 8px;
-                color: var(--muted);
-                line-height: 1.65;
-            }
-
-            .summary-label {
-                font-size: 0.82rem;
-                font-weight: 800;
-                letter-spacing: 0.08em;
-                text-transform: uppercase;
-                color: var(--muted);
-            }
-
-            .summary-value {
-                font-weight: 500;
-            }
-
-            .booking-status {
-                padding: 8px 12px;
-                border-radius: 14px;
-                background: var(--warning-soft);
-                color: var(--warning-ink);
-                font-size: 0.82rem;
-                font-weight: 800;
-                text-transform: capitalize;
-                white-space: nowrap;
-            }
-
-            .booking-link {
-                color: var(--accent);
-                font-weight: 800;
+            .quick-label {
+                font-size: 0.76rem;
+                font-weight: 900;
+                text-align: center;
+                line-height: 1.25;
             }
 
             .empty-state {
-                padding: 24px;
+                margin: 24px 10px;
+                padding: 18px;
                 border: 1px dashed var(--line);
-                border-radius: 20px;
-                background: #fafdff;
+                border-radius: 8px;
                 color: var(--muted);
-                line-height: 1.7;
+                font-weight: 800;
+                line-height: 1.6;
             }
 
             @media (max-width: 1360px) {
-                .stats-grid {
-                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                .dashboard-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            @media (max-width: 980px) {
+                .metrics-grid {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
                 }
             }
 
@@ -505,83 +706,92 @@
                     position: static;
                     min-height: 0;
                 }
-
-                .hero-card,
-                .dashboard-grid {
-                    grid-template-columns: 1fr;
-                }
-
-                .hero-side {
-                    justify-items: start;
-                    text-align: left;
-                }
             }
 
-            @media (max-width: 760px) {
+            @media (max-width: 780px) {
                 .workspace {
-                    padding: 18px 16px 28px;
+                    padding: 18px 14px 116px;
                 }
 
-                .topbar,
-                .toolbar,
-                .hero-actions,
+                .dashboard-topbar,
+                .dashboard-heading,
+                .utility-actions,
+                .profile-chip,
                 .panel-head,
-                .booking-top {
-                    flex-direction: column;
+                .chart-head {
                     align-items: stretch;
+                    flex-direction: column;
                 }
 
-                .stats-grid {
-                    grid-template-columns: 1fr;
-                }
-
-                .button-dark,
-                .button-light,
-                .hero-actions .button-dark,
-                .hero-actions .button-light {
+                .search-box,
+                .date-pill {
                     width: 100%;
                 }
+
+                .metrics-grid,
+                .quick-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .metric-card {
+                    min-height: 112px;
+                }
             }
-            @include('partials.auth-console-overrides')
+
+            @include('partials.mobile-console-nav-styles')
         </style>
     </head>
     <body>
         @php
-            $profileLocation = $profileReady
-                ? $profileDetails['address_line'].', '.$profileDetails['neighborhood'].', '.$profileDetails['city']
-                : 'Profile details are not complete yet.';
-            $profileHours = $profileReady
-                ? $profileDetails['opening_time'].' - '.$profileDetails['closing_time']
-                : 'Set your opening hours';
+            $ownerName = trim(($accountSetup['first_name'] ?? '').' '.($accountSetup['last_name'] ?? ''));
+            $ownerFirstName = $accountSetup['first_name'] ?? 'Owner';
             $profileSummary = $profileReady
                 ? $profileDetails['tagline']
-                : 'Your dashboard is ready. Complete the public profile to start receiving bookings from customers.';
+                : 'Complete your public profile to start receiving customer bookings.';
+            $formattedTodaySales = 'KES '.number_format($todaySalesTotal);
+            $formattedWeekSales = 'KES '.number_format($weekSalesTotal);
+            $chartPoints = '0,160 62,132 124,120 186,72 248,144 310,42 372,96 434,66 496,12';
         @endphp
 
         <div class="console-app">
             @include('partials.business-console-sidebar', ['profileReady' => $profileReady])
 
             <main class="workspace">
-                <div class="workspace-shell">
-                    <div class="topbar">
+                <div class="dashboard-shell">
+                    <header class="dashboard-topbar">
+                        <button class="menu-button" type="button" aria-label="Open dashboard menu">☰</button>
+
+                        <div class="utility-actions">
+                            <label class="search-box" aria-label="Search dashboard">
+                                <span aria-hidden="true">⌕</span>
+                                <input type="search" placeholder="Search anything...">
+                                <span class="shortcut">Ctrl + K</span>
+                            </label>
+
+                            <button class="icon-button bell-dot" type="button" aria-label="Notifications">⌂</button>
+
+                            <div class="profile-chip">
+                                <div class="profile-photo">{{ strtoupper(substr($ownerFirstName, 0, 1)) }}</div>
+                                <div>
+                                    <div class="profile-name">{{ $ownerName !== '' ? $ownerName : 'Business Owner' }}</div>
+                                    <div class="profile-role">Owner</div>
+                                </div>
+                                <span aria-hidden="true">⌄</span>
+                            </div>
+                        </div>
+                    </header>
+
+                    <section class="dashboard-heading">
                         <div>
-                            <span class="eyebrow">Business dashboard</span>
-                            <h1>{{ $accountSetup['business_name'] }}</h1>
-                            <p class="subtitle">
-                                {{ $profileSummary }}
-                            </p>
+                            <h1>Welcome back, {{ $ownerFirstName }}</h1>
+                            <p class="heading-copy">Here's what's happening at {{ $accountSetup['business_name'] }} today.</p>
                         </div>
 
-                        <div class="toolbar">
-                            <a class="button-light" href="{{ route('for-business.settings') }}">Settings</a>
-                            <a class="button-light" href="{{ route('for-business.bookings') }}">Customer bookings</a>
-                            @if ($profileReady)
-                                <a class="button-dark" href="{{ route('business.show', ['slug' => $businessSlug]) }}">View public page</a>
-                            @else
-                                <a class="button-dark" href="{{ route('for-business.profile-details') }}">Update profile</a>
-                            @endif
+                        <div class="date-pill">
+                            <span>{{ now()->format('M j, Y') }}</span>
+                            <span aria-hidden="true">▣</span>
                         </div>
-                    </div>
+                    </section>
 
                     @if (session('dashboard_success'))
                         <div class="success-banner">{{ session('dashboard_success') }}</div>
@@ -591,173 +801,177 @@
                         <div class="warning-banner">{{ session('dashboard_warning') }}</div>
                     @endif
 
-                    <section class="hero-card">
-                        <div>
-                            <span class="eyebrow" style="background: rgba(255, 255, 255, 0.16); color: #fff;">Owner workspace</span>
-                            <h2>Your dashboard is ready</h2>
-                            <p class="hero-copy">
-                                @if ($profileReady)
-                                    Customers can discover {{ $accountSetup['business_name'] }}, place bookings, upload reference images, and send appointment notes directly into your workspace.
-                                @else
-                                    Finish the public profile first so customers can discover your business and start sending booking requests into this dashboard.
-                                @endif
-                            </p>
-                            <div class="hero-actions">
-                                <a class="button-dark" href="{{ route('for-business.profile-details') }}">Update profile</a>
-                                <a class="button-light" href="{{ route('for-business.bookings') }}">Customer bookings</a>
-                                @if ($profileReady)
-                                    <a class="button-light" href="{{ route('business.show', ['slug' => $businessSlug]) }}">Preview customer page</a>
-                                @endif
+                    <section class="metrics-grid" aria-label="Business metrics">
+                        <article class="metric-card">
+                            <div class="metric-icon is-purple">CA</div>
+                            <div>
+                                <div class="metric-copy">Today's Appointments</div>
+                                <div class="metric-value">{{ $todayBookingCount }}</div>
+                                <span class="metric-foot is-good">+20% from yesterday ↑</span>
                             </div>
-                        </div>
+                        </article>
 
-                        <div class="hero-side">
-                            <span class="hero-tag">{{ $profileReady ? 'Profile live for customers' : 'Setup needed' }}</span>
-                            <div class="hero-metric">{{ $bookingCount }}</div>
-                            <div class="hero-side-copy">
-                                {{ $pendingBookingCount }} pending response{{ $pendingBookingCount === 1 ? '' : 's' }} and {{ $todayBookingCount }} booking{{ $todayBookingCount === 1 ? '' : 's' }} scheduled for today.
+                        <article class="metric-card">
+                            <div class="metric-icon is-green">KES</div>
+                            <div>
+                                <div class="metric-copy">Today's Sales</div>
+                                <div class="metric-value">{{ $formattedTodaySales }}</div>
+                                <span class="metric-foot is-good">+32% from yesterday ↑</span>
                             </div>
-                        </div>
-                    </section>
+                        </article>
 
-                    <section class="stats-grid">
-                        <article class="stat-card">
-                            <div class="stat-label">All bookings</div>
-                            <div class="stat-value">{{ $bookingCount }}</div>
-                            <div class="stat-pill">Workspace total</div>
+                        <article class="metric-card">
+                            <div class="metric-icon is-amber">CU</div>
+                            <div>
+                                <div class="metric-copy">Total Customers</div>
+                                <div class="metric-value">{{ number_format($customerCount) }}</div>
+                                <span class="metric-foot is-good">+18% from last month ↑</span>
+                            </div>
                         </article>
-                        <article class="stat-card">
-                            <div class="stat-label">Pending bookings</div>
-                            <div class="stat-value">{{ $pendingBookingCount }}</div>
-                            <div class="stat-pill is-warning">Needs response</div>
+
+                        <article class="metric-card">
+                            <div class="metric-icon is-pink">BX</div>
+                            <div>
+                                <div class="metric-copy">Low Stock Items</div>
+                                <div class="metric-value">{{ $lowStockItemCount }}</div>
+                                <a class="metric-foot is-alert" href="{{ route('for-business.pos', ['tab' => 'inventory']) }}">View items</a>
+                            </div>
                         </article>
-                        <article class="stat-card">
-                            <div class="stat-label">Today's bookings</div>
-                            <div class="stat-value">{{ $todayBookingCount }}</div>
-                            <div class="stat-pill">Daily activity</div>
-                        </article>
-                        <article class="stat-card">
-                            <div class="stat-label">Profile status</div>
-                            <div class="stat-value">{{ $profileReady ? 'Live' : 'Draft' }}</div>
-                            <div class="stat-pill {{ $profileReady ? 'is-success' : 'is-warning' }}">{{ $profileReady ? 'Published' : 'Setup needed' }}</div>
-                        </article>
-                        <article class="stat-card">
-                            <div class="stat-label">Business category</div>
-                            <div class="stat-value">{{ $accountSetup['business_category'] }}</div>
-                            <div class="stat-pill is-danger">Owner workspace</div>
+
+                        <article class="metric-card">
+                            <div class="metric-icon is-blue">ST</div>
+                            <div>
+                                <div class="metric-copy">Employees</div>
+                                <div class="metric-value">{{ $employeeCount }}</div>
+                                <span class="metric-foot">2 on leave today</span>
+                            </div>
                         </article>
                     </section>
 
                     <section class="dashboard-grid">
                         <section class="panel">
                             <div class="panel-head">
-                                <div>
-                                    <h3 class="panel-title">Recent bookings</h3>
-                                    <p class="panel-copy">The latest booking activity is shown here so the owner can act quickly after login.</p>
+                                <h2 class="panel-title">Appointments</h2>
+                                <div class="calendar-controls">
+                                    <a class="panel-button" href="{{ route('for-business.pos', ['tab' => 'appointments']) }}">Today</a>
+                                    <button class="panel-button" type="button" aria-label="Previous day">‹</button>
+                                    <button class="panel-button" type="button" aria-label="Next day">›</button>
+                                    <strong>{{ now()->format('M j, Y') }}</strong>
+                                    <button class="panel-button" type="button">Day ⌄</button>
                                 </div>
-                                <a class="button-light" href="{{ route('for-business.bookings') }}">Open full inbox</a>
                             </div>
 
-                            @if ($recentBookings->isEmpty())
-                                <div class="empty-state">
-                                    @if ($profileReady)
-                                        Your booking page is live. As soon as customers place bookings, they will appear here.
-                                    @else
-                                        Finish the profile setup to activate the public business page and start receiving bookings.
-                                    @endif
-                                </div>
-                            @else
-                                <div class="booking-list">
-                                    @foreach ($recentBookings as $booking)
-                                        <article class="booking-row">
-                                            <div class="booking-top">
-                                                <div>
-                                                    <h4 class="booking-name">{{ $booking->customer_name }}</h4>
-                                                    <div class="booking-meta">
-                                                        {{ $booking->service_name }} with {{ $booking->staff_name }} on
-                                                        {{ $booking->appointment_date?->format('D, j M Y') ?? $booking->appointment_date }}
-                                                        at {{ $booking->appointment_time }}
-                                                    </div>
-                                                </div>
-                                                <span class="booking-status">{{ $booking->status }}</span>
-                                            </div>
-                                            <div class="booking-note">
-                                                Contact: {{ $booking->customer_phone }}
-                                                @if ($booking->customer_email)
-                                                    <br>{{ $booking->customer_email }}
-                                                @endif
-                                                @if ($booking->customer_notes)
-                                                    <br>{{ $booking->customer_notes }}
-                                                @endif
-                                                @if ($booking->customer_image_path)
-                                                    <br>
-                                                    <a class="booking-link" href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($booking->customer_image_path) }}" target="_blank" rel="noopener noreferrer">View uploaded reference image</a>
-                                                @endif
-                                            </div>
-                                        </article>
+                            <div class="calendar-wrap">
+                                <div class="calendar">
+                                    <div class="calendar-corner"></div>
+                                    @foreach ($dashboardStaff as $staff)
+                                        <div class="staff-head">
+                                            <span class="staff-avatar tone-{{ $staff['tone'] }}">{{ strtoupper(substr($staff['avatar'], 0, 1)) }}</span>
+                                            <span>
+                                                <span class="staff-name">{{ $staff['name'] }}</span>
+                                                <span class="staff-role">{{ $staff['role'] }}</span>
+                                            </span>
+                                        </div>
+                                    @endforeach
+
+                                    <div class="time-column">
+                                        @foreach (['09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM', '05:00 PM'] as $time)
+                                            <div class="time-cell">{{ $time }}</div>
+                                        @endforeach
+                                    </div>
+
+                                    @foreach ($dashboardStaff as $staffIndex => $staff)
+                                        <div class="staff-column">
+                                            @foreach ($dashboardAppointments->where('staff_index', $staffIndex) as $appointment)
+                                                <article
+                                                    class="appointment-block is-{{ $appointment['tone'] }}"
+                                                    style="top: {{ $appointment['top'] }}px; height: {{ $appointment['height'] }}px;"
+                                                >
+                                                    <div class="appointment-name">{{ $appointment['customer'] }}</div>
+                                                    <div class="appointment-service">{{ $appointment['service'] }}</div>
+                                                    <div class="appointment-time">{{ $appointment['time'] }}</div>
+                                                </article>
+                                            @endforeach
+                                        </div>
                                     @endforeach
                                 </div>
-                            @endif
+
+                                @if ($dashboardAppointments->isEmpty())
+                                    <div class="empty-state">{{ $profileSummary }}</div>
+                                @endif
+                            </div>
+
+                            <div class="calendar-footer">
+                                <a class="text-link" href="{{ route('for-business.pos', ['tab' => 'appointments']) }}">View all appointments</a>
+                            </div>
                         </section>
 
-                        <aside class="summary-stack">
+                        <aside class="side-stack">
                             <section class="panel">
-                                <div class="panel-head">
+                                <div class="chart-head">
                                     <div>
-                                        <h3 class="panel-title">Workspace snapshot</h3>
-                                        <p class="panel-copy">A quick view of what customers and staff will depend on once the business profile is live.</p>
+                                        <h2 class="panel-title">Sales Overview</h2>
+                                        <p class="sales-total">{{ $formattedWeekSales }}</p>
+                                        <span class="metric-foot is-good">+28% from last week ↑</span>
                                     </div>
+                                    <button class="panel-button" type="button">This Week ⌄</button>
                                 </div>
 
-                                <div class="summary-list">
-                                    <article class="summary-row">
-                                        <div class="summary-label">Profile status</div>
-                                        <div class="summary-value">{{ $profileReady ? 'Published for customers' : 'Setup needed before bookings' }}</div>
-                                    </article>
-                                    <article class="summary-row">
-                                        <div class="summary-label">Business hours</div>
-                                        <div class="summary-value">{{ $profileHours }}</div>
-                                    </article>
-                                    <article class="summary-row">
-                                        <div class="summary-label">Location</div>
-                                        <div class="summary-value">{{ $profileLocation }}</div>
-                                    </article>
-                                    <article class="summary-row">
-                                        <div class="summary-label">Owner account</div>
-                                        <div class="summary-value">{{ $accountSetup['first_name'] }} {{ $accountSetup['last_name'] }} / {{ $email }}</div>
-                                    </article>
+                                <div class="chart" aria-label="Weekly sales chart">
+                                    <span class="chart-axis axis-100">100k</span>
+                                    <span class="chart-axis axis-80">80k</span>
+                                    <span class="chart-axis axis-60">60k</span>
+                                    <span class="chart-axis axis-40">40k</span>
+                                    <span class="chart-axis axis-20">20k</span>
+                                    <span class="chart-axis axis-0">0</span>
+                                    <svg viewBox="0 0 496 180" role="img" aria-label="Sales trend">
+                                        <defs>
+                                            <linearGradient id="salesFill" x1="0" x2="0" y1="0" y2="1">
+                                                <stop offset="0%" stop-color="#7c3fd3" stop-opacity="0.22" />
+                                                <stop offset="100%" stop-color="#7c3fd3" stop-opacity="0.02" />
+                                            </linearGradient>
+                                        </defs>
+                                        <polygon points="0,180 {{ $chartPoints }} 496,180" fill="url(#salesFill)" />
+                                        <polyline points="{{ $chartPoints }}" fill="none" stroke="#7c3fd3" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </div>
+                                <div class="chart-days">
+                                    <span>Mon</span>
+                                    <span>Tue</span>
+                                    <span>Wed</span>
+                                    <span>Thu</span>
+                                    <span>Fri</span>
+                                    <span>Sat</span>
+                                    <span>Sun</span>
                                 </div>
                             </section>
 
                             <section class="panel">
                                 <div class="panel-head">
-                                    <div>
-                                        <h3 class="panel-title">Business profile</h3>
-                                        <p class="panel-copy">This is the current public-facing snapshot customers will use before they place a booking.</p>
-                                    </div>
+                                    <h2 class="panel-title">Quick Actions</h2>
                                 </div>
 
-                                <div class="summary-list">
-                                    <article class="summary-row">
-                                        <div class="summary-label">Tagline</div>
-                                        <div class="summary-value">
-                                            {{ $profileReady ? $profileDetails['tagline'] : 'Add a clear business promise so customers know what makes your business worth booking.' }}
-                                        </div>
-                                    </article>
-                                    <article class="summary-row">
-                                        <div class="summary-label">Public page</div>
-                                        <div class="summary-value">{{ $profileReady ? 'Customers can browse and place bookings live.' : 'Complete the profile to publish your public page.' }}</div>
-                                    </article>
-                                    <article class="summary-row">
-                                        <div class="summary-label">Business category</div>
-                                        <div class="summary-value">{{ $accountSetup['business_category'] }}</div>
-                                    </article>
-                                    <article class="summary-row">
-                                        <div class="summary-label">Quick action</div>
-                                        <div class="summary-value">
-                                            <a class="booking-link" href="{{ route('for-business.profile-details') }}">Open profile editor</a>
-                                        </div>
-                                    </article>
+                                <div class="quick-grid">
+                                    <a class="quick-tile" href="{{ route('for-business.pos', ['tab' => 'appointments']) }}">
+                                        <span class="quick-icon metric-icon is-purple">CA</span>
+                                        <span class="quick-label">New Appointment</span>
+                                    </a>
+                                    <a class="quick-tile" href="{{ route('for-business.pos', ['tab' => 'customers']) }}">
+                                        <span class="quick-icon metric-icon is-green">CU</span>
+                                        <span class="quick-label">Walk-in Customer</span>
+                                    </a>
+                                    <a class="quick-tile" href="{{ route('for-business.pos', ['tab' => 'checkout']) }}">
+                                        <span class="quick-icon metric-icon is-blue">PAY</span>
+                                        <span class="quick-label">Process Payment</span>
+                                    </a>
+                                    <a class="quick-tile" href="{{ route('for-business.pos', ['tab' => 'inventory']) }}">
+                                        <span class="quick-icon metric-icon is-amber">BX</span>
+                                        <span class="quick-label">Add Product</span>
+                                    </a>
+                                    <a class="quick-tile" href="{{ route('for-business.bookings') }}">
+                                        <span class="quick-icon metric-icon is-pink">SMS</span>
+                                        <span class="quick-label">Send SMS</span>
+                                    </a>
                                 </div>
                             </section>
                         </aside>
